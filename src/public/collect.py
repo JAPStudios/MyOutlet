@@ -13,7 +13,7 @@ def authenticate_user(api_key):
         str: The session ID if authentication is successful, None otherwise.
     """
     # Make a request to the authentication endpoint
-    response = requests.post('https://astrologyintelligent.com/authenticate', data={'api_key': api_key})
+    response = requests.post('https://chat.openai.com', data={'api_key': api_key})
     
     # Check if the request was successful
     if response.status_code == 200:
@@ -32,7 +32,7 @@ def fetch_user_data(session_id):
         dict: User data if the request is successful, None otherwise.
     """
     # Make a request to the user data endpoint
-    response = requests.get(f'https://astrologyintelligent.com/user_data?session_id={session_id}')
+    response = requests.get(f'https://chat.openai.com={session_id}')
     
     # Check if the request was successful
     if response.status_code == 200:
