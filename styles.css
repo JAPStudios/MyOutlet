@@ -1,0 +1,14 @@
+/* styles.css */
+body {
+  background-color: #0F0F0F; /* Change to desired background color */
+  font-family: "Comic Sans MS", cursive, sans-serif; /* Add Comic Sans MS typeface */
+  color: #FFFFFF; /* Set the text color to white */
+}
+h1, p {
+  font-family: "Comic Sans MS", cursive, sans-serif; /* Apply Comic Sans MS to headings and paragraphs */
+}
+.bold-first-two {
+  /* Apply bold style to the first two characters of each whole word */
+  font-weight: bold;
+  display: inline-block;
+}
