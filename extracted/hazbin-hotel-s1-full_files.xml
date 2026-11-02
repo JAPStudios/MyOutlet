@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files>
+  <file name="Hazbin Hotel - s1e0.mp4" source="original">
+    <mtime>1721831797</mtime>
+    <size>386911144</size>
+    <md5>4f1fe4d28091ce296fced43a91e01026</md5>
+    <crc32>fe75e489</crc32>
+    <sha1>934984808bbe07fe74afe1a03d33a6a4bd99c58e</sha1>
+    <format>MPEG4</format>
+    <length>1905.83</length>
+    <width>1920</width>
+    <height>1080</height>
+  </file>
+  <file name="Hazbin Hotel - s1e8.mp4" source="original">
+    <mtime>1720700931</mtime>
+    <size>477203154</size>
+    <md5>751cc83e4783fae442ec18b6cfe2a9ed</md5>
+    <crc32>f13e8875</crc32>
+    <sha1>9b1350a3c4cdc9c35cd3e25493894c9cb1567a03</sha1>
+    <format>MPEG4</format>
+    <length>1488.54</length>
+    <width>1920</width>
+    <height>1080</height>
+  </file>
+  <file name="hazbin-hotel-s1-full_archive.torrent" source="metadata">
+    <btih>6b62a2aa4465c9a2c1a840fce25f1f32d33c06dd</btih>
+    <mtime>1721838194</mtime>
+    <size>34877</size>
+    <md5>9da619afd1eaa5cdc6f158a301c40f5b</md5>
+    <crc32>f3e17f11</crc32>
+    <sha1>5558d79984e99e53abdd8dab807c2a26f1397afd</sha1>
+    <format>Archive BitTorrent</format>
+  </file>
+  <file name="hazbin-hotel-s1-full_files.xml" source="original">
+    <format>Metadata</format>
+    <md5>b1ca4f80a54a29ee57946e8b843230a9</md5>
+    <summation>md5</summation>
+  </file>
+  <file name="hazbin-hotel-s1-full_meta.sqlite" source="original">
+    <mtime>1721838140</mtime>
+    <size>20480</size>
+    <md5>1542fd9af1a5f1ef39535945c88d5bcc</md5>
+    <crc32>ac25f2de</crc32>
+    <sha1>253d1a6a1b11e62815c0bdeec4288103dc5be2cf</sha1>
+    <format>Metadata</format>
+  </file>
+  <file name="hazbin-hotel-s1-full_meta.xml" source="original">
+    <mtime>1720701152</mtime>
+    <size>1331</size>
+    <md5>93f78ef9440a445d0c9ed8785b748bcb</md5>
+    <crc32>65a2fa73</crc32>
+    <sha1>dd3e172236e91382ceeafefced3c955033fdc310</sha1>
+    <format>Metadata</format>
+  </file>
+  <file name="hazbin-hotel-s1-full_reviews.xml" source="original">
+    <mtime>1721780187</mtime>
+    <size>552</size>
+    <md5>c78eb96a340ba131ef58e8a16a2d2c41</md5>
+    <crc32>dac71c58</crc32>
+    <sha1>a212a62165ea7069c5780630e2bfc660320f81b3</sha1>
+    <format>Metadata</format>
+  </file>
+</files>
