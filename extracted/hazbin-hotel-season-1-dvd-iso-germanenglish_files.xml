@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files>
+  <file name="HAZBIN_HOTEL_S1.iso" source="original">
+    <mtime>1755479829</mtime>
+    <size>8512512000</size>
+    <md5>6314f0b67ca1c191ec332e037cbddfdf</md5>
+    <crc32>64ca653e</crc32>
+    <sha1>0c57eaadc3a990c121bc380f6a3f4e48c3201568</sha1>
+    <format>ISO Image</format>
+    <filecount>17</filecount>
+  </file>
+  <file name="HAZBIN_HOTEL_S1.mp4" source="derivative">
+    <format>h.264</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755482714</mtime>
+    <size>143918778</size>
+    <md5>357fb77565a0343c142e328d70ba5f94</md5>
+    <crc32>0fbe4817</crc32>
+    <sha1>544b6a3a350e880d481e23615603fcbfff87095d</sha1>
+    <length>1488.66</length>
+    <width>852</width>
+    <height>480</height>
+  </file>
+  <file name="HAZBIN_HOTEL_S11.mp4" source="derivative">
+    <format>h.264</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755490180</mtime>
+    <size>143297815</size>
+    <md5>369b2c96c7865cf5c008387c3f0544df</md5>
+    <crc32>b5efb55e</crc32>
+    <sha1>0d5294cf85948edac56d600eabef6b43c7d101ce</sha1>
+    <length>1482.99</length>
+    <width>852</width>
+    <height>480</height>
+  </file>
+  <file name="HAZBIN_HOTEL_S110.mp4" source="derivative">
+    <format>h.264</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755501456</mtime>
+    <size>141163610</size>
+    <md5>fe2af2c005bb91be6d0d0b54756d7dca</md5>
+    <crc32>e41a026d</crc32>
+    <sha1>700fdad6f3dab890506a1f9171fb58a41af3fb62</sha1>
+    <length>1471.79</length>
+    <width>852</width>
+    <height>480</height>
+  </file>
+  <file name="HAZBIN_HOTEL_S111.mp4" source="derivative">
+    <format>h.264</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755504885</mtime>
+    <size>141445960</size>
+    <md5>886fadbf2ecec3407c77238f1197ec21</md5>
+    <crc32>b713c149</crc32>
+    <sha1>a2d3c7d5f69a8924555020b626859539bd62a346</sha1>
+    <length>1467.92</length>
+    <width>852</width>
+    <height>480</height>
+  </file>
+  <file name="HAZBIN_HOTEL_S112.mp4" source="derivative">
+    <format>h.264</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755508345</mtime>
+    <size>140328082</size>
+    <md5>5bdb08072b0dd5c3589a9d01832cd577</md5>
+    <crc32>03fee4f9</crc32>
+    <sha1>af480abc5decc2778c82a3c3b3a0163c69c34325</sha1>
+    <length>1465.97</length>
+    <width>852</width>
+    <height>480</height>
+  </file>
+  <file name="HAZBIN_HOTEL_S113.mp4" source="derivative">
+    <format>h.264</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755499702</mtime>
+    <size>143147360</size>
+    <md5>c461612cddf775efe1d07540cd2c6a7a</md5>
+    <crc32>3cf08e1b</crc32>
+    <sha1>09999b191b84810b709e21538c17c8c917491cee</sha1>
+    <length>1480.03</length>
+    <width>852</width>
+    <height>480</height>
+  </file>
+  <file name="HAZBIN_HOTEL_S114.mp4" source="derivative">
+    <format>h.264</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755486481</mtime>
+    <size>144143771</size>
+    <md5>d916d3fccaec68b6b4e1f6fd9a0fc089</md5>
+    <crc32>33641bce</crc32>
+    <sha1>80c8d9405f935b20bf717a4557757877d90575f2</sha1>
+    <length>1483.28</length>
+    <width>852</width>
+    <height>480</height>
+  </file>
+  <file name="HAZBIN_HOTEL_S115.mp4" source="derivative">
+    <format>h.264</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755494058</mtime>
+    <size>143446239</size>
+    <md5>4440c92c2ecc299f49587f522b80689d</md5>
+    <crc32>c21d7ad8</crc32>
+    <sha1>f19f974a0d017dc5a2b440e462ab7161c0f956f7</sha1>
+    <length>1482.49</length>
+    <width>852</width>
+    <height>480</height>
+  </file>
+  <file name="HAZBIN_HOTEL_S12.mp4" source="derivative">
+    <format>h.264</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755503254</mtime>
+    <size>142644450</size>
+    <md5>0cc1f15a0e32ddb898cad84c973dc7d3</md5>
+    <crc32>d70a31f8</crc32>
+    <sha1>16496956b706c9785d49ea8dbbb5100fb400d622</sha1>
+    <length>1471.72</length>
+    <width>852</width>
+    <height>480</height>
+  </file>
+  <file name="HAZBIN_HOTEL_S13.mp4" source="derivative">
+    <format>h.264</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755506582</mtime>
+    <size>142530771</size>
+    <md5>e3ece205a3ac6e180019383fd9a7b1c7</md5>
+    <crc32>1367612c</crc32>
+    <sha1>8e7da451b3ea69e0b5d794807df9e1509b960dd5</sha1>
+    <length>1467.88</length>
+    <width>852</width>
+    <height>480</height>
+  </file>
+  <file name="HAZBIN_HOTEL_S14.mp4" source="derivative">
+    <format>h.264</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755510077</mtime>
+    <size>141808981</size>
+    <md5>fe4e3cb7bfb7baa90d6f71555e9f6d73</md5>
+    <crc32>57e8165c</crc32>
+    <sha1>4fb1865c6f6a026fd5ce9b70302924231746eed4</sha1>
+    <length>1465.9</length>
+    <width>852</width>
+    <height>480</height>
+  </file>
+  <file name="HAZBIN_HOTEL_S15.mp4" source="derivative">
+    <format>h.264</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755497845</mtime>
+    <size>144137060</size>
+    <md5>2b9ce6e427fe72638385ca9d8d4fbebf</md5>
+    <crc32>6209c882</crc32>
+    <sha1>8d6135694c651a0ea13f86ead5b6fcf281a3a3af</sha1>
+    <length>1480.08</length>
+    <width>852</width>
+    <height>480</height>
+  </file>
+  <file name="HAZBIN_HOTEL_S16.mp4" source="derivative">
+    <format>h.264</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755488379</mtime>
+    <size>144583001</size>
+    <md5>54004f2a7e2d5f4dce7364bf76e1d525</md5>
+    <crc32>8afae359</crc32>
+    <sha1>cd264318ea2af08878b6829bd9ab619e1e6d1f0b</sha1>
+    <length>1483.21</length>
+    <width>852</width>
+    <height>480</height>
+  </file>
+  <file name="HAZBIN_HOTEL_S17.mp4" source="derivative">
+    <format>h.264</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755495964</mtime>
+    <size>143750988</size>
+    <md5>e6b75a8b61a9efd23c533e1730dab550</md5>
+    <crc32>f4263123</crc32>
+    <sha1>14f1f86826727440df1cf4cbff63a6bb64e27d67</sha1>
+    <length>1482.41</length>
+    <width>852</width>
+    <height>480</height>
+  </file>
+  <file name="HAZBIN_HOTEL_S18.mp4" source="derivative">
+    <format>h.264</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755484637</mtime>
+    <size>143736709</size>
+    <md5>58e5bcc9753f63a3d79f97eaccec0e45</md5>
+    <crc32>2706a56d</crc32>
+    <sha1>faec6604a12e0792a5dc0a4d04e7f383432bc564</sha1>
+    <length>1488.56</length>
+    <width>852</width>
+    <height>480</height>
+  </file>
+  <file name="HAZBIN_HOTEL_S19.mp4" source="derivative">
+    <format>h.264</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755492158</mtime>
+    <size>142357856</size>
+    <md5>5df6fbf3153a4ede732ea58fd3329cdb</md5>
+    <crc32>97c5beac</crc32>
+    <sha1>ba97796cb7767c75bbcb2a41fa959413be212725</sha1>
+    <length>1482.99</length>
+    <width>852</width>
+    <height>480</height>
+  </file>
+  <file name="__ia_thumb.jpg" source="original">
+    <mtime>1755510882</mtime>
+    <size>8706</size>
+    <md5>77cbe7f28508b56e6b11eec2b16defe7</md5>
+    <crc32>04f9a877</crc32>
+    <sha1>a7cbffe5d7ae76b97fe09ead0733f569d4897e0e</sha1>
+    <format>Item Tile</format>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_000001.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480596</mtime>
+    <size>10993</size>
+    <md5>e5ad61f1cf0ea57d361ec3796983add0</md5>
+    <crc32>17e25241</crc32>
+    <sha1>5b70fdcdc04eff2aecc4a3f13a4c8d4a6986db60</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_000114.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480600</mtime>
+    <size>49891</size>
+    <md5>8e377e7c2c5b6c8c28466dac74c6f707</md5>
+    <crc32>41958994</crc32>
+    <sha1>9174df99830c0badc7e29e494de21910f3ad2041</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_000174.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480602</mtime>
+    <size>49105</size>
+    <md5>fcdf276b71253eb2df04946fda60733b</md5>
+    <crc32>e8352d06</crc32>
+    <sha1>6fc2d2aef5d01022ef1af1586e0a6a3fe2deae11</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_000234.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480606</mtime>
+    <size>53264</size>
+    <md5>3a27568467300fd5d5248f65c22f392b</md5>
+    <crc32>2d496746</crc32>
+    <sha1>3c0019b58b428f857dab4913794c3df9b8086866</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_000294.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480609</mtime>
+    <size>54044</size>
+    <md5>12e3cd94744b409606e0dabf53ed04eb</md5>
+    <crc32>1cd09ff7</crc32>
+    <sha1>4d5adebb9b87835ea9b7b738dc27b2a5ba46afb5</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_000354.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480613</mtime>
+    <size>78557</size>
+    <md5>924ef75480b9423452e4da0d07dc88b2</md5>
+    <crc32>c8a32005</crc32>
+    <sha1>3f2034320842199407d32694203528835813cd38</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_000414.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480616</mtime>
+    <size>51718</size>
+    <md5>2166ef8e17c11292afe2f3c5c17aeefa</md5>
+    <crc32>deb97faf</crc32>
+    <sha1>650c8a8f39e130d09ca79408c6767988d777800b</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_000474.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480619</mtime>
+    <size>49664</size>
+    <md5>f9623fe7536efc94336215de764c26e1</md5>
+    <crc32>78f7670a</crc32>
+    <sha1>93f0b4f28366f6e30750403ae6e62f6f0e1179ba</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_000534.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480623</mtime>
+    <size>49777</size>
+    <md5>e7e04922a31b24732739358a958c4a92</md5>
+    <crc32>6d0c92a0</crc32>
+    <sha1>1dcb8d742fecdecd690053829d835932e9d062d4</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_000594.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480629</mtime>
+    <size>25339</size>
+    <md5>7429c66cfb9f50ed349d66559c628d89</md5>
+    <crc32>95b328c6</crc32>
+    <sha1>40ff8c635d08f813a84fb69df131f4909b4b76ef</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_000654.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480633</mtime>
+    <size>44811</size>
+    <md5>7b8ba9611c110d2fe20977ed22cecec2</md5>
+    <crc32>1f713e5c</crc32>
+    <sha1>53918b57a00b5274d1c99b5b34235e394e5696e6</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_000714.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480638</mtime>
+    <size>44916</size>
+    <md5>d8bf5992cac6dc7047578c6836829570</md5>
+    <crc32>2d770436</crc32>
+    <sha1>c9ba83a5d719544735f006b7112751313a9f2ca9</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_000774.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480644</mtime>
+    <size>64318</size>
+    <md5>39a6e72d2dca9c3c8b4c325efc3583aa</md5>
+    <crc32>909920f1</crc32>
+    <sha1>db143611655c366f0c11cb86e163f04c65904e73</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_000834.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480648</mtime>
+    <size>20676</size>
+    <md5>aa376ae58713cce2662474fba92721e5</md5>
+    <crc32>4d3115b8</crc32>
+    <sha1>cddab977f22c817036d93ab57d912f33f579457d</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_000894.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480652</mtime>
+    <size>35491</size>
+    <md5>254493f4023d7d8e4d93d927849bbf20</md5>
+    <crc32>4391651a</crc32>
+    <sha1>16025177cd49801d61b0e735e82e5c304d53cbe1</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_000954.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480657</mtime>
+    <size>78959</size>
+    <md5>fc2a8549ce33b3a770162d65686135af</md5>
+    <crc32>c93aa208</crc32>
+    <sha1>6b37c258407e5638ac31708cfaa856e870e641f2</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_001014.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480661</mtime>
+    <size>39206</size>
+    <md5>8f6da04698982839111114bafc97f081</md5>
+    <crc32>5d1e6398</crc32>
+    <sha1>9fdee161fb28358e1f74642259e60b101715d5e1</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_001074.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480665</mtime>
+    <size>69167</size>
+    <md5>36e740fb21771906bd2452890faa4102</md5>
+    <crc32>1e8926f6</crc32>
+    <sha1>9cffbb599926c1374cebce0b2de209b57f3a26b1</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_001134.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480669</mtime>
+    <size>48885</size>
+    <md5>77d4a08656f1f1e3ba4b0f7eb9f1fc67</md5>
+    <crc32>8fb195dc</crc32>
+    <sha1>def099263a45ac25b8ae6aa2093f3649c1fc4d7c</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_001194.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480674</mtime>
+    <size>66778</size>
+    <md5>faf56d6e750670d0dc82e9631f8103df</md5>
+    <crc32>693fb7c0</crc32>
+    <sha1>a16b4cc8ad72ce4500f9e57d45420149e4e0b318</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_001254.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480679</mtime>
+    <size>62464</size>
+    <md5>fea71326d5ad765559590dab8e69eaa2</md5>
+    <crc32>b1a89fc0</crc32>
+    <sha1>60bd0ecb4e816834626e0b7a77e212b5260b1657</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_001314.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480683</mtime>
+    <size>43038</size>
+    <md5>a254a687eab0835c9ebb5c7d94cb2c45</md5>
+    <crc32>cbae4e60</crc32>
+    <sha1>b8194137421e687dd975f29c5018cd14a53f17ba</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_001374.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480686</mtime>
+    <size>66562</size>
+    <md5>2fc727adae31856a14c07f7e931b7c26</md5>
+    <crc32>0a522d77</crc32>
+    <sha1>f211706020e58f813d35c088ac6251da61996892</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_001434.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480690</mtime>
+    <size>90893</size>
+    <md5>7a663b72489bbc51cf81a37ffce96762</md5>
+    <crc32>a35e601a</crc32>
+    <sha1>ccc3b18e864e16d5d5d7c82f6c1d3cdeb4fcbfad</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish.thumbs/HAZBIN_HOTEL_S1_001488.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN_HOTEL_S1.iso</original>
+    <mtime>1755480693</mtime>
+    <size>15089</size>
+    <md5>f37e26c37caf6ac65fe5d55cd752f313</md5>
+    <crc32>cf6eb9d7</crc32>
+    <sha1>dce30738aa744381bc047acc76f83bd2673d9d17</sha1>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish_archive.torrent" source="metadata">
+    <btih>f51d62e441159a7bfcbdfee1f8ce81ded51e407c</btih>
+    <mtime>1778631564</mtime>
+    <size>57867</size>
+    <md5>b53b581f4a365839836285070116957a</md5>
+    <crc32>516c6837</crc32>
+    <sha1>7a8f43ef0025fdd120b4f85ba0b8b1a4583350ce</sha1>
+    <format>Archive BitTorrent</format>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish_files.xml" source="original">
+    <format>Metadata</format>
+    <md5>90f771b9549bd9df450d4f5ad58de72b</md5>
+    <summation>md5</summation>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish_meta.sqlite" source="original">
+    <mtime>1755479949</mtime>
+    <size>20480</size>
+    <md5>ea5d342a306a884906543b5543585aef</md5>
+    <crc32>b5f8192d</crc32>
+    <sha1>58ddb5849ebe8695062f224f268e248202d8c6d3</sha1>
+    <format>Metadata</format>
+  </file>
+  <file name="hazbin-hotel-season-1-dvd-iso-germanenglish_meta.xml" source="original">
+    <mtime>1778631552</mtime>
+    <size>7367</size>
+    <md5>cf7b72c4a51e0426c3eddd3a88e59537</md5>
+    <crc32>6d62e7e3</crc32>
+    <sha1>f55e50dc1f04fb06fa0d418b6ef98724bba604b1</sha1>
+    <format>Metadata</format>
+  </file>
+</files>
