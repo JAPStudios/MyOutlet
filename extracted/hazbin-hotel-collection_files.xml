@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files>
+  <file name="HAZBIN HOTEL (PILOT).ia.mp4" source="derivative">
+    <format>h.264 IA</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717324472</mtime>
+    <size>386829673</size>
+    <md5>04532722a107f597bc166cc51e5c0d47</md5>
+    <crc32>e78e4438</crc32>
+    <sha1>875a9c333714539e08d7b45ff6de82fc259074d5</sha1>
+    <length>1905.83</length>
+    <width>1920</width>
+    <height>1080</height>
+  </file>
+  <file name="HAZBIN HOTEL (PILOT).mp4" source="original">
+    <mtime>1717323046</mtime>
+    <size>386829673</size>
+    <md5>fcf65e66d3d39ce9cdca590e28f9cf5e</md5>
+    <crc32>91444d68</crc32>
+    <sha1>f782a501c5a50f8fdced8f13590cf2773efa1e12</sha1>
+    <format>MPEG4</format>
+    <length>1905.83</length>
+    <width>1920</width>
+    <height>1080</height>
+  </file>
+  <file name="__ia_thumb.jpg" source="original">
+    <mtime>1717324566</mtime>
+    <size>5661</size>
+    <md5>f772a317e4f22489c6af3653c3eb8fdf</md5>
+    <crc32>d31b5c13</crc32>
+    <sha1>ffbd3aa8d58c941aef973d80bf7b8c0bad7e807a</sha1>
+    <format>Item Tile</format>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_000001.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323256</mtime>
+    <size>21958</size>
+    <md5>fad647c6a334b235c2370af621615110</md5>
+    <crc32>6ea0c252</crc32>
+    <sha1>69e63f616e96ef3571c619d1a6a32a86fde29fc5</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_000117.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323267</mtime>
+    <size>29747</size>
+    <md5>e0ee4ef079d7fc814ebcb5cfedddcc4a</md5>
+    <crc32>44ef5558</crc32>
+    <sha1>fdf1f25097ed9811da256838aa9e6480f0410a05</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_000175.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323277</mtime>
+    <size>105084</size>
+    <md5>92b8519bb991f8916577b20c65265ed7</md5>
+    <crc32>0cce32e9</crc32>
+    <sha1>0914d3f0b22f83fe050acaeecf1900739eb8d2f4</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_000235.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323286</mtime>
+    <size>35813</size>
+    <md5>c527f14479a8cb8e840b364a6be50944</md5>
+    <crc32>45c6f28d</crc32>
+    <sha1>c50954c472b236e2d3cec4d11de777e1fc3293c0</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_000295.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323296</mtime>
+    <size>23680</size>
+    <md5>85594bfbd0b4bfe620d4f9b54c1765e1</md5>
+    <crc32>a9c4cddd</crc32>
+    <sha1>b5da4360f6e6d00ae4c8bfc0441d4fb074f449d8</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_000355.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323304</mtime>
+    <size>63649</size>
+    <md5>9df9005103de408ef7f87fdea85695eb</md5>
+    <crc32>8e245d21</crc32>
+    <sha1>0f11bc784b5013c2c5adbd71535be5b242df136a</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_000415.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323311</mtime>
+    <size>56235</size>
+    <md5>a3268d98d3cd1100c4b587441f3bd98e</md5>
+    <crc32>afeab177</crc32>
+    <sha1>0913f59516baa619e0c4bd931ffece148e38cecf</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_000476.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323319</mtime>
+    <size>34730</size>
+    <md5>25cbf36dbcc258aecb943c8d17ffc8c7</md5>
+    <crc32>4a2487b9</crc32>
+    <sha1>e53edc9262ac761b741615c5b6cbb3ed7856fc5c</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_000534.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323327</mtime>
+    <size>42370</size>
+    <md5>28aca3c605de6d5dbe9c119ca0ae52d4</md5>
+    <crc32>c479c6ca</crc32>
+    <sha1>bf7e4af294952c4cdc4c687b5383cdc08c94f8c0</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_000594.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323334</mtime>
+    <size>53065</size>
+    <md5>2ce76fe1ea4e1175cbe472ad9ba3e37d</md5>
+    <crc32>81e826bd</crc32>
+    <sha1>89a4726e977514e0a4618d392af431e71151cc47</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_000654.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323342</mtime>
+    <size>83841</size>
+    <md5>40fa77194454c26f294466ff62af594a</md5>
+    <crc32>12e86485</crc32>
+    <sha1>35146c9fca3e5d31f653bf1089af61b0d9df91f2</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_000714.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323350</mtime>
+    <size>59381</size>
+    <md5>b302b5b7825134b8d0aedd33ff3ea35a</md5>
+    <crc32>8232e25d</crc32>
+    <sha1>5f3f9e44999be22975428c5e4f29f77f452c8ece</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_000774.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323358</mtime>
+    <size>41766</size>
+    <md5>55251e205d8a1e3cfae1fba7e182e854</md5>
+    <crc32>29612542</crc32>
+    <sha1>c834fafa9801d5804876fcbacd0bca8ff8b6b99e</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_000836.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323367</mtime>
+    <size>16544</size>
+    <md5>fdcc94558a6561d38833f0fe69d747fc</md5>
+    <crc32>43f29390</crc32>
+    <sha1>125ae90438650a6421802f1f6536a5a0717fe34e</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_000895.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323375</mtime>
+    <size>21706</size>
+    <md5>984b4a87a2df590474b0315814487fc0</md5>
+    <crc32>89130151</crc32>
+    <sha1>d3893f4fa5e6b219130a83ce96151567a2faba11</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_000957.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323384</mtime>
+    <size>78923</size>
+    <md5>7b2b825b35d7da0b5e74d971dee93cc2</md5>
+    <crc32>2e5ebadd</crc32>
+    <sha1>969e71c18d8de72f49f2cd50bb25bb2eb517fe6c</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_001016.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323392</mtime>
+    <size>60492</size>
+    <md5>1d815e3174c10d41a00ccd24663e420d</md5>
+    <crc32>d193035d</crc32>
+    <sha1>5da0e3a10e54013d63f391c76f5a1f03a3735ac1</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_001074.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323399</mtime>
+    <size>52131</size>
+    <md5>f0a6a5acda41e5cb9c41a5655aeaeb10</md5>
+    <crc32>6f00796c</crc32>
+    <sha1>ec00bd434d3f5e30c69510d9f66977c210eab28f</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_001134.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323406</mtime>
+    <size>58758</size>
+    <md5>a7afa5e34389d74166de54eb0feb8d4c</md5>
+    <crc32>7ce9a907</crc32>
+    <sha1>9c79ad97c4fae0bba02dac2a47d7ed3c19caf669</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_001195.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323414</mtime>
+    <size>66707</size>
+    <md5>7be738ea76335e860784b0abb45ec212</md5>
+    <crc32>0ff119a6</crc32>
+    <sha1>68e21f7492c579afa774541514811a3c8689761f</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_001257.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323422</mtime>
+    <size>50123</size>
+    <md5>741634bedd5ef39a0dc874da71df6a60</md5>
+    <crc32>a355f357</crc32>
+    <sha1>00dee71b7f4bd835fc2a8001b0e1c069d66b5692</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_001316.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323429</mtime>
+    <size>73764</size>
+    <md5>3b8535208100d0dbe02e7a143790ae8a</md5>
+    <crc32>ddeb8e44</crc32>
+    <sha1>15c9c7892285657db12f1e90e08afa734e689ef5</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_001375.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323436</mtime>
+    <size>58604</size>
+    <md5>a693ab0d31e2fa1cdc22002351ec5663</md5>
+    <crc32>0af74c53</crc32>
+    <sha1>4fd1d831911a1087f3d41285ea73cb6640169c6b</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_001435.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323443</mtime>
+    <size>69203</size>
+    <md5>cc42aec4bdadf7cfa5e8666a0e9b0eac</md5>
+    <crc32>defbe731</crc32>
+    <sha1>24d8a849aea7b2459ef45608f5572cc0f290b13c</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_001495.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323450</mtime>
+    <size>47304</size>
+    <md5>a8fa72d787d08052817a0595219252cf</md5>
+    <crc32>1cf99963</crc32>
+    <sha1>484cf96f6be2c02757bc52ac19b341431970b017</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_001558.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323457</mtime>
+    <size>60164</size>
+    <md5>a89e2cad999ef42aff51654d638e7dd2</md5>
+    <crc32>3fa7c9fd</crc32>
+    <sha1>e9ce739cb4cf4dd56b60a3ad3594fcabb2564b14</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_001614.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323465</mtime>
+    <size>74388</size>
+    <md5>4fe0a0b52180e1de70bd9efbcbad863d</md5>
+    <crc32>04f9d84f</crc32>
+    <sha1>8fdc82f02613071a42ad44e0151c0a4e2bdc4c73</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_001674.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323472</mtime>
+    <size>102483</size>
+    <md5>4ee4e6227c08ed59c31703b8a7a427fe</md5>
+    <crc32>78b3b0ec</crc32>
+    <sha1>772672a3d9cfb54ef8df1dd493a5f6f5f41634ca</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_001735.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323479</mtime>
+    <size>67243</size>
+    <md5>6bbec7a19fa5629d32dae16eb2aac635</md5>
+    <crc32>73dd585c</crc32>
+    <sha1>9e4c2194501ef5d560e467f461d344d2a3a70084</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_001799.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323487</mtime>
+    <size>75855</size>
+    <md5>2de11085408f5807cae964a70dce5376</md5>
+    <crc32>5029b3eb</crc32>
+    <sha1>6523583bc39659da7880669c8907f9488b484ac1</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_001859.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323494</mtime>
+    <size>93200</size>
+    <md5>a1201b2932a4e40aa9bec4289bae1d51</md5>
+    <crc32>94327ba4</crc32>
+    <sha1>2798c7cc238387d354a2fa233332facfea84ae23</sha1>
+  </file>
+  <file name="hazbin-hotel-collection.thumbs/HAZBIN HOTEL (PILOT)_001901.jpg" source="derivative">
+    <format>Thumbnail</format>
+    <original>HAZBIN HOTEL (PILOT).mp4</original>
+    <mtime>1717323500</mtime>
+    <size>70267</size>
+    <md5>e0a09fc7ec9be1be72894c0cf7737e4e</md5>
+    <crc32>7135aae3</crc32>
+    <sha1>9d25c7fde12edf4b1d19a3439893d8d8b391bf81</sha1>
+  </file>
+  <file name="hazbin-hotel-collection_archive.torrent" source="metadata">
+    <btih>804f1ad080a25fb06b08084182999fbb50781688</btih>
+    <mtime>1748727323</mtime>
+    <size>31616</size>
+    <md5>cbb68f1a5fd25c3dd9752a99b2c58647</md5>
+    <crc32>9c83fe1c</crc32>
+    <sha1>ea509512397fc746c1c6d2d38c89cbe174521856</sha1>
+    <format>Archive BitTorrent</format>
+  </file>
+  <file name="hazbin-hotel-collection_files.xml" source="original">
+    <format>Metadata</format>
+    <md5>eca3d1400ac38f6c4c4f054177989211</md5>
+    <summation>md5</summation>
+  </file>
+  <file name="hazbin-hotel-collection_meta.sqlite" source="original">
+    <mtime>1717323055</mtime>
+    <size>20480</size>
+    <md5>1484f9399dc0992495897a7757019cbe</md5>
+    <crc32>028da030</crc32>
+    <sha1>4ff7f3de7b43b41c6d3012d2f2f319e31a3505ad</sha1>
+    <format>Metadata</format>
+  </file>
+  <file name="hazbin-hotel-collection_meta.xml" source="original">
+    <mtime>1748727319</mtime>
+    <size>1484</size>
+    <md5>592ca88e6b5e561414e811ec6ec331cc</md5>
+    <crc32>94bc525e</crc32>
+    <sha1>d9a8e357de2d7fdcbe1d41fe798ada13c4e14cc7</sha1>
+    <format>Metadata</format>
+  </file>
+</files>
