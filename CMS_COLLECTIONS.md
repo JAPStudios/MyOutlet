@@ -1,6 +1,6 @@
 # MyOutlet CMS data collections
 
-The fifteen custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
+The sixteen custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
 
 ## MediaItems
 
@@ -68,6 +68,26 @@ Fields:
 - `moderationNote` — Text
 
 Permissions: `ADMIN` (site administrators) for direct collection access. Members can create reports and read their own reports through authenticated backend methods. Only site owners can review and resolve reports.
+
+## RightsRecords
+
+Fields:
+- `mediaItemId` — Text, unique; associated MediaItems record ID
+- `creatorMemberId` — Text, required
+- `rightsBasis` — Text: `original_work`, `licensed`, `public_domain`, `commissioned` or `other`
+- `rightsHolder` — Text, required
+- `sourceDetails` — Text, required
+- `territories` — Array of ISO 3166-1 alpha-2 country codes, or `WORLDWIDE`
+- `validFrom` — Date
+- `validUntil` — Date
+- `evidenceUrl` — Text; optional HTTPS evidence reference
+- `status` — Text: `pending_review`, `verified`, `rejected` or `revoked`
+- `declaredAt` — Date and time
+- `reviewedAt` — Date and time
+- `reviewerMemberId` — Text
+- `reviewNote` — Text
+
+Permissions: `ADMIN` for direct read, insert, update and remove. Creators submit and read their own declarations through authenticated methods; only site owners can review declarations. A declaration is not itself a licence or legal determination.
 
 ## CreatorChannels
 
@@ -208,7 +228,7 @@ Permissions: `ADMIN` (site administrators) for direct collection access. Applica
 
 - Public creator directory, creator search and handle-based creator profiles, alongside published catalogue browse, title/description search and per-channel catalogue reads. Creator search/profile responses expose only public channel fields and published media.
 - Member-owned creator channel creation and update.
-- Member content submission into the moderation queue, plus private submission-status tracking.
+- Member content submission into the moderation queue, plus private submission-status tracking.\n- Creator distribution-rights declarations, private owner review, expiry checks and a mandatory verified-rights record before publication.
 - Private MP4 uploads to the Wix Media Manager, event-driven transcoding readiness, and published-video HLS/DASH playback URLs.
 - Owner-only pending-review queue, publish/reject/remove decisions and song-request queue status controls.
 - Member song requests and a public read-only queue scoped to a specific creator channel and ordered by submission time.
@@ -244,4 +264,4 @@ Indexes for the first nine collections were confirmed `ACTIVE` on the MyOutlet s
 - `MediaComments`: `media-comments-status-created`, `media-comments-member-created`
 - `MediaPlaylists`: `playlists-owner-updated`, `playlists-visibility-updated`
 - `PlaylistItems`: unique `playlist-item-key-unique`, plus `playlist-items-position` and `playlist-items-media`
-- `Notifications`: unique `notifications-key-unique`, plus `notifications-recipient-created` and `notifications-recipient-read`
+- `Notifications`: unique `notifications-key-unique`, plus `notifications-recipient-created` and `notifications-recipient-read`\n- `RightsRecords`: unique `rights-media-unique`, plus `rights-creator-created` and `rights-status-created`

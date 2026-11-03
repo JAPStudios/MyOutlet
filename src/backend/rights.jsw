@@ -1,0 +1,256 @@
+import wixData from 'wix-data';
+import wixUsersBackend from 'wix-users-backend';
+
+const RIGHTS = 'RightsRecords';
+const MEDIA = 'MediaItems';
+const BASES = ['original_work', 'licensed', 'public_domain', 'commissioned', 'other'];
+
+function memberId() {
+  const id = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  if (!id) throw new Error('A signed-in site member is required.');
+  return id;
+}
+
+function requiredText(value, field, max) {
+  if (typeof value !== 'string') throw new Error(field + ' must be text.');
+  const result = value.trim();
+  if (!result || result.length > max) {
+    throw new Error(field + ' is required and must be at most ' + max + ' characters.');
+  }
+  return result;
+}
+
+function optionalHttpsUrl(value) {
+  if (value === undefined || value === null || value === '') return '';
+  const raw = requiredText(value, 'Evidence URL', 2048);
+  let parsed;
+  try { parsed = new URL(raw); } catch (_) { throw new Error('Evidence URL must be a valid HTTPS URL.'); }
+  if (parsed.protocol !== 'https:') throw new Error('Evidence URL must use HTTPS.');
+  return parsed.toString();
+}
+
+function normalizeTerritories(value) {
+  if (!Array.isArray(value) || value.length === 0 || value.length > 50) {
+    throw new Error('List at least one territory, using ISO 3166-1 alpha-2 country codes or WORLDWIDE.');
+  }
+  const territories = [...new Set(value.map(item => {
+    const code = requiredText(item, 'Territory', 10).toUpperCase();
+    if (code !== 'WORLDWIDE' && !/^[A-Z]{2}$/.test(code)) {
+      throw new Error('Territories must use ISO 3166-1 alpha-2 codes or WORLDWIDE.');
+    }
+    return code;
+  }))];
+  if (territories.includes('WORLDWIDE') && territories.length > 1) {
+    throw new Error('WORLDWIDE cannot be combined with individual territories.');
+  }
+  return territories;
+}
+
+function normalizeDate(value, field, optional) {
+  if ((value === undefined || value === null || value === '') && optional) return null;
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) throw new Error(field + ' must be a valid date.');
+  return date;
+}
+
+function rightsSummary(item) {
+  return {
+    _id: item._id,
+    mediaItemId: item.mediaItemId,
+    rightsBasis: item.rightsBasis,
+    rightsHolder: item.rightsHolder,
+    sourceDetails: item.sourceDetails,
+    territories: Array.isArray(item.territories) ? item.territories : [],
+    validFrom: item.validFrom || null,
+    validUntil: item.validUntil || null,
+    evidenceUrl: item.evidenceUrl || '',
+    status: item.status,
+    declaredAt: item.declaredAt,
+    reviewedAt: item.reviewedAt || null,
+    reviewNote: item.reviewNote || ''
+  };
+}
+
+export async function submitRightsDeclaration(input = {}) {
+  const creatorMemberId = memberId();
+  const mediaItemId = requiredText(input.mediaItemId, 'Media item ID', 100);
+  const media = await wixData.get(MEDIA, mediaItemId, { suppressAuth: true });
+  if (!media || media.creatorMemberId !== creatorMemberId) {
+    throw new Error('Rights can only be declared for media submitted by this member.');
+  }
+  if (media.status === 'removed' || media.status === 'rejected') {
+    throw new Error('Rights cannot be declared for rejected or removed media.');
+  }
+
+  const rightsBasis = requiredText(input.rightsBasis, 'Rights basis', 30);
+  if (!BASES.includes(rightsBasis)) throw new Error('Unsupported rights basis.');
+  const rightsHolder = requiredText(input.rightsHolder, 'Rights holder', 160);
+  const sourceDetails = requiredText(input.sourceDetails, 'Rights details', 2000);
+  const territories = normalizeTerritories(input.territories);
+  const validFrom = normalizeDate(input.validFrom, 'Valid from', false);
+  const validUntil = normalizeDate(input.validUntil, 'Valid until', true);
+  if (validUntil && validUntil <= validFrom) {
+    throw new Error('Rights expiry must be later than the rights start date.');
+  }
+  if (validUntil && validUntil < new Date()) {
+    throw new Error('Expired rights cannot be submitted for verification.');
+  }
+  const evidenceUrl = optionalHttpsUrl(input.evidenceUrl);
+
+  const existing = await wixData.query(RIGHTS)
+    .eq('mediaItemId', mediaItemId)
+    .limit(1)
+    .find({ suppressAuth: true });
+  if (existing.items.length) {
+    const previous = existing.items[0];
+    if (previous.status === 'verified') {
+      throw new Error('Verified rights must be revoked by a site owner before a replacement declaration can be submitted.');
+    }
+    if (previous.status === 'revoked') {
+      throw new Error('Revoked rights declarations cannot be replaced.');
+    }
+    const updated = await wixData.update(RIGHTS, {
+      ...previous,
+      creatorMemberId,
+      rightsBasis,
+      rightsHolder,
+      sourceDetails,
+      territories,
+      validFrom,
+      validUntil,
+      evidenceUrl,
+      status: 'pending_review',
+      declaredAt: new Date(),
+      reviewedAt: null,
+      reviewerMemberId: '',
+      reviewNote: ''
+    }, { suppressAuth: true });
+    return { ...rightsSummary(updated), submitted: true };
+  }
+
+  const created = await wixData.insert(RIGHTS, {
+    mediaItemId,
+    creatorMemberId,
+    rightsBasis,
+    rightsHolder,
+    sourceDetails,
+    territories,
+    validFrom,
+    validUntil,
+    evidenceUrl,
+    status: 'pending_review',
+    declaredAt: new Date(),
+    reviewedAt: null,
+    reviewerMemberId: '',
+    reviewNote: ''
+  }, { suppressAuth: true });
+  return { ...rightsSummary(created), submitted: true };
+}
+
+export async function getMyRightsRecords(options = {}) {
+  const creatorMemberId = memberId();
+  const requested = Number(options.limit);
+  const limit = Math.min(Math.max(Number.isFinite(requested) && requested ? requested : 50, 1), 100);
+  const result = await wixData.query(RIGHTS)
+    .eq('creatorMemberId', creatorMemberId)
+    .descending('declaredAt')
+    .limit(limit)
+    .find({ suppressAuth: true });
+  return { items: result.items.map(rightsSummary), total: result.totalCount };
+}
+
+export async function listPendingRights(options = {}) {
+  const requested = Number(options.limit);
+  const limit = Math.min(Math.max(Number.isFinite(requested) && requested ? requested : 50, 1), 100);
+  const result = await wixData.query(RIGHTS)
+    .eq('status', 'pending_review')
+    .ascending('declaredAt')
+    .limit(limit)
+    .find({ suppressAuth: true });
+  const items = await Promise.all(result.items.map(async item => {
+    const media = await wixData.get(MEDIA, item.mediaItemId, { suppressAuth: true });
+    return {
+      ...rightsSummary(item),
+      mediaTitle: media ? media.title : '',
+      mediaStatus: media ? media.status : 'missing'
+    };
+  }));
+  return { items, total: result.totalCount };
+}
+
+export async function reviewRightsDeclaration(input = {}) {
+  const reviewerMemberId = memberId();
+  const rightsId = requiredText(input.rightsId, 'Rights record ID', 100);
+  const status = requiredText(input.status, 'Review status', 20);
+  const reviewNote = typeof input.reviewNote === 'string' ? input.reviewNote.trim().slice(0, 2000) : '';
+  if (!['verified', 'rejected', 'revoked'].includes(status)) {
+    throw new Error('Review status must be verified, rejected or revoked.');
+  }
+
+  const record = await wixData.get(RIGHTS, rightsId, { suppressAuth: true });
+  if (!record) throw new Error('Rights declaration was not found.');
+  if (status === 'verified' && record.status !== 'pending_review') {
+    throw new Error('Only pending rights declarations can be verified.');
+  }
+  if (status === 'revoked' && record.status !== 'verified') {
+    throw new Error('Only verified rights declarations can be revoked.');
+  }
+  if (status === 'rejected' && record.status !== 'pending_review') {
+    throw new Error('Only pending rights declarations can be rejected.');
+  }
+
+  const now = new Date();
+  if (status === 'verified') {
+    if (record.validFrom && new Date(record.validFrom) > now) {
+      throw new Error('Rights have not yet become effective.');
+    }
+    if (record.validUntil && new Date(record.validUntil) < now) {
+      throw new Error('Expired rights cannot be verified.');
+    }
+    const media = await wixData.get(MEDIA, record.mediaItemId, { suppressAuth: true });
+    if (!media || media.creatorMemberId !== record.creatorMemberId) {
+      throw new Error('The media item and rights declaration do not match.');
+    }
+  }
+
+  const updated = await wixData.update(RIGHTS, {
+    ...record,
+    status,
+    reviewedAt: now,
+    reviewerMemberId,
+    reviewNote
+  }, { suppressAuth: true });
+
+  if (status === 'revoked') {
+    const media = await wixData.get(MEDIA, record.mediaItemId, { suppressAuth: true });
+    if (media && media.status === 'published') {
+      await wixData.update(MEDIA, {
+        ...media,
+        status: 'removed',
+        moderationNote: 'Distribution rights verification was revoked.'
+      }, { suppressAuth: true });
+    }
+  }
+
+  return rightsSummary(updated);
+}
+
+export async function getVerifiedRightsForMedia(mediaItemId) {
+  const id = requiredText(mediaItemId, 'Media item ID', 100);
+  const result = await wixData.query(RIGHTS)
+    .eq('mediaItemId', id)
+    .eq('status', 'verified')
+    .limit(1)
+    .find({ suppressAuth: true });
+  if (!result.items.length) return null;
+  const record = result.items[0];
+  const now = new Date();
+  if (record.validFrom && new Date(record.validFrom) > now) return null;
+  if (record.validUntil && new Date(record.validUntil) < now) return null;
+  return {
+    mediaItemId: record.mediaItemId,
+    rightsBasis: record.rightsBasis,
+    territories: record.territories || [],
+    validUntil: record.validUntil || null
+  };
+}

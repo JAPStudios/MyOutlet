@@ -70,7 +70,9 @@ const memberMethods = new Set([
   'backend/playlists.jsw:getMyPlaylists',
   'backend/notifications.jsw:getMyNotifications',
   'backend/notifications.jsw:markNotificationRead',
-  'backend/notifications.jsw:markAllNotificationsRead'
+  'backend/notifications.jsw:markAllNotificationsRead',
+  'backend/rights.jsw:submitRightsDeclaration',
+  'backend/rights.jsw:getMyRightsRecords'
 ]);
 
 const ownerMethods = new Set([
@@ -79,7 +81,9 @@ const ownerMethods = new Set([
   'backend/reports.jsw:listContentReports',
   'backend/reports.jsw:resolveContentReport',
   'backend/engagement.jsw:moderateComment',
-  'backend/engagement.jsw:listPendingComments'
+  'backend/engagement.jsw:listPendingComments',
+  'backend/rights.jsw:listPendingRights',
+  'backend/rights.jsw:reviewRightsDeclaration'
 ]);
 
 const modules = [
@@ -89,7 +93,8 @@ const modules = [
   'reports.jsw',
   'engagement.jsw',
   'playlists.jsw',
-  'notifications.jsw'
+  'notifications.jsw',
+  'rights.jsw'
 ];
 let methodCount = 0;
 for (const file of modules) {
@@ -187,6 +192,12 @@ assert.match(engagement, /listPendingComments/);
 const playlists = read('src/backend/playlists.jsw');
 assert.match(playlists, /getPlaylist/);
 assert.match(playlists, /reorderPlaylistItems/);
+const rights = read('src/backend/rights.jsw');
+assert.match(rights, /submitRightsDeclaration/);
+assert.match(rights, /reviewRightsDeclaration/);
+assert.match(rights, /getVerifiedRightsForMedia/);
+assert.match(catalog, /getVerifiedRightsForMedia/);
+
 const notifications = read('src/backend/notifications.jsw');
 assert.match(notifications, /getMyNotifications/);
 assert.match(notifications, /markAllNotificationsRead/);

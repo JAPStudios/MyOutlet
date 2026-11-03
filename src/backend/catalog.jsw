@@ -2,6 +2,7 @@ import wixData from 'wix-data';
 import wixUsersBackend from 'wix-users-backend';
 import { createNotification } from 'backend/notifications';
 import { applyViewerRatingPreference } from 'backend/ratingPreferences';
+import { getVerifiedRightsForMedia } from 'backend/rights';
 
 const MEDIA = 'MediaItems';
 const CHANNELS = 'CreatorChannels';
@@ -369,6 +370,12 @@ export async function moderateContent(input = {}) {
   if (!['published', 'rejected', 'removed'].includes(status)) throw new Error('Unsupported moderation status.');
   const existing = await wixData.get(MEDIA, id, { suppressAuth: true });
   if (!existing) throw new Error('Content item was not found.');
+  if (status === 'published') {
+    const verifiedRights = await getVerifiedRightsForMedia(existing._id);
+    if (!verifiedRights) {
+      throw new Error('This media cannot be published until its distribution rights have been verified and are currently valid.');
+    }
+  }
   const updated = await wixData.update(MEDIA, {
     ...existing, status,
     publishedAt: status === 'published' ? new Date() : existing.publishedAt,
