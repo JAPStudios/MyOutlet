@@ -40,6 +40,7 @@ const memberMethods = new Set([
   'backend/catalog.jsw:saveMyChannel',
   'backend/catalog.jsw:submitContent',
   'backend/catalog.jsw:enqueueSong',
+  'backend/catalog.jsw:enqueueSongs',
   'backend/catalog.jsw:getMySubmissions',
   'backend/catalog.jsw:setSongRequestStatus',
   'backend/viewer.jsw:addToWatchlist',
@@ -175,6 +176,9 @@ assert.match(uploader, /request\.upload\.onprogress/,
   'The browser uploader must expose upload progress');
 
 const catalog = read('src/backend/catalog.jsw');
+assert.match(catalog, /enqueueSongs/);
+assert.match(catalog, /for \(const song of songs\)/);
+assert.match(catalog, /created\.map\(item => wixData\.update\(SONGS/);
 for (const field of ['category', 'tags', 'language', 'durationSeconds']) {
   assert.ok(catalog.includes(field), 'Catalogue must support ' + field);
   assert.ok(cms.includes(tick + field + tick), 'CMS schema must document ' + field);
