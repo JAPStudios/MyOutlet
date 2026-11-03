@@ -63,6 +63,8 @@ const memberMethods = new Set([
   'backend/engagement.jsw:addComment',
   'backend/engagement.jsw:editComment',
   'backend/engagement.jsw:deleteComment',
+  'backend/engagement.jsw:listMyPendingComments',
+  'backend/engagement.jsw:moderateMyChannelComment',
   'backend/playlists.jsw:createPlaylist',
   'backend/playlists.jsw:updatePlaylist',
   'backend/playlists.jsw:deletePlaylist',
@@ -195,6 +197,8 @@ assert.match(engagement, /likeMedia/);
 assert.match(engagement, /addComment/);
 assert.match(engagement, /moderateComment/);
 assert.match(engagement, /listPendingComments/);
+assert.match(engagement, /listMyPendingComments/);
+assert.match(engagement, /moderateMyChannelComment/);
 
 const playlists = read('src/backend/playlists.jsw');
 assert.match(playlists, /getPlaylist/);

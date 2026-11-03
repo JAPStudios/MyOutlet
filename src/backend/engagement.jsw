@@ -9,6 +9,74 @@ const LIKES = 'MediaLikes';
 const COMMENTS = 'MediaComments';
 const CHANNELS = 'CreatorChannels';
 
+
+export async function listMyPendingComments(options = {}) {
+  const ownerId = memberId();
+  const requested = Number(options.limit);
+  const limit = Math.min(Math.max(Number.isFinite(requested) && requested ? requested : 50, 1), 100);
+  const channels = await wixData.query(CHANNELS)
+    .eq('memberId', ownerId)
+    .limit(100)
+    .find({ suppressAuth: true });
+  const channelIds = channels.items.map(channel => channel._id);
+  if (!channelIds.length) return { items: [], total: 0 };
+
+  const mediaResult = await wixData.query(MEDIA)
+    .hasSome('creatorChannelId', channelIds)
+    .limit(1000)
+    .find({ suppressAuth: true });
+  const mediaIds = mediaResult.items.map(media => media._id);
+  if (!mediaIds.length) return { items: [], total: 0 };
+
+  const pending = await wixData.query(COMMENTS)
+    .eq('status', 'pending_review')
+    .ascending('updatedAt')
+    .limit(1000)
+    .find({ suppressAuth: true });
+  const mediaById = new Map(mediaResult.items.map(media => [media._id, media]));
+  const items = pending.items
+    .filter(comment => mediaById.has(comment.mediaItemId))
+    .slice(0, limit)
+    .map(comment => {
+      const media = mediaById.get(comment.mediaItemId);
+      return {
+        _id: comment._id,
+        mediaItemId: comment.mediaItemId,
+        mediaTitle: media.title,
+        memberId: comment.memberId,
+        body: comment.body,
+        createdAt: comment.createdAt,
+        updatedAt: comment.updatedAt
+      };
+    });
+  return { items, total: pending.items.filter(comment => mediaById.has(comment.mediaItemId)).length };
+}
+
+export async function moderateMyChannelComment(input = {}) {
+  const ownerId = memberId();
+  const commentId = requiredText(input.commentId, 'Comment ID', 100);
+  const status = requiredText(input.status, 'Comment status', 20);
+  const note = typeof input.note === 'string' ? input.note.trim().slice(0, 1000) : '';
+  if (!['published', 'removed'].includes(status)) {
+    throw new Error('Comment status must be published or removed.');
+  }
+  const comment = await wixData.get(COMMENTS, commentId, { suppressAuth: true });
+  if (!comment) throw new Error('Comment was not found.');
+  const media = await wixData.get(MEDIA, comment.mediaItemId, { suppressAuth: true });
+  if (!media) throw new Error('The associated media item was not found.');
+  const channel = await wixData.get(CHANNELS, media.creatorChannelId, { suppressAuth: true });
+  if (!channel || channel.memberId !== ownerId) {
+    throw new Error('Only the owner of this creator channel can moderate its comments.');
+  }
+  const updated = await wixData.update(COMMENTS, {
+    ...comment,
+    status,
+    moderationNote: note,
+    updatedAt: new Date()
+  }, { suppressAuth: true });
+  return { _id: updated._id, status: updated.status };
+}
+
 function memberId() {
   const id = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
   if (!id) throw new Error('A signed-in site member is required.');
