@@ -352,6 +352,16 @@ assert.match(readme, /OBS Browser Source chat overlays/);
 console.log('MyOutlet source validation passed: ' + methodCount +
   ' web methods, ' + collectionNames.size + ' documented collections.');
 
+const notificationCore = read('src/backend/notificationCore.js');
+assert.match(notificationCore, /export async function createNotification/);
+for (const file of ['catalog.jsw', 'viewer.jsw', 'engagement.jsw']) {
+  const source = read('src/backend/' + file);
+  assert.match(source, /from 'backend\/notificationCore'/,
+    file + ' must use the internal notification helper');
+  assert.doesNotMatch(source, /from 'backend\/notifications'/,
+    file + ' must not import the member-facing notification web module as an internal helper');
+}
+
 const gitmodules = read('.gitmodules');
 const upstreamComponents = read('UPSTREAM_COMPONENTS.md');
 const chatterinoSubmoduleCount = gitmodules.split('[submodule "upstream/chatterino/').length - 1;
