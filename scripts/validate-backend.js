@@ -199,6 +199,8 @@ assert.match(engagement, /moderateComment/);
 assert.match(engagement, /listPendingComments/);
 assert.match(engagement, /listMyPendingComments/);
 assert.match(engagement, /moderateMyChannelComment/);
+const publicCommentList = engagement.slice(engagement.indexOf('export async function listComments'), engagement.indexOf('export async function listPendingComments'));
+assert.doesNotMatch(publicCommentList, /memberId: comment\\.memberId/);
 assert.match(engagement, /channel.memberId !== ownerId/);
 
 const playlists = read('src/backend/playlists.jsw');
