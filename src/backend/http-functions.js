@@ -75,16 +75,8 @@ export async function post_streamAuth(request) {
               .find({ suppressAuth: true });
             if (!followers.items.length) break;
 
-            const existing = await wixData.query(NOTIFICATIONS)
-              .eq('type', 'new_live_stream')
-              .eq('sourceId', stream._id)
-              .limit(1000)
-              .find({ suppressAuth: true });
-            const notified = new Set(existing.items.map(item => item.recipientMemberId));
             const now = new Date();
-            const notifications = followers.items
-              .filter(follow => !notified.has(follow.memberId))
-              .map(follow => ({
+            const notifications = followers.items.map(follow => ({
                 notificationKey: ['new_live_stream', stream._id, follow.memberId].join(':'),
                 recipientMemberId: follow.memberId,
                 actorMemberId: stream.creatorMemberId,
