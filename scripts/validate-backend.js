@@ -307,7 +307,7 @@ assert.match(mediamtx, /record: true/);
 assert.match(mediamtx, /recordFormat: fmp4/);
 assert.match(mediamtx, /recordSegmentDuration: 1h/);
 assert.match(mediamtx, /recordDeleteAfter: 7d/);
-assert.match(compose, /\\.\\/recordings:\\/recordings/);
+assert.ok(compose.includes('./recordings:/recordings'));
 assert.match(httpFunctions, /bulkInsert\(NOTIFICATIONS/);
 assert.match(httpFunctions, /const starting = stream.status !== 'live'/);
 
