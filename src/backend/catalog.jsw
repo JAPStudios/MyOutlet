@@ -326,17 +326,30 @@ export async function getSongQueue(options = {}) {
   const channelId = cleanText(options.creatorChannelId, 'Creator channel', 100);
   const channel = await wixData.get(CHANNELS, channelId, { suppressAuth: true });
   if (!channel) throw new Error('Creator channel was not found.');
+  const activeStream = await wixData.query(LIVE)
+    .eq('creatorChannelId', channelId)
+    .eq('status', 'live')
+    .limit(1)
+    .find({ suppressAuth: true });
+  if (!activeStream.items.length) return { items: [], live: false };
+  const stream = activeStream.items[0];
   const limit = Math.min(Math.max(Number(options.limit) || 50, 1), 100);
   const result = await wixData.query(SONGS)
-    .eq('creatorChannelId', channelId)
+    .eq('liveStreamId', stream._id)
     .eq('status', 'queued')
     .ascending('_createdDate')
     .limit(limit)
     .find({ suppressAuth: true });
   return {
+    live: true,
+    liveStreamId: stream._id,
     items: result.items.map(item => ({
-      _id: item._id, title: item.title, artist: item.artist,
-      creatorChannelId: item.creatorChannelId, requestedAt: item._createdDate
+      _id: item._id,
+      title: item.title,
+      artist: item.artist,
+      creatorChannelId: item.creatorChannelId,
+      liveStreamId: item.liveStreamId,
+      requestedAt: item._createdDate
     }))
   };
 }
@@ -348,9 +361,39 @@ export async function enqueueSong(input = {}) {
   const channelId = cleanText(input.creatorChannelId, 'Creator channel', 100);
   const channel = await wixData.get(CHANNELS, channelId, { suppressAuth: true });
   if (!channel) throw new Error('Creator channel was not found.');
+
+  const activeStreamResult = await wixData.query(LIVE)
+    .eq('creatorChannelId', channelId)
+    .eq('status', 'live')
+    .limit(1)
+    .find({ suppressAuth: true });
+  const activeStream = activeStreamResult.items[0];
+  if (!activeStream) throw new Error('Song requests are available only while this creator is live.');
+
+  const queue = await wixData.query(SONGS)
+    .eq('liveStreamId', activeStream._id)
+    .eq('status', 'queued')
+    .limit(1)
+    .find({ suppressAuth: true });
+  if (queue.totalCount >= 50) throw new Error('This live stream song queue is full.');
+
+  const requesterQueue = await wixData.query(SONGS)
+    .eq('liveStreamId', activeStream._id)
+    .eq('requesterMemberId', requesterId)
+    .eq('status', 'queued')
+    .limit(1)
+    .find({ suppressAuth: true });
+  if (requesterQueue.totalCount >= 5) {
+    throw new Error('A maximum of five queued song requests per viewer is allowed per live stream.');
+  }
+
   const created = await wixData.insert(SONGS, {
-    title, artist, creatorChannelId: channelId,
-    requesterMemberId: requesterId, status: 'queued'
+    title,
+    artist,
+    creatorChannelId: channelId,
+    liveStreamId: activeStream._id,
+    requesterMemberId: requesterId,
+    status: 'queued'
   }, { suppressAuth: true });
   if (channel.memberId !== requesterId) {
     try {
@@ -366,7 +409,13 @@ export async function enqueueSong(input = {}) {
       console.error('MyOutlet song-request notification failed.', error);
     }
   }
-  return { _id: created._id, title: created.title, artist: created.artist, status: created.status };
+  return {
+    _id: created._id,
+    title: created.title,
+    artist: created.artist,
+    liveStreamId: created.liveStreamId,
+    status: created.status
+  };
 }
 
 export async function moderateContent(input = {}) {

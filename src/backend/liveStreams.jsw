@@ -8,6 +8,7 @@ import { isContentRatingAllowed } from 'backend/ratingPreferences';
 const LIVE = 'LiveStreams';
 const MEDIA = 'MediaItems';
 const CHANNELS = 'CreatorChannels';
+const SONGS = 'SongRequests';
 const RATINGS = ['TV-Y', 'TV-Y7', 'TV-G', 'TV-PG', 'TV-14', 'TV-MA', 'Unrated'];
 
 function memberId() {
@@ -224,6 +225,18 @@ export async function endLiveStream(input = {}) {
     endedAt: now,
     updatedAt: now
   }, { suppressAuth: true });
+
+  const pendingSongs = await wixData.query(SONGS)
+    .eq('liveStreamId', stream._id)
+    .eq('status', 'queued')
+    .limit(100)
+    .find({ suppressAuth: true });
+  for (const request of pendingSongs.items) {
+    await wixData.update(SONGS, {
+      ...request,
+      status: 'cancelled'
+    }, { suppressAuth: true });
+  }
 
   const media = await wixData.get(MEDIA, stream.mediaItemId, { suppressAuth: true });
   if (media && media.status !== 'removed') {

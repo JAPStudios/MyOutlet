@@ -133,6 +133,7 @@ Fields:
 - `title` — Text, required
 - `artist` — Text, required
 - `creatorChannelId` — Text
+- `liveStreamId` — Text, required; the specific live session that owns this queue item
 - `requesterMemberId` — Text
 - `status` — Text: `queued`, `played`, `skipped` or `cancelled`
 
@@ -274,7 +275,7 @@ Indexes for the first nine collections were confirmed `ACTIVE` on the MyOutlet s
 
 - `MediaItems`: `media-status-published`, `media-channel-status-published`, `media-creator-submitted`. Rights-validity fields are additionally filtered in the backend; a dedicated composite index could not be created because the collection's index quota was already full.
 - `CreatorChannels`: case-insensitive unique `creator-handle-unique`, plus `creator-member`
-- `SongRequests`: `song-channel-status-created`
+- `SongRequests`: `song-channel-status-created`, `song-stream-status-created`
 - `ViewerLibrary`: `viewer-library-member-saved`
 - `PlaybackProgress`: `playback-member-completed-last`
 - `CreatorFollows`: `follows-member-date`
