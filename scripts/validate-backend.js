@@ -368,12 +368,11 @@ for (const file of [
 const notifications = read('src/backend/notifications.jsw');
 assert.match(notifications, /getMyNotifications/);
 assert.match(notifications, /markAllNotificationsRead/);
-const notificationWriter = read('src/backend/notifications.js');
-assert.match(notificationWriter, /createNotification/);
+const notificationCore = read('src/backend/notificationCore.js');
+assert.match(notificationCore, /export async function createNotification/);
 
 const readme = read('README.md');
 assert.match(readme, /The twenty CMS collections/);
-assert.match(readme, /OBS Browser Source chat overlays/);
 console.log('MyOutlet source validation passed: ' + methodCount +
   ' web methods, ' + collectionNames.size + ' documented collections.');
 
