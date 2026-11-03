@@ -97,9 +97,22 @@ Permissions: `ADMIN` (site administrators) for direct collection access. Applica
 - Member content submission into the moderation queue, plus private submission-status tracking.
 - Private MP4 uploads to the Wix Media Manager, event-driven transcoding readiness, and published-video HLS/DASH playback URLs.
 - Owner-only pending-review queue, publish/reject/remove decisions and song-request queue status controls.
-- Member song requests and a public read-only queue, ordered by submission time.
+- Member song requests and a public read-only queue scoped to a specific creator channel and ordered by submission time.
 - Member watchlists, with published-media checks and private per-member records.
 - Continue-watching history for on-demand video/audio, with bounded playback positions and completed-item exclusion.
 - Creator follows, followed-channel lists and a published-media feed across followed channels.
 
 This layer uploads private MP4 files to the Wix Media Manager, records upload/transcoding events, and can request HLS or DASH playback URLs for published MyOutlet-uploaded videos. It does not provide live ingest, a custom CDN, external media transcoding, creator analytics, payment processing or rights verification. Do not publish an item until the media is ready, distribution rights and content rating have been checked, and moderation is complete. Wix backend media events do not run in site Preview.
+
+
+## Wix data indexes
+
+The following indexes have been requested on the MyOutlet site. Wix initially reports them as `BUILDING`; they become query-ready when their status changes to `ACTIVE`.
+
+- `MediaItems`: `media-status-published`, `media-channel-status-published`, `media-creator-submitted`
+- `CreatorChannels`: case-insensitive unique `creator-handle-unique`, plus `creator-member`
+- `SongRequests`: `song-channel-status-created`
+- `ViewerLibrary`: `viewer-library-member-saved`
+- `PlaybackProgress`: `playback-member-completed-last`
+- `CreatorFollows`: `follows-member-date`
+- `MediaUploadSessions`: `uploads-owner-created`

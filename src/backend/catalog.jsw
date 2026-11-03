@@ -212,8 +212,16 @@ export async function submitContent(input = {}) {
 }
 
 export async function getSongQueue(options = {}) {
+  const channelId = cleanText(options.creatorChannelId, 'Creator channel', 100);
+  const channel = await wixData.get(CHANNELS, channelId, { suppressAuth: true });
+  if (!channel) throw new Error('Creator channel was not found.');
   const limit = Math.min(Math.max(Number(options.limit) || 50, 1), 100);
-  const result = await wixData.query(SONGS).eq('status', 'queued').ascending('_createdDate').limit(limit).find({ suppressAuth: true });
+  const result = await wixData.query(SONGS)
+    .eq('creatorChannelId', channelId)
+    .eq('status', 'queued')
+    .ascending('_createdDate')
+    .limit(limit)
+    .find({ suppressAuth: true });
   return {
     items: result.items.map(item => ({
       _id: item._id, title: item.title, artist: item.artist,
