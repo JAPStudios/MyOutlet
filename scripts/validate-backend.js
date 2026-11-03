@@ -358,7 +358,7 @@ assert.match(notifications, /getMyNotifications/);
 assert.match(notifications, /markAllNotificationsRead/);
 
 const readme = read('README.md');
-assert.match(readme, /The twenty CMS collections/);
+assert.match(readme, /The 20 custom CMS collections/);
 console.log('MyOutlet source validation passed: ' + methodCount +
   ' web methods, ' + collectionNames.size + ' documented collections.');
 
