@@ -23,5 +23,11 @@ assert.match(source, /seenRecipients\.has\(memberId\)/,
   'Follower fan-out must deduplicate recipient IDs across pages.');
 assert.match(source, /wixData\.bulkInsert\(NOTIFICATIONS, notifications/,
   'Notifications must be written in batches.');
+assert.ok(source.includes("replace(/^\\/+|\\/+$/g, '').replace(/\\/index\\.m3u8$/i, '')"),
+  'The auth callback must normalize HLS playlist paths to the stored stream path.');
+assert.match(source, /if \(stream\.status !== 'live'\) return forbidden\(\)/,
+  'HLS readers must be rejected after the stream is no longer live.');
+assert.match(source, /timingSafeEqual\(stored, candidateHash\)/,
+  'Publisher credentials must be compared using a timing-safe hash comparison.');
 
-console.log('MyOutlet live-auth validation passed: per-recipient live notifications are scoped and deduplicated.');
+console.log('MyOutlet live-auth validation passed: stream authorization and per-recipient live notifications are covered.');
