@@ -1,0 +1,154 @@
+import wixData from 'wix-data';
+import wixUsersBackend from 'wix-users-backend';
+
+const MEDIA = 'MediaItems';
+const CHANNELS = 'CreatorChannels';
+const SONGS = 'SongRequests';
+
+function cleanText(value, field, max) {
+  if (typeof value !== 'string') throw new Error(field + ' must be text.');
+  const result = value.trim();
+  if (!result || result.length > max) throw new Error(field + ' is required and must be at most ' + max + ' characters.');
+  return result;
+}
+
+function safeHttpsUrl(value, field) {
+  const raw = cleanText(value, field, 2048);
+  let parsed;
+  try { parsed = new URL(raw); } catch (_) { throw new Error(field + ' must be a valid HTTPS URL.'); }
+  if (parsed.protocol !== 'https:') throw new Error(field + ' must use HTTPS.');
+  return parsed.toString();
+}
+
+function memberId() {
+  const id = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  if (!id) throw new Error('A signed-in site member is required.');
+  return id;
+}
+
+function publicMedia(item) {
+  return {
+    _id: item._id,
+    title: item.title,
+    description: item.description || '',
+    mediaUrl: item.mediaUrl,
+    thumbnailUrl: item.thumbnailUrl || '',
+    contentType: item.contentType,
+    contentRating: item.contentRating,
+    creatorChannelId: item.creatorChannelId,
+    publishedAt: item.publishedAt || item._createdDate
+  };
+}
+
+const RATINGS = ['TV-Y', 'TV-Y7', 'TV-G', 'TV-PG', 'TV-14', 'TV-MA', 'Unrated'];
+const TYPES = ['video', 'livestream', 'audio'];
+
+export async function browseCatalog(options = {}) {
+  const limit = Math.min(Math.max(Number(options.limit) || 24, 1), 50);
+  const offset = Math.min(Math.max(Number(options.offset) || 0, 0), 10000);
+  const result = await wixData.query(MEDIA)
+    .eq('status', 'published')
+    .descending('publishedAt')
+    .skip(offset)
+    .limit(limit)
+    .find();
+  return { items: result.items.map(publicMedia), total: result.totalCount, offset, limit };
+}
+
+export async function searchCatalog(options = {}) {
+  const term = cleanText(options.term, 'Search term', 100);
+  const limit = Math.min(Math.max(Number(options.limit) || 24, 1), 50);
+  const offset = Math.min(Math.max(Number(options.offset) || 0, 0), 10000);
+  const titleQuery = wixData.query(MEDIA).eq('status', 'published').contains('title', term);
+  const descriptionQuery = wixData.query(MEDIA).eq('status', 'published').contains('description', term);
+  const result = await titleQuery.or(descriptionQuery)
+    .descending('publishedAt')
+    .skip(offset)
+    .limit(limit)
+    .find();
+  return { items: result.items.map(publicMedia), total: result.totalCount, offset, limit };
+}
+
+export async function getMyChannel() {
+  const ownerId = memberId();
+  const result = await wixData.query(CHANNELS).eq('memberId', ownerId).limit(1).find();
+  if (!result.items.length) return null;
+  const channel = result.items[0];
+  return { _id: channel._id, name: channel.name, handle: channel.handle, description: channel.description || '' };
+}
+
+export async function saveMyChannel(input = {}) {
+  const ownerId = memberId();
+  const name = cleanText(input.name, 'Channel name', 80);
+  const handle = cleanText(input.handle, 'Channel handle', 30).replace(/^@/, '').toLowerCase();
+  if (!/^[a-z0-9_]+$/.test(handle)) throw new Error('Channel handle may contain only lowercase letters, numbers and underscores.');
+  const description = typeof input.description === 'string' ? input.description.trim().slice(0, 500) : '';
+  const found = await wixData.query(CHANNELS).eq('memberId', ownerId).limit(1).find();
+  const record = { name, handle, description, memberId: ownerId };
+  if (found.items.length) {
+    const updated = await wixData.update(CHANNELS, { ...found.items[0], ...record });
+    return { _id: updated._id, name: updated.name, handle: updated.handle, description: updated.description };
+  }
+  const created = await wixData.insert(CHANNELS, record);
+  return { _id: created._id, name: created.name, handle: created.handle, description: created.description };
+}
+
+export async function submitContent(input = {}) {
+  const creatorId = memberId();
+  const title = cleanText(input.title, 'Title', 120);
+  const description = typeof input.description === 'string' ? input.description.trim().slice(0, 2000) : '';
+  const mediaUrl = safeHttpsUrl(input.mediaUrl, 'Media URL');
+  const thumbnailUrl = input.thumbnailUrl ? safeHttpsUrl(input.thumbnailUrl, 'Thumbnail URL') : '';
+  const contentType = cleanText(input.contentType, 'Content type', 20);
+  const contentRating = cleanText(input.contentRating, 'Content rating', 20);
+  if (!TYPES.includes(contentType)) throw new Error('Unsupported content type.');
+  if (!RATINGS.includes(contentRating)) throw new Error('Unsupported content rating.');
+  const channelId = cleanText(input.creatorChannelId, 'Creator channel', 100);
+  const channel = await wixData.get(CHANNELS, channelId);
+  if (!channel || channel.memberId !== creatorId) throw new Error('The selected channel is not available to this account.');
+  const created = await wixData.insert(MEDIA, {
+    title, description, mediaUrl, thumbnailUrl, contentType, contentRating,
+    creatorChannelId: channelId, creatorMemberId: creatorId,
+    status: 'pending_review', submittedAt: new Date()
+  });
+  return { _id: created._id, status: created.status, title: created.title };
+}
+
+export async function getSongQueue(options = {}) {
+  const limit = Math.min(Math.max(Number(options.limit) || 50, 1), 100);
+  const result = await wixData.query(SONGS).eq('status', 'queued').ascending('_createdDate').limit(limit).find();
+  return {
+    items: result.items.map(item => ({
+      _id: item._id, title: item.title, artist: item.artist,
+      creatorChannelId: item.creatorChannelId, requestedAt: item._createdDate
+    }))
+  };
+}
+
+export async function enqueueSong(input = {}) {
+  const requesterId = memberId();
+  const title = cleanText(input.title, 'Song title', 120);
+  const artist = cleanText(input.artist, 'Artist', 120);
+  const channelId = cleanText(input.creatorChannelId, 'Creator channel', 100);
+  const channel = await wixData.get(CHANNELS, channelId);
+  if (!channel) throw new Error('Creator channel was not found.');
+  const created = await wixData.insert(SONGS, {
+    title, artist, creatorChannelId: channelId,
+    requesterMemberId: requesterId, status: 'queued'
+  });
+  return { _id: created._id, title: created.title, artist: created.artist, status: created.status };
+}
+
+export async function moderateContent(input = {}) {
+  const id = cleanText(input.contentId, 'Content ID', 100);
+  const status = cleanText(input.status, 'Status', 30);
+  if (!['published', 'rejected', 'removed'].includes(status)) throw new Error('Unsupported moderation status.');
+  const existing = await wixData.get(MEDIA, id);
+  if (!existing) throw new Error('Content item was not found.');
+  const updated = await wixData.update(MEDIA, {
+    ...existing, status,
+    publishedAt: status === 'published' ? new Date() : existing.publishedAt,
+    moderationNote: typeof input.note === 'string' ? input.note.trim().slice(0, 1000) : ''
+  });
+  return { _id: updated._id, status: updated.status };
+}
