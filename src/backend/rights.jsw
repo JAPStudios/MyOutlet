@@ -104,6 +104,9 @@ export async function submitRightsDeclaration(input = {}) {
   const rightsHolder = requiredText(input.rightsHolder, 'Rights holder', 160);
   const sourceDetails = requiredText(input.sourceDetails, 'Rights details', 2000);
   const territories = normalizeTerritories(input.territories);
+  if (!territories.includes('WORLDWIDE')) {
+    throw new Error('MyOutlet currently accepts worldwide distribution declarations only; geographic access controls are not implemented.');
+  }
   const validFrom = normalizeDate(input.validFrom, 'Valid from', false);
   const validUntil = normalizeDate(input.validUntil, 'Valid until', true);
   if (validUntil && validUntil < validFrom) {

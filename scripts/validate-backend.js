@@ -218,6 +218,7 @@ assert.match(rightsCore, /WORLDWIDE/);
 assert.match(rightsCore, /applyVerifiedRightsFilter/);
 assert.match(rights, /rightsVerified: true/);
 assert.match(rights, /worldwide distribution rights only/);
+assert.match(rights, /worldwide distribution declarations only/);
 assert.match(rights, /rightsVerified: false/);
 assert.match(rights, /Distribution rights verification was revoked/);
 assert.match(rights, /status: 'cancelled'/);
