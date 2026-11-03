@@ -51,7 +51,7 @@ export async function browseCatalog(options = {}) {
     .descending('publishedAt')
     .skip(offset)
     .limit(limit)
-    .find();
+    .find({ suppressAuth: true });
   return { items: result.items.map(publicMedia), total: result.totalCount, offset, limit };
 }
 
@@ -65,13 +65,13 @@ export async function searchCatalog(options = {}) {
     .descending('publishedAt')
     .skip(offset)
     .limit(limit)
-    .find();
+    .find({ suppressAuth: true });
   return { items: result.items.map(publicMedia), total: result.totalCount, offset, limit };
 }
 
 export async function getMyChannel() {
   const ownerId = memberId();
-  const result = await wixData.query(CHANNELS).eq('memberId', ownerId).limit(1).find();
+  const result = await wixData.query(CHANNELS).eq('memberId', ownerId).limit(1).find({ suppressAuth: true });
   if (!result.items.length) return null;
   const channel = result.items[0];
   return { _id: channel._id, name: channel.name, handle: channel.handle, description: channel.description || '' };
@@ -83,13 +83,13 @@ export async function saveMyChannel(input = {}) {
   const handle = cleanText(input.handle, 'Channel handle', 30).replace(/^@/, '').toLowerCase();
   if (!/^[a-z0-9_]+$/.test(handle)) throw new Error('Channel handle may contain only lowercase letters, numbers and underscores.');
   const description = typeof input.description === 'string' ? input.description.trim().slice(0, 500) : '';
-  const found = await wixData.query(CHANNELS).eq('memberId', ownerId).limit(1).find();
+  const found = await wixData.query(CHANNELS).eq('memberId', ownerId).limit(1).find({ suppressAuth: true });
   const record = { name, handle, description, memberId: ownerId };
   if (found.items.length) {
-    const updated = await wixData.update(CHANNELS, { ...found.items[0], ...record });
+    const updated = await wixData.update(CHANNELS, { ...found.items[0], ...record }, { suppressAuth: true });
     return { _id: updated._id, name: updated.name, handle: updated.handle, description: updated.description };
   }
-  const created = await wixData.insert(CHANNELS, record);
+  const created = await wixData.insert(CHANNELS, record, { suppressAuth: true });
   return { _id: created._id, name: created.name, handle: created.handle, description: created.description };
 }
 
@@ -110,13 +110,13 @@ export async function submitContent(input = {}) {
     title, description, mediaUrl, thumbnailUrl, contentType, contentRating,
     creatorChannelId: channelId, creatorMemberId: creatorId,
     status: 'pending_review', submittedAt: new Date()
-  });
+  }, { suppressAuth: true });
   return { _id: created._id, status: created.status, title: created.title };
 }
 
 export async function getSongQueue(options = {}) {
   const limit = Math.min(Math.max(Number(options.limit) || 50, 1), 100);
-  const result = await wixData.query(SONGS).eq('status', 'queued').ascending('_createdDate').limit(limit).find();
+  const result = await wixData.query(SONGS).eq('status', 'queued').ascending('_createdDate').limit(limit).find({ suppressAuth: true });
   return {
     items: result.items.map(item => ({
       _id: item._id, title: item.title, artist: item.artist,
@@ -130,12 +130,12 @@ export async function enqueueSong(input = {}) {
   const title = cleanText(input.title, 'Song title', 120);
   const artist = cleanText(input.artist, 'Artist', 120);
   const channelId = cleanText(input.creatorChannelId, 'Creator channel', 100);
-  const channel = await wixData.get(CHANNELS, channelId);
+  const channel = await wixData.get(CHANNELS, channelId, { suppressAuth: true });
   if (!channel) throw new Error('Creator channel was not found.');
   const created = await wixData.insert(SONGS, {
     title, artist, creatorChannelId: channelId,
     requesterMemberId: requesterId, status: 'queued'
-  });
+  }, { suppressAuth: true });
   return { _id: created._id, title: created.title, artist: created.artist, status: created.status };
 }
 
@@ -143,12 +143,12 @@ export async function moderateContent(input = {}) {
   const id = cleanText(input.contentId, 'Content ID', 100);
   const status = cleanText(input.status, 'Status', 30);
   if (!['published', 'rejected', 'removed'].includes(status)) throw new Error('Unsupported moderation status.');
-  const existing = await wixData.get(MEDIA, id);
+  const existing = await wixData.get(MEDIA, id, { suppressAuth: true });
   if (!existing) throw new Error('Content item was not found.');
   const updated = await wixData.update(MEDIA, {
     ...existing, status,
     publishedAt: status === 'published' ? new Date() : existing.publishedAt,
     moderationNote: typeof input.note === 'string' ? input.note.trim().slice(0, 1000) : ''
-  });
+  }, { suppressAuth: true });
   return { _id: updated._id, status: updated.status };
 }
