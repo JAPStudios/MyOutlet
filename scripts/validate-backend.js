@@ -199,6 +199,7 @@ assert.match(engagement, /moderateComment/);
 assert.match(engagement, /listPendingComments/);
 assert.match(engagement, /listMyPendingComments/);
 assert.match(engagement, /moderateMyChannelComment/);
+assert.match(engagement, /channel.memberId !== ownerId/);
 
 const playlists = read('src/backend/playlists.jsw');
 assert.match(playlists, /getPlaylist/);

@@ -210,7 +210,7 @@ Fields:
 - `updatedAt` — Date and time
 - `moderationNote` — Text
 
-Permissions: `ADMIN` (site administrators) for direct collection access. Members can create, edit and delete their own comments. Edits return to `pending_review`; site owners can publish or remove comments.
+Permissions: `ADMIN` (site administrators) for direct collection access. Members can create, edit and delete their own comments. Edits return to `pending_review`; site owners can review all comments, and creator-channel owners can review comments on media belonging to their own channels.
 
 ## MediaMetrics
 
