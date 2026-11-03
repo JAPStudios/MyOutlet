@@ -13,7 +13,7 @@ function requiredText(value, field, max) {
 }
 
 export function isMediaRightsCurrent(media) {
-  if (!media || media.rightsVerified !== true) return false;
+  if (!media || media.rightsVerified !== true || !Array.isArray(media.rightsTerritories) || !media.rightsTerritories.includes('WORLDWIDE')) return false;
   if (!media.rightsValidUntil) return true;
   const expiry = new Date(media.rightsValidUntil);
   if (!Number.isFinite(expiry.getTime())) return false;
@@ -26,7 +26,9 @@ export function applyVerifiedRightsFilter(query) {
   now.setUTCHours(0, 0, 0, 0);
   const noExpiry = wixData.query(MEDIA).isEmpty('rightsValidUntil');
   const currentExpiry = wixData.query(MEDIA).ge('rightsValidUntil', now);
-  return query.eq('rightsVerified', true).and(noExpiry.or(currentExpiry));
+  return query.eq('rightsVerified', true)
+    .hasSome('rightsTerritories', ['WORLDWIDE'])
+    .and(noExpiry.or(currentExpiry));
 }
 
 export async function getVerifiedRightsForMedia(mediaItemId) {
@@ -38,6 +40,7 @@ export async function getVerifiedRightsForMedia(mediaItemId) {
     .find({ suppressAuth: true });
   if (!result.items.length) return null;
   const record = result.items[0];
+  if (!Array.isArray(record.territories) || !record.territories.includes('WORLDWIDE')) return null;
   const now = new Date();
   if (record.validFrom && new Date(record.validFrom) > now) return null;
   if (record.validUntil) {

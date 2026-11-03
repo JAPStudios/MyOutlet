@@ -162,6 +162,7 @@ export async function submitRightsDeclaration(input = {}) {
   await wixData.update(MEDIA, {
     ...media,
     rightsVerified: false,
+    rightsTerritories: [],
     rightsValidUntil: validUntil,
     rightsRecordId: ''
   }, { suppressAuth: true });
@@ -251,6 +252,9 @@ export async function reviewRightsDeclaration(input = {}) {
   }
 
   if (status === 'verified') {
+    if (!Array.isArray(record.territories) || !record.territories.includes('WORLDWIDE')) {
+      throw new Error('MyOutlet currently verifies worldwide distribution rights only; territorial restrictions require geographic access controls.');
+    }
     if (!['pending_review', 'published'].includes(media.status)) {
       throw new Error('The media item is no longer reviewable.');
     }
@@ -274,6 +278,7 @@ export async function reviewRightsDeclaration(input = {}) {
     await wixData.update(MEDIA, {
       ...media,
       rightsVerified: true,
+      rightsTerritories: Array.isArray(record.territories) ? record.territories : [],
       rightsValidUntil: record.validUntil || null,
       rightsRecordId: record._id
     }, { suppressAuth: true });
@@ -282,7 +287,8 @@ export async function reviewRightsDeclaration(input = {}) {
 
   const mediaUpdate = {
     ...media,
-    rightsVerified: false
+    rightsVerified: false,
+    rightsTerritories: []
   };
   if (status === 'revoked' && media.status === 'published') {
     mediaUpdate.status = 'removed';

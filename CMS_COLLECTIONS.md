@@ -19,6 +19,7 @@ Fields:
 - `rightsVerified` — Boolean; set only after owner verification of a matching RightsRecords item
 - `rightsValidUntil` — Date; blank for no expiry, otherwise the final valid date (inclusive through 23:59:59 UTC)
 - `rightsRecordId` — Text; associated RightsRecords item ID
+- `rightsTerritories` — Array; verified distribution territories. MyOutlet currently requires `WORLDWIDE` because geographic access controls are not implemented.
 - `creatorChannelId` — Text
 - `creatorMemberId` — Text
 - `status` — Text: `pending_review`, `published`, `rejected` or `removed`
@@ -273,7 +274,7 @@ This layer uploads private MP4 files to the Wix Media Manager, records upload/tr
 
 Indexes for the first nine collections were confirmed `ACTIVE` on the MyOutlet site. The two MediaMetrics indexes have also been confirmed `ACTIVE`.
 
-- `MediaItems`: `media-status-published`, `media-channel-status-published`, `media-creator-submitted`. Rights-validity fields are additionally filtered in the backend; a dedicated composite index could not be created because the collection's index quota was already full.
+- `MediaItems`: `media-status-published`, `media-channel-status-published`, `media-creator-submitted`. Rights-validity and worldwide-territory fields are additionally filtered in the backend; a dedicated composite index could not be created because the collection's index quota was already full.
 - `CreatorChannels`: case-insensitive unique `creator-handle-unique`, plus `creator-member`
 - `SongRequests`: `song-channel-status-created`, `song-stream-status-created`
 - `ViewerLibrary`: `viewer-library-member-saved`
