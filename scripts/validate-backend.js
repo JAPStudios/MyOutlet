@@ -263,7 +263,7 @@ for (const file of [
 ]) {
   const source = read('src/backend/' + file);
   if (source.includes('.totalCount')) {
-    assert.match(source, /returnTotalCount:\\s*true/,
+    assert.match(source, /returnTotalCount:\s*true/,
       file + ' must explicitly request Wix Data total counts');
   }
 }
