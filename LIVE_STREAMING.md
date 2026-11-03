@@ -40,6 +40,14 @@ Chat reads and writes require the stream to remain live and its media to remain 
 
 The backend and CMS schema are present, but this repository change does not create or wire a visible chat panel into the Wix Editor page. The page-level chat interface still needs to be connected to these web methods.
 
+## OBS Browser Source chat overlay
+
+Each new creator live-stream session receives a separate random chat-overlay token. The backend stores only its SHA-256 hash and returns a creator-only URL at creation time. The creator can rotate the URL through `getMyLiveChatOverlay`; rotating it invalidates the previous URL.
+
+The URL opens a transparent, self-contained browser overlay at `/_functions/chatOverlay`. It polls `/_functions/chatOverlayMessages` every 2.5 seconds, displays the latest 30 published chat messages in chronological order, and writes sender names and message bodies with DOM `textContent` rather than HTML injection. The overlay is read-only and never exposes the RTMPS publisher key. The tokenized URL should be treated as a secret and pasted into OBS Browser Source.
+
+The overlay is implemented in the Wix HTTP functions and is not yet a separate downloadable OBS plug-in. Its production URL depends on the current MyOutlet Wix site URL.
+
 ## Ordered song-request queue
 
 The catalogue backend exposes `enqueueSong` for one track and `enqueueSongs` for an ordered batch of one to five tracks. The batch method checks the active stream and verified media rights, enforces the 50-item stream queue and five-pending-requests-per-member limits, inserts the selected tracks sequentially in the submitted order, and marks already inserted items cancelled if a later insert fails. The creator receives one notification for the batch.

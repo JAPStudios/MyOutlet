@@ -1,6 +1,6 @@
 # MyOutlet
 
-MyOutlet is the audiovisual publishing, streaming and creator platform being developed by JAPStudios. Its scope includes creator channels, on-demand and live media, live chat and viewer chat reports, search, moderation, content ratings, creator tools and audience song requests.
+MyOutlet is the audiovisual publishing, streaming and creator platform being developed by JAPStudios. Its scope includes creator channels, on-demand and live media, live chat, viewer chat reports, OBS Browser Source chat overlays, search, moderation, content ratings, creator tools and audience song requests.
 
 ## Current repository structure
 

@@ -10,6 +10,7 @@ const MEDIA = 'MediaItems';
 const CHANNELS = 'CreatorChannels';
 const SONGS = 'SongRequests';
 const RATINGS = ['TV-Y', 'TV-Y7', 'TV-G', 'TV-PG', 'TV-14', 'TV-MA', 'Unrated'];
+const SITE_BASE_URL = 'https://japbstudios.wixsite.com/myoutlet';
 
 function memberId() {
   const id = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
@@ -130,6 +131,8 @@ export async function createLiveStream(input = {}) {
   const streamPath = randomBytes(16).toString('hex');
   const streamKey = randomBytes(32).toString('hex');
   const streamKeyHash = createHash('sha256').update(streamKey).digest('hex');
+  const chatOverlayToken = randomBytes(32).toString('hex');
+  const chatOverlayTokenHash = createHash('sha256').update(chatOverlayToken).digest('hex');
   const mediaUrl = bases.hls + '/' + streamPath + '/index.m3u8';
   const now = new Date();
 
@@ -158,6 +161,7 @@ export async function createLiveStream(input = {}) {
     stream = await wixData.insert(LIVE, {
       streamPath,
       streamKeyHash,
+      chatOverlayTokenHash,
       creatorChannelId,
       creatorMemberId,
       mediaItemId: media._id,
@@ -181,12 +185,15 @@ export async function createLiveStream(input = {}) {
   const ingestUrl = bases.rtmps + '/' + streamPath +
     '?user=' + encodeURIComponent(creatorChannelId) +
     '&pass=' + encodeURIComponent(streamKey);
+  const chatOverlayUrl = SITE_BASE_URL + '/_functions/chatOverlay?streamId=' +
+    encodeURIComponent(stream._id) + '&token=' + chatOverlayToken;
 
   return {
     streamId: stream._id,
     mediaItemId: media._id,
     status: stream.status,
     ingestUrl,
+    chatOverlayUrl,
     playbackUrl: mediaUrl
   };
 }
@@ -205,6 +212,31 @@ export async function getMyLiveStreams(options = {}) {
     return publicSession(stream, media);
   }));
   return { items, total: result.totalCount };
+}
+
+export async function getMyLiveChatOverlay(input = {}) {
+  const creatorMemberId = memberId();
+  const streamId = requiredText(input.streamId, 'Live-stream ID', 100);
+  const stream = await wixData.get(LIVE, streamId, { suppressAuth: true });
+  if (!stream || stream.creatorMemberId !== creatorMemberId ||
+      ['ended', 'cancelled'].includes(stream.status)) {
+    throw new Error('The live-stream session is not available to this account.');
+  }
+
+  const token = randomBytes(32).toString('hex');
+  const tokenHash = createHash('sha256').update(token).digest('hex');
+  await wixData.update(LIVE, {
+    ...stream,
+    chatOverlayTokenHash: tokenHash,
+    updatedAt: new Date()
+  }, { suppressAuth: true });
+
+  return {
+    streamId: stream._id,
+    overlayUrl: SITE_BASE_URL + '/_functions/chatOverlay?streamId=' +
+      encodeURIComponent(stream._id) + '&token=' + token,
+    rotated: true
+  };
 }
 
 export async function endLiveStream(input = {}) {

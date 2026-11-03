@@ -777,6 +777,17 @@
         "anonymous": {
           "invoke": true
         }
+      },
+      "getMyLiveChatOverlay": {
+        "siteOwner": {
+          "invoke": true
+        },
+        "siteMember": {
+          "invoke": true
+        },
+        "anonymous": {
+          "invoke": false
+        }
       }
     },
     "backend/liveChat.jsw": {

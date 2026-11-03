@@ -79,6 +79,7 @@ const memberMethods = new Set([
   'backend/notifications.jsw:markAllNotificationsRead',
   'backend/liveStreams.jsw:createLiveStream',
   'backend/liveStreams.jsw:getMyLiveStreams',
+  'backend/liveStreams.jsw:getMyLiveChatOverlay',
   'backend/liveStreams.jsw:endLiveStream',
   'backend/liveChat.jsw:sendLiveChatMessage',
   'backend/liveChat.jsw:reportLiveChatMessage',
@@ -288,6 +289,12 @@ assert.match(liveStreams, /getMyLiveStreams/);
 assert.match(liveStreams, /endLiveStream/);
 assert.match(liveStreams, /MYOUTLET_RTMPS_BASE_URL/);
 assert.match(liveStreams, /MYOUTLET_HLS_BASE_URL/);
+assert.match(liveStreams, /chatOverlayTokenHash/);
+assert.match(liveStreams, /getMyLiveChatOverlay/);
+assert.match(httpFunctions, /get_chatOverlay/);
+assert.match(httpFunctions, /get_chatOverlayMessages/);
+assert.match(httpFunctions, /textContent/);
+assert.match(httpFunctions, /matchesStreamKey\(token, stream\.chatOverlayTokenHash\)/);
 const httpFunctions = read('src/backend/http-functions.js');
 assert.match(httpFunctions, /post_streamAuth/);
 assert.match(httpFunctions, /timingSafeEqual/);
