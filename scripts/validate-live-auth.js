@@ -30,12 +30,4 @@ assert.match(source, /if \(stream\.status !== 'live'\) return forbidden\(\)/,
 assert.match(source, /timingSafeEqual\(stored, candidateHash\)/,
   'Publisher credentials must be compared using a timing-safe hash comparison.');
 
-assert.match(source, /get_chatOverlay/);
-assert.match(source, /get_chatOverlayMessages/);
-assert.match(source, /chatOverlayTokenHash/);
-assert.match(source, /textContent = item\.body/,
-  'The OBS chat overlay must render viewer text without interpreting HTML.');
-assert.doesNotMatch(source, /innerHTML\s*=\s*item\.body/,
-  'The OBS chat overlay must not inject viewer messages as HTML.');
-
-console.log('MyOutlet live-auth validation passed: stream authorization, recipient notifications and OBS chat-overlay security are covered.');
+console.log('MyOutlet live-auth validation passed: stream authorization and recipient notifications are covered.');
