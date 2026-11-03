@@ -37,6 +37,7 @@ const memberMethods = new Set([
   'backend/catalog.jsw:submitContent',
   'backend/catalog.jsw:enqueueSong',
   'backend/catalog.jsw:getMySubmissions',
+  'backend/catalog.jsw:setSongRequestStatus',
   'backend/viewer.jsw:addToWatchlist',
   'backend/viewer.jsw:removeFromWatchlist',
   'backend/viewer.jsw:getMyWatchlist',
@@ -54,7 +55,6 @@ const memberMethods = new Set([
 const ownerMethods = new Set([
   'backend/catalog.jsw:moderateContent',
   'backend/catalog.jsw:listPendingContent',
-  'backend/catalog.jsw:setSongRequestStatus'
 ]);
 
 const modules = ['catalog.jsw', 'viewer.jsw', 'media.jsw'];
