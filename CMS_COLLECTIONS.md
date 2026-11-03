@@ -43,10 +43,10 @@ Permissions: site owner only. Queue reads and member submissions are mediated by
 
 ## Implemented backend operations
 
-- Public catalogue browse and title/description search, limited to published records.
+- Public catalogue browse, title/description search and per-channel catalogue reads, limited to published records.
 - Member-owned creator channel creation and update.
-- Member content submission into the moderation queue.
-- Owner-only publish, reject and remove decisions.
+- Member content submission into the moderation queue, plus private submission-status tracking.
+- Owner-only pending-review queue, publish/reject/remove decisions and song-request queue status controls.
 - Member song requests and a public read-only queue, ordered by submission time.
 
 This is a metadata and workflow layer. It does not upload or transcode media, host video, provide adaptive-bitrate playback, run a live ingest server, process payments or verify music rights. Those require separate infrastructure and integrations. Do not mark an item published until the media URL, distribution rights, content rating and moderation decision have been checked.

@@ -152,3 +152,59 @@ export async function moderateContent(input = {}) {
   }, { suppressAuth: true });
   return { _id: updated._id, status: updated.status };
 }
+
+export async function getCreatorCatalog(input = {}) {
+  const channelId = cleanText(input.creatorChannelId, 'Creator channel', 100);
+  const limit = Math.min(Math.max(Number(input.limit) || 24, 1), 50);
+  const result = await wixData.query(MEDIA)
+    .eq('creatorChannelId', channelId)
+    .eq('status', 'published')
+    .descending('publishedAt')
+    .limit(limit)
+    .find({ suppressAuth: true });
+  return { items: result.items.map(publicMedia), total: result.totalCount };
+}
+
+export async function getMySubmissions(options = {}) {
+  const creatorId = memberId();
+  const limit = Math.min(Math.max(Number(options.limit) || 50, 1), 100);
+  const result = await wixData.query(MEDIA)
+    .eq('creatorMemberId', creatorId)
+    .descending('submittedAt')
+    .limit(limit)
+    .find({ suppressAuth: true });
+  return {
+    items: result.items.map(item => ({
+      _id: item._id, title: item.title, contentType: item.contentType,
+      contentRating: item.contentRating, status: item.status,
+      submittedAt: item.submittedAt, moderationNote: item.moderationNote || ''
+    }))
+  };
+}
+
+export async function listPendingContent(options = {}) {
+  const limit = Math.min(Math.max(Number(options.limit) || 50, 1), 100);
+  const result = await wixData.query(MEDIA)
+    .eq('status', 'pending_review')
+    .ascending('submittedAt')
+    .limit(limit)
+    .find({ suppressAuth: true });
+  return {
+    items: result.items.map(item => ({
+      _id: item._id, title: item.title, description: item.description || '',
+      mediaUrl: item.mediaUrl, contentType: item.contentType,
+      contentRating: item.contentRating, creatorChannelId: item.creatorChannelId,
+      submittedAt: item.submittedAt
+    }))
+  };
+}
+
+export async function setSongRequestStatus(input = {}) {
+  const id = cleanText(input.requestId, 'Song request ID', 100);
+  const status = cleanText(input.status, 'Song request status', 20);
+  if (!['played', 'skipped', 'cancelled'].includes(status)) throw new Error('Unsupported song request status.');
+  const existing = await wixData.get(SONGS, id, { suppressAuth: true });
+  if (!existing) throw new Error('Song request was not found.');
+  const updated = await wixData.update(SONGS, { ...existing, status }, { suppressAuth: true });
+  return { _id: updated._id, status: updated.status };
+}
