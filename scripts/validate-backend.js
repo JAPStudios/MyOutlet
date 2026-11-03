@@ -81,6 +81,8 @@ const memberMethods = new Set([
   'backend/liveStreams.jsw:getMyLiveStreams',
   'backend/liveStreams.jsw:endLiveStream',
   'backend/liveChat.jsw:sendLiveChatMessage',
+  'backend/liveChat.jsw:reportLiveChatMessage',
+  'backend/liveChat.jsw:getMyLiveChatReports',
   'backend/liveChat.jsw:moderateMyChannelChatMessage',
   'backend/rights.jsw:submitRightsDeclaration',
   'backend/rights.jsw:getMyRightsRecords'
@@ -95,7 +97,9 @@ const ownerMethods = new Set([
   'backend/engagement.jsw:listPendingComments',
   'backend/rights.jsw:listPendingRights',
   'backend/rights.jsw:reviewRightsDeclaration',
-  'backend/liveChat.jsw:moderateChatMessage'
+  'backend/liveChat.jsw:moderateChatMessage',
+  'backend/liveChat.jsw:listLiveChatReports',
+  'backend/liveChat.jsw:resolveLiveChatReport'
 ]);
 
 const modules = [
@@ -250,6 +254,12 @@ assert.match(liveChat, /getLiveChatMessages/);
 assert.match(liveChat, /sendLiveChatMessage/);
 assert.match(liveChat, /moderateMyChannelChatMessage/);
 assert.match(liveChat, /moderateChatMessage/);
+assert.match(liveChat, /reportLiveChatMessage/);
+assert.match(liveChat, /getMyLiveChatReports/);
+assert.match(liveChat, /listLiveChatReports/);
+assert.match(liveChat, /resolveLiveChatReport/);
+assert.match(liveChat, /ten reports per 24 hours/);
+assert.match(liveChat, /remove_message/);
 assert.match(liveChat, /five messages per ten seconds/);
 assert.match(liveChat, /isMediaRightsCurrent/);
 assert.match(liveChat, /isContentRatingAllowed/);

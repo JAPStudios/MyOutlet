@@ -4,6 +4,8 @@ import { isContentRatingAllowed } from 'backend/ratingPreferences';
 import { isMediaRightsCurrent } from 'backend/rightsCore';
 
 const CHAT = 'LiveChatMessages';
+const REPORTS = 'LiveChatReports';
+const REPORT_REASONS = ['harassment', 'hate', 'sexual_content', 'violence', 'self_harm', 'spam', 'threats', 'other'];
 const LIVE = 'LiveStreams';
 const MEDIA = 'MediaItems';
 const CHANNELS = 'CreatorChannels';
@@ -155,4 +157,173 @@ export async function moderateMyChannelChatMessage(input = {}) {
 
 export async function moderateChatMessage(input = {}) {
   return removeMessage(input, memberId(), false);
+}
+
+export async function reportLiveChatMessage(input = {}) {
+  const reporterMemberId = memberId();
+  const messageId = requiredText(input.messageId, 'Chat message ID', 100);
+  const reason = requiredText(input.reason, 'Report reason', 30);
+  if (!REPORT_REASONS.includes(reason)) throw new Error('Unsupported live-chat report reason.');
+
+  const message = await wixData.get(CHAT, messageId, { suppressAuth: true });
+  if (!message || message.status !== 'published') {
+    throw new Error('Only published live-chat messages can be reported.');
+  }
+  if (message.senderMemberId === reporterMemberId) {
+    throw new Error('A member cannot report their own live-chat message.');
+  }
+
+  const existing = await wixData.query(REPORTS)
+    .eq('chatMessageId', messageId)
+    .eq('reporterMemberId', reporterMemberId)
+    .eq('status', 'open')
+    .limit(1)
+    .find({ suppressAuth: true });
+  if (existing.items.length) {
+    return { _id: existing.items[0]._id, status: 'open', alreadyReported: true };
+  }
+
+  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const recentReports = await wixData.query(REPORTS)
+    .eq('reporterMemberId', reporterMemberId)
+    .ge('createdAt', cutoff)
+    .limit(10)
+    .find({ suppressAuth: true });
+  if (recentReports.items.length >= 10) {
+    throw new Error('The live-chat report limit is ten reports per 24 hours.');
+  }
+
+  const created = await wixData.insert(REPORTS, {
+    liveStreamId: message.liveStreamId,
+    chatMessageId: message._id,
+    creatorChannelId: message.creatorChannelId,
+    reporterMemberId,
+    reason,
+    details: typeof input.details === 'string' ? input.details.trim().slice(0, 2000) : '',
+    status: 'open',
+    createdAt: new Date()
+  }, { suppressAuth: true });
+
+  return { _id: created._id, status: created.status, alreadyReported: false };
+}
+
+export async function getMyLiveChatReports(options = {}) {
+  const reporterMemberId = memberId();
+  const requested = Number(options.limit);
+  const limit = Math.min(Math.max(Number.isFinite(requested) && requested ? requested : 50, 1), 100);
+  const result = await wixData.query(REPORTS)
+    .eq('reporterMemberId', reporterMemberId)
+    .descending('createdAt')
+    .limit(limit)
+    .find({ suppressAuth: true });
+  return {
+    items: result.items.map(item => ({
+      _id: item._id,
+      chatMessageId: item.chatMessageId,
+      liveStreamId: item.liveStreamId,
+      reason: item.reason,
+      details: item.details || '',
+      status: item.status,
+      createdAt: item.createdAt,
+      resolution: item.resolution || '',
+      reviewNote: item.reviewNote || ''
+    }))
+  };
+}
+
+export async function listLiveChatReports(options = {}) {
+  const requested = Number(options.limit);
+  const limit = Math.min(Math.max(Number.isFinite(requested) && requested ? requested : 50, 1), 100);
+  const status = options.status === undefined ? 'open' : requiredText(options.status, 'Report status', 20);
+  if (!['open', 'resolved', 'dismissed'].includes(status)) {
+    throw new Error('Unsupported live-chat report status.');
+  }
+  const result = await wixData.query(REPORTS)
+    .eq('status', status)
+    .ascending('createdAt')
+    .limit(limit)
+    .find({ suppressAuth: true });
+
+  const items = await Promise.all(result.items.map(async report => {
+    let message = null;
+    try {
+      message = await wixData.get(CHAT, report.chatMessageId, { suppressAuth: true });
+    } catch (_) {
+      message = null;
+    }
+    return {
+      _id: report._id,
+      liveStreamId: report.liveStreamId,
+      chatMessageId: report.chatMessageId,
+      creatorChannelId: report.creatorChannelId,
+      reporterMemberId: report.reporterMemberId,
+      reason: report.reason,
+      details: report.details || '',
+      status: report.status,
+      createdAt: report.createdAt,
+      reviewedAt: report.reviewedAt,
+      reviewedBy: report.reviewedBy || '',
+      resolution: report.resolution || '',
+      reviewNote: report.reviewNote || '',
+      messageBody: message ? message.body : '',
+      senderName: message ? message.senderName || 'Viewer' : '',
+      messageStatus: message ? message.status : 'unavailable'
+    };
+  }));
+  return { items };
+}
+
+export async function resolveLiveChatReport(input = {}) {
+  const reviewerMemberId = memberId();
+  const reportId = requiredText(input.reportId, 'Report ID', 100);
+  const status = requiredText(input.status, 'Report status', 20);
+  const resolution = requiredText(input.resolution, 'Resolution', 30);
+  const reviewNote = typeof input.reviewNote === 'string' ? input.reviewNote.trim().slice(0, 1000) : '';
+  if (!['resolved', 'dismissed'].includes(status)) {
+    throw new Error('Live-chat report status must be resolved or dismissed.');
+  }
+  if (!['remove_message', 'no_action', 'other'].includes(resolution)) {
+    throw new Error('Unsupported live-chat report resolution.');
+  }
+  if (resolution === 'remove_message' && status !== 'resolved') {
+    throw new Error('Removing a reported message requires a resolved report.');
+  }
+
+  const report = await wixData.get(REPORTS, reportId, { suppressAuth: true });
+  if (!report) throw new Error('Live-chat report was not found.');
+  if (report.status !== 'open') throw new Error('Only open live-chat reports can be reviewed.');
+
+  let messageStatus = 'unavailable';
+  if (resolution === 'remove_message') {
+    const message = await wixData.get(CHAT, report.chatMessageId, { suppressAuth: true });
+    if (message) {
+      if (message.status === 'published') {
+        const updatedMessage = await wixData.update(CHAT, {
+          ...message,
+          status: 'removed',
+          moderatedAt: new Date(),
+          moderatedBy: reviewerMemberId,
+          moderationNote: reviewNote || 'Removed after viewer live-chat report.'
+        }, { suppressAuth: true });
+        messageStatus = updatedMessage.status;
+      } else {
+        messageStatus = message.status;
+      }
+    }
+  }
+
+  const updated = await wixData.update(REPORTS, {
+    ...report,
+    status,
+    resolution,
+    reviewNote,
+    reviewedBy: reviewerMemberId,
+    reviewedAt: new Date()
+  }, { suppressAuth: true });
+  return {
+    _id: updated._id,
+    status: updated.status,
+    resolution: updated.resolution,
+    messageStatus
+  };
 }

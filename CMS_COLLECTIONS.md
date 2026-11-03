@@ -1,6 +1,6 @@
 # MyOutlet CMS data collections
 
-The eighteen custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
+The nineteen custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
 
 ## MediaItems
 
@@ -128,6 +128,28 @@ Fields:
 - `moderationNote` — Text
 
 Permissions: `ADMIN` for direct read, insert, update and remove. Public reads, authenticated member sends, creator-channel-owner moderation and site-owner moderation are mediated by `src/backend/liveChat.jsw`. Messages are accepted only for a live stream with published media and current verified worldwide rights. Each member is limited to five messages per stream per ten seconds. Removed messages are excluded from public chat reads.
+
+## LiveChatReports
+
+Fields:
+- `liveStreamId` — Text, required
+- `chatMessageId` — Text, required
+- `creatorChannelId` — Text, required
+- `reporterMemberId` — Text, required
+- `reason` — Text, required; harassment, hate, sexual content, violence, self-harm, spam, threats or other
+- `details` — Text; optional reporter explanation, maximum 2,000 characters
+- `status` — Text: `open`, `resolved` or `dismissed`
+- `createdAt` — Date and time, required
+- `reviewedAt` — Date and time
+- `reviewedBy` — Text
+- `resolution` — Text: `remove_message`, `no_action` or `other`
+- `reviewNote` — Text; site-owner review note, maximum 1,000 characters
+
+Permissions: `ADMIN` for direct read, insert, update and remove. Members submit reports and read their own reports through `src/backend/liveChat.jsw`; only site owners can list all reports and resolve them. The backend limits each member to ten reports per 24 hours and prevents duplicate open reports by the same member for the same message.
+
+Indexes:
+- `live-chat-reports-status-created`
+- `live-chat-reports-message-reporter`
 
 ## CreatorChannels
 

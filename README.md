@@ -1,6 +1,6 @@
 # MyOutlet
 
-MyOutlet is the audiovisual publishing, streaming and creator platform being developed by JAPStudios. Its scope includes creator channels, on-demand and live media, live chat, search, moderation, content ratings, creator tools and audience song requests.
+MyOutlet is the audiovisual publishing, streaming and creator platform being developed by JAPStudios. Its scope includes creator channels, on-demand and live media, live chat and viewer chat reports, search, moderation, content ratings, creator tools and audience song requests.
 
 ## Current repository structure
 
@@ -18,7 +18,7 @@ Current MyOutlet site state:
 
 ## Functional boundaries
 
-The current media workflow accepts private MP4 uploads into the Wix Media Manager, waits for Wix's video-transcoding event, and returns HLS or DASH playback URLs for published uploaded videos. Creator live sessions use RTMPS ingest through MediaMTX and authenticated HLS playback, with rights review and content moderation gating. Live chat is tied to an active, rights-cleared stream, is rate-limited to five messages per member per ten seconds, and supports creator-channel and site-owner moderation. Because geographic access controls are not implemented, rights verification currently accepts worldwide distribution declarations only. The live service does not yet provide adaptive-bitrate transcoding, recording/VOD archival, a custom CDN, verified age checks, payment processing or operational monitoring. Content-rating preferences are viewer-selected filters, not age verification. Creator analytics report playback starts, bounded client-reported watch time and completions; they are not audited audience measurements.
+The current media workflow accepts private MP4 uploads into the Wix Media Manager, waits for Wix's video-transcoding event, and returns HLS or DASH playback URLs for published uploaded videos. Creator live sessions use RTMPS ingest through MediaMTX and authenticated HLS playback, with rights review and content moderation gating. Live chat is tied to an active, rights-cleared stream, is rate-limited to five messages per member per ten seconds, and supports creator-channel and site-owner moderation. Members can report chat messages; reports are private to the reporter and site owners, rate-limited, and reviewable through the owner-only moderation methods. Because geographic access controls are not implemented, rights verification currently accepts worldwide distribution declarations only. The live service does not yet provide adaptive-bitrate transcoding, recording/VOD archival, a custom CDN, verified age checks, payment processing or operational monitoring. Content-rating preferences are viewer-selected filters, not age verification. Creator analytics report playback starts, bounded client-reported watch time and completions; they are not audited audience measurements.
 
 No payment is collected by the current backend. Song requests are queued as metadata only, scoped to one active live session, limited to 50 pending requests per stream and five per viewer; ending the stream cancels its remaining queue. They do not charge viewers and are not yet connected to NoiseGround song search or paid request checkout. No third-party media is licensed by the presence of a URL or catalogue record.
 
