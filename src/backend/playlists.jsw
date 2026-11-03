@@ -1,0 +1,279 @@
+import wixData from 'wix-data';
+import wixUsersBackend from 'wix-users-backend';
+import { isContentRatingAllowed } from 'backend/ratingPreferences';
+
+const CHANNELS = 'CreatorChannels';
+const MEDIA = 'MediaItems';
+const PLAYLISTS = 'MediaPlaylists';
+const ITEMS = 'PlaylistItems';
+
+function memberId() {
+  const id = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  if (!id) throw new Error('A signed-in site member is required.');
+  return id;
+}
+
+function requiredText(value, field, max) {
+  if (typeof value !== 'string') throw new Error(field + ' must be text.');
+  const result = value.trim();
+  if (!result || result.length > max) {
+    throw new Error(field + ' is required and must be at most ' + max + ' characters.');
+  }
+  return result;
+}
+
+function optionalText(value, field, max) {
+  if (value === undefined || value === null || value === '') return '';
+  if (typeof value !== 'string') throw new Error(field + ' must be text.');
+  const result = value.trim();
+  if (result.length > max) throw new Error(field + ' must be at most ' + max + ' characters.');
+  return result;
+}
+
+function safeHttpsUrl(value, field) {
+  const raw = requiredText(value, field, 2048);
+  let parsed;
+  try { parsed = new URL(raw); } catch (_) { throw new Error(field + ' must be a valid HTTPS URL.'); }
+  if (parsed.protocol !== 'https:') throw new Error(field + ' must use HTTPS.');
+  return parsed.toString();
+}
+
+async function ownedPlaylist(playlistId, ownerId) {
+  const playlist = await wixData.get(PLAYLISTS, playlistId, { suppressAuth: true });
+  if (!playlist || playlist.creatorMemberId !== ownerId) {
+    throw new Error('Playlist was not found or is not owned by this member.');
+  }
+  return playlist;
+}
+
+async function compactMedia(media, viewerId) {
+  if (!media || media.status !== 'published') return null;
+  if (!await isContentRatingAllowed(media.contentRating, viewerId)) return null;
+  return {
+    _id: media._id,
+    title: media.title,
+    description: media.description || '',
+    mediaUrl: media.mediaUrl || '',
+    thumbnailUrl: media.thumbnailUrl || '',
+    contentType: media.contentType,
+    contentRating: media.contentRating,
+    category: media.category || 'Other',
+    tags: Array.isArray(media.tags) ? media.tags : [],
+    language: media.language || '',
+    durationSeconds: Number(media.durationSeconds) || 0,
+    creatorChannelId: media.creatorChannelId,
+    publishedAt: media.publishedAt
+  };
+}
+
+export async function createPlaylist(input = {}) {
+  const ownerId = memberId();
+  const channelId = requiredText(input.creatorChannelId, 'Creator channel ID', 100);
+  const channel = await wixData.get(CHANNELS, channelId, { suppressAuth: true });
+  if (!channel || channel.memberId !== ownerId) {
+    throw new Error('A playlist can only be created for a channel owned by this member.');
+  }
+  const title = requiredText(input.title, 'Playlist title', 100);
+  const description = optionalText(input.description, 'Description', 2000);
+  const visibility = input.visibility === undefined ? 'public' : requiredText(input.visibility, 'Visibility', 20);
+  if (!['public', 'unlisted', 'private'].includes(visibility)) {
+    throw new Error('Visibility must be public, unlisted or private.');
+  }
+  const thumbnailUrl = input.thumbnailUrl
+    ? safeHttpsUrl(input.thumbnailUrl, 'Thumbnail URL')
+    : '';
+  const now = new Date();
+  const created = await wixData.insert(PLAYLISTS, {
+    creatorChannelId: channelId,
+    creatorMemberId: ownerId,
+    title,
+    description,
+    visibility,
+    thumbnailUrl,
+    createdAt: now,
+    updatedAt: now
+  }, { suppressAuth: true });
+  return { _id: created._id, title: created.title, visibility: created.visibility };
+}
+
+export async function updatePlaylist(input = {}) {
+  const ownerId = memberId();
+  const playlistId = requiredText(input.playlistId, 'Playlist ID', 100);
+  const playlist = await ownedPlaylist(playlistId, ownerId);
+  const update = { ...playlist, updatedAt: new Date() };
+  if (input.title !== undefined) update.title = requiredText(input.title, 'Playlist title', 100);
+  if (input.description !== undefined) update.description = optionalText(input.description, 'Description', 2000);
+  if (input.visibility !== undefined) {
+    const visibility = requiredText(input.visibility, 'Visibility', 20);
+    if (!['public', 'unlisted', 'private'].includes(visibility)) {
+      throw new Error('Visibility must be public, unlisted or private.');
+    }
+    update.visibility = visibility;
+  }
+  if (input.thumbnailUrl !== undefined) {
+    update.thumbnailUrl = input.thumbnailUrl
+      ? safeHttpsUrl(input.thumbnailUrl, 'Thumbnail URL')
+      : '';
+  }
+  const saved = await wixData.update(PLAYLISTS, update, { suppressAuth: true });
+  return { _id: saved._id, title: saved.title, visibility: saved.visibility, updatedAt: saved.updatedAt };
+}
+
+export async function deletePlaylist(input = {}) {
+  const ownerId = memberId();
+  const playlistId = requiredText(input.playlistId, 'Playlist ID', 100);
+  await ownedPlaylist(playlistId, ownerId);
+  const result = await wixData.query(ITEMS)
+    .eq('playlistId', playlistId)
+    .limit(1000)
+    .find({ suppressAuth: true });
+  await Promise.all(result.items.map(item =>
+    wixData.remove(ITEMS, item._id, { suppressAuth: true })
+  ));
+  await wixData.remove(PLAYLISTS, playlistId, { suppressAuth: true });
+  return { deleted: true, playlistId, removedItems: result.items.length };
+}
+
+export async function addMediaToPlaylist(input = {}) {
+  const ownerId = memberId();
+  const playlistId = requiredText(input.playlistId, 'Playlist ID', 100);
+  const mediaItemId = requiredText(input.mediaItemId, 'Media item ID', 100);
+  const playlist = await ownedPlaylist(playlistId, ownerId);
+  const media = await wixData.get(MEDIA, mediaItemId, { suppressAuth: true });
+  if (!media || media.status !== 'published') {
+    throw new Error('Only published media can be added to a playlist.');
+  }
+  const itemKey = playlistId + ':' + mediaItemId;
+  const existing = await wixData.query(ITEMS)
+    .eq('itemKey', itemKey)
+    .limit(1)
+    .find({ suppressAuth: true });
+  if (existing.items.length) {
+    return { _id: existing.items[0]._id, alreadyAdded: true, position: existing.items[0].position };
+  }
+  const last = await wixData.query(ITEMS)
+    .eq('playlistId', playlistId)
+    .descending('position')
+    .limit(1)
+    .find({ suppressAuth: true });
+  const position = last.items.length ? Number(last.items[0].position) + 1 : 0;
+  const created = await wixData.insert(ITEMS, {
+    playlistId,
+    mediaItemId,
+    itemKey,
+    position,
+    addedAt: new Date()
+  }, { suppressAuth: true });
+  await wixData.update(PLAYLISTS, { ...playlist, updatedAt: new Date() }, { suppressAuth: true });
+  return { _id: created._id, alreadyAdded: false, position };
+}
+
+export async function removeMediaFromPlaylist(input = {}) {
+  const ownerId = memberId();
+  const playlistId = requiredText(input.playlistId, 'Playlist ID', 100);
+  const mediaItemId = requiredText(input.mediaItemId, 'Media item ID', 100);
+  const playlist = await ownedPlaylist(playlistId, ownerId);
+  const itemKey = playlistId + ':' + mediaItemId;
+  const existing = await wixData.query(ITEMS)
+    .eq('itemKey', itemKey)
+    .limit(1)
+    .find({ suppressAuth: true });
+  if (!existing.items.length) return { removed: false };
+  await wixData.remove(ITEMS, existing.items[0]._id, { suppressAuth: true });
+  const remaining = await wixData.query(ITEMS)
+    .eq('playlistId', playlistId)
+    .ascending('position')
+    .limit(1000)
+    .find({ suppressAuth: true });
+  await Promise.all(remaining.items.map((item, index) =>
+    wixData.update(ITEMS, { ...item, position: index }, { suppressAuth: true })
+  ));
+  await wixData.update(PLAYLISTS, { ...playlist, updatedAt: new Date() }, { suppressAuth: true });
+  return { removed: true };
+}
+
+export async function reorderPlaylistItems(input = {}) {
+  const ownerId = memberId();
+  const playlistId = requiredText(input.playlistId, 'Playlist ID', 100);
+  const mediaItemIds = input.mediaItemIds;
+  if (!Array.isArray(mediaItemIds) || mediaItemIds.length > 1000) {
+    throw new Error('Media item IDs must be an array of at most 1000 items.');
+  }
+  const playlist = await ownedPlaylist(playlistId, ownerId);
+  const ids = mediaItemIds.map(id => requiredText(id, 'Media item ID', 100));
+  if (new Set(ids).size !== ids.length) throw new Error('A media item cannot appear twice in a playlist.');
+  const current = await wixData.query(ITEMS)
+    .eq('playlistId', playlistId)
+    .limit(1000)
+    .find({ suppressAuth: true });
+  const currentIds = new Set(current.items.map(item => item.mediaItemId));
+  if (currentIds.size !== ids.length || ids.some(id => !currentIds.has(id))) {
+    throw new Error('The reorder list must contain every playlist item exactly once.');
+  }
+  const byMediaId = new Map(current.items.map(item => [item.mediaItemId, item]));
+  await Promise.all(ids.map((id, index) =>
+    wixData.update(ITEMS, { ...byMediaId.get(id), position: index }, { suppressAuth: true })
+  ));
+  await wixData.update(PLAYLISTS, { ...playlist, updatedAt: new Date() }, { suppressAuth: true });
+  return { playlistId, itemCount: ids.length };
+}
+
+export async function getPlaylist(input = {}) {
+  const playlistId = requiredText(input.playlistId, 'Playlist ID', 100);
+  const playlist = await wixData.get(PLAYLISTS, playlistId, { suppressAuth: true });
+  if (!playlist) throw new Error('Playlist was not found.');
+  const viewerId = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  if (playlist.visibility === 'private' && playlist.creatorMemberId !== viewerId) {
+    throw new Error('This playlist is private.');
+  }
+  const channel = await wixData.get(CHANNELS, playlist.creatorChannelId, { suppressAuth: true });
+  const itemsResult = await wixData.query(ITEMS)
+    .eq('playlistId', playlistId)
+    .ascending('position')
+    .limit(1000)
+    .find({ suppressAuth: true });
+  const mediaItems = await Promise.all(itemsResult.items.map(async item => {
+    const media = await wixData.get(MEDIA, item.mediaItemId, { suppressAuth: true });
+    const summary = await compactMedia(media, viewerId);
+    return summary ? { ...summary, position: item.position } : null;
+  }));
+  const visibleItems = mediaItems.filter(Boolean);
+  return {
+    _id: playlist._id,
+    title: playlist.title,
+    description: playlist.description || '',
+    visibility: playlist.visibility,
+    thumbnailUrl: playlist.thumbnailUrl || '',
+    creatorChannelId: playlist.creatorChannelId,
+    creatorChannelName: channel ? channel.name : '',
+    items: visibleItems,
+    total: visibleItems.length
+  };
+}
+
+export async function getMyPlaylists(options = {}) {
+  const ownerId = memberId();
+  const requested = Number(options.limit);
+  const limit = Math.min(Math.max(Number.isFinite(requested) && requested ? requested : 50, 1), 100);
+  const result = await wixData.query(PLAYLISTS)
+    .eq('creatorMemberId', ownerId)
+    .descending('updatedAt')
+    .limit(limit)
+    .find({ suppressAuth: true });
+  const items = await Promise.all(result.items.map(async playlist => {
+    const count = await wixData.query(ITEMS)
+      .eq('playlistId', playlist._id)
+      .count({ suppressAuth: true });
+    return {
+      _id: playlist._id,
+      creatorChannelId: playlist.creatorChannelId,
+      title: playlist.title,
+      description: playlist.description || '',
+      visibility: playlist.visibility,
+      thumbnailUrl: playlist.thumbnailUrl || '',
+      itemCount: count,
+      updatedAt: playlist.updatedAt
+    };
+  }));
+  return { items, total: result.totalCount };
+}

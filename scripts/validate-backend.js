@@ -30,6 +30,7 @@ const publicMethods = new Set([
   'backend/catalog.jsw:getCreatorCatalog',
   'backend/engagement.jsw:getMediaEngagement',
   'backend/engagement.jsw:listComments',
+  'backend/playlists.jsw:getPlaylist',
   'backend/media.jsw:getPublishedVideoPlayback'
 ]);
 
@@ -150,6 +151,9 @@ const engagement = read('src/backend/engagement.jsw');
 assert.match(engagement, /export async function likeMedia/);
 assert.match(engagement, /export async function addComment/);
 assert.match(engagement, /export async function moderateComment/);
+const playlists = read('src/backend/playlists.jsw');
+assert.match(playlists, /export async function getPlaylist/);
+assert.match(playlists, /export async function reorderPlaylistItems/);
 
 
 console.log('MyOutlet source validation passed: ' + methodCount +
