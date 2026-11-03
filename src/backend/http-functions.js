@@ -10,7 +10,7 @@ const NOTIFICATIONS = 'Notifications';
 
 function normalizePath(value) {
   if (typeof value !== 'string') return '';
-  return value.trim().replace(/^\/+|\/+$/g, '').replace(/\/index\.m3u8$/i, '');
+  return value.trim().replace(/^\\/+|\\/+$/g, '').replace(/\\/index\\.m3u8$/i, '');
 }
 
 function matchesStreamKey(candidate, storedHash) {
@@ -80,19 +80,19 @@ export async function post_streamAuth(request) {
               .map(follow => follow.memberId)
               .filter(memberId => typeof memberId === 'string' && memberId && !seenRecipients.has(memberId));
             recipients.forEach(memberId => seenRecipients.add(memberId));
-            const now = new Date();
+            const notificationTime = new Date();
             const notifications = recipients.map(memberId => ({
-                notificationKey: ['new_live_stream', stream._id, follow.memberId].join(':'),
-                recipientMemberId: memberId,
-                actorMemberId: stream.creatorMemberId,
-                type: 'new_live_stream',
-                creatorChannelId: stream.creatorChannelId,
-                mediaItemId: media._id,
-                sourceId: stream._id,
-                message: (media.title || 'A creator you follow') + ' is live now.',
-                readAt: null,
-                createdAt: now
-              }));
+              notificationKey: ['new_live_stream', stream._id, memberId].join(':'),
+              recipientMemberId: memberId,
+              actorMemberId: stream.creatorMemberId,
+              type: 'new_live_stream',
+              creatorChannelId: stream.creatorChannelId,
+              mediaItemId: media._id,
+              sourceId: stream._id,
+              message: (media.title || 'A creator you follow') + ' is live now.',
+              readAt: null,
+              createdAt: notificationTime
+            }));
             if (notifications.length) {
               const inserted = await wixData.bulkInsert(NOTIFICATIONS, notifications, { suppressAuth: true });
               if (inserted.errors && inserted.errors.length) {
