@@ -88,7 +88,8 @@ const modules = [
   'media.jsw',
   'reports.jsw',
   'engagement.jsw',
-  'playlists.jsw'
+  'playlists.jsw',
+  'notifications.jsw'
 ];
 let methodCount = 0;
 for (const file of modules) {
