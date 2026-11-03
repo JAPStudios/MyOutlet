@@ -217,7 +217,7 @@ Indexes for the first nine collections were confirmed `ACTIVE` on the MyOutlet s
 - `ViewerPreferences`: unique `viewer-preferences-member-unique`
 - `ContentReports`: `reports-status-created`, `reports-member-created`, `reports-media-status`
 - `MediaMetrics`: unique `media-metrics-media-unique`, plus `media-metrics-channel`
-- `MediaLikes`: unique `media-likes-key-unique`, plus `media-likes-media` (building)
-- `MediaComments`: `media-comments-status-created`, `media-comments-member-created` (building)
-- `MediaPlaylists`: `playlists-owner-updated`, `playlists-visibility-updated` (building)
-- `PlaylistItems`: unique `playlist-item-key-unique`, plus `playlist-items-position` and `playlist-items-media` (building)
+- `MediaLikes`: unique `media-likes-key-unique`, plus `media-likes-media`
+- `MediaComments`: `media-comments-status-created`, `media-comments-member-created`
+- `MediaPlaylists`: `playlists-owner-updated`, `playlists-visibility-updated`
+- `PlaylistItems`: unique `playlist-item-key-unique`, plus `playlist-items-position` and `playlist-items-media`
