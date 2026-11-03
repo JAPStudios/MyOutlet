@@ -178,6 +178,17 @@
         "anonymous": {
           "invoke": true
         }
+      },
+      "enqueueSongs": {
+        "siteOwner": {
+          "invoke": true
+        },
+        "siteMember": {
+          "invoke": true
+        },
+        "anonymous": {
+          "invoke": false
+        }
       }
     },
     "backend/viewer.jsw": {
