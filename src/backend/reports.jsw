@@ -1,0 +1,170 @@
+import wixData from 'wix-data';
+import wixUsersBackend from 'wix-users-backend';
+
+const MEDIA = 'MediaItems';
+const REPORTS = 'ContentReports';
+const REASONS = [
+  'copyright',
+  'harassment',
+  'hate',
+  'sexual_content',
+  'violence',
+  'self_harm',
+  'misinformation',
+  'spam',
+  'other'
+];
+const RATINGS = ['TV-Y', 'TV-Y7', 'TV-G', 'TV-PG', 'TV-14', 'TV-MA', 'Unrated'];
+
+function memberId() {
+  const id = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  if (!id) throw new Error('A signed-in site member is required.');
+  return id;
+}
+
+function requiredText(value, field, max) {
+  if (typeof value !== 'string') throw new Error(field + ' must be text.');
+  const result = value.trim();
+  if (!result || result.length > max) throw new Error(field + ' is required and must be at most ' + max + ' characters.');
+  return result;
+}
+
+export async function reportContent(input = {}) {
+  const reporterMemberId = memberId();
+  const mediaItemId = requiredText(input.mediaItemId, 'Media item ID', 100);
+  const reason = requiredText(input.reason, 'Report reason', 30);
+  if (!REASONS.includes(reason)) throw new Error('Unsupported content report reason.');
+
+  const media = await wixData.get(MEDIA, mediaItemId, { suppressAuth: true });
+  if (!media || media.status !== 'published') {
+    throw new Error('Only published media can be reported.');
+  }
+
+  const existing = await wixData.query(REPORTS)
+    .eq('mediaItemId', mediaItemId)
+    .eq('reporterMemberId', reporterMemberId)
+    .eq('status', 'open')
+    .limit(1)
+    .find({ suppressAuth: true });
+  if (existing.items.length) {
+    return { _id: existing.items[0]._id, status: 'open', alreadyReported: true };
+  }
+
+  const details = typeof input.details === 'string' ? input.details.trim().slice(0, 2000) : '';
+  const created = await wixData.insert(REPORTS, {
+    mediaItemId,
+    reporterMemberId,
+    reason,
+    details,
+    status: 'open',
+    createdAt: new Date()
+  }, { suppressAuth: true });
+
+  return { _id: created._id, status: created.status, alreadyReported: false };
+}
+
+export async function getMyContentReports(options = {}) {
+  const reporterMemberId = memberId();
+  const requested = Number(options.limit);
+  const limit = Math.min(Math.max(Number.isFinite(requested) && requested ? requested : 50, 1), 100);
+  const result = await wixData.query(REPORTS)
+    .eq('reporterMemberId', reporterMemberId)
+    .descending('createdAt')
+    .limit(limit)
+    .find({ suppressAuth: true });
+  return {
+    items: result.items.map(item => ({
+      _id: item._id,
+      mediaItemId: item.mediaItemId,
+      reason: item.reason,
+      details: item.details || '',
+      status: item.status,
+      createdAt: item.createdAt,
+      resolution: item.resolution || ''
+    }))
+  };
+}
+
+export async function listContentReports(options = {}) {
+  const requested = Number(options.limit);
+  const limit = Math.min(Math.max(Number.isFinite(requested) && requested ? requested : 50, 1), 100);
+  const status = options.status === undefined ? 'open' : requiredText(options.status, 'Report status', 20);
+  if (!['open', 'resolved', 'dismissed'].includes(status)) {
+    throw new Error('Unsupported report status.');
+  }
+  const result = await wixData.query(REPORTS)
+    .eq('status', status)
+    .ascending('createdAt')
+    .limit(limit)
+    .find({ suppressAuth: true });
+  return {
+    items: result.items.map(item => ({
+      _id: item._id,
+      mediaItemId: item.mediaItemId,
+      reporterMemberId: item.reporterMemberId,
+      reason: item.reason,
+      details: item.details || '',
+      status: item.status,
+      createdAt: item.createdAt,
+      resolution: item.resolution || '',
+      moderationNote: item.moderationNote || ''
+    }))
+  };
+}
+
+export async function resolveContentReport(input = {}) {
+  const reportId = requiredText(input.reportId, 'Report ID', 100);
+  const status = requiredText(input.status, 'Report status', 20);
+  const resolution = requiredText(input.resolution, 'Resolution', 30);
+  const note = typeof input.note === 'string' ? input.note.trim().slice(0, 1000) : '';
+  if (!['resolved', 'dismissed'].includes(status)) throw new Error('Report status must be resolved or dismissed.');
+  if (!['no_action', 'remove_content', 'rating_corrected', 'other'].includes(resolution)) {
+    throw new Error('Unsupported report resolution.');
+  }
+
+  const report = await wixData.get(REPORTS, reportId, { suppressAuth: true });
+  if (!report) throw new Error('Content report was not found.');
+  if (report.status !== 'open') throw new Error('Only open reports can be resolved.');
+
+  let updatedMedia = null;
+  if (resolution === 'remove_content') {
+    const media = await wixData.get(MEDIA, report.mediaItemId, { suppressAuth: true });
+    if (media && media.status !== 'removed') {
+      updatedMedia = await wixData.update(MEDIA, {
+        ...media,
+        status: 'removed',
+        moderationNote: note || 'Removed after viewer content report.'
+      }, { suppressAuth: true });
+    }
+  } else if (resolution === 'rating_corrected') {
+    if (!RATINGS.includes(input.correctedRating)) {
+      throw new Error('A valid corrected content rating is required.');
+    }
+    const media = await wixData.get(MEDIA, report.mediaItemId, { suppressAuth: true });
+    if (media) {
+      updatedMedia = await wixData.update(MEDIA, {
+        ...media,
+        contentRating: input.correctedRating,
+        moderationNote: note || 'Content rating corrected after viewer report.'
+      }, { suppressAuth: true });
+    }
+  }
+
+  const reviewer = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  const updated = await wixData.update(REPORTS, {
+    ...report,
+    status,
+    resolution,
+    moderationNote: note,
+    reviewedBy: reviewer || 'site-owner',
+    reviewedAt: new Date()
+  }, { suppressAuth: true });
+
+  return {
+    _id: updated._id,
+    status: updated.status,
+    resolution: updated.resolution,
+    mediaStatus: updatedMedia ? updatedMedia.status : undefined,
+    correctedRating: updatedMedia ? updatedMedia.contentRating : undefined
+  };
+}

@@ -1,5 +1,6 @@
 import wixData from 'wix-data';
 import wixUsersBackend from 'wix-users-backend';
+import { applyViewerRatingPreference } from 'backend/ratingPreferences';
 
 const MEDIA = 'MediaItems';
 const CHANNELS = 'CreatorChannels';
@@ -146,9 +147,12 @@ export async function getCreatorProfile(input = {}) {
     .find({ suppressAuth: true });
   if (!result.items.length) return null;
   const channel = result.items[0];
-  const media = await wixData.query(MEDIA)
-    .eq('creatorChannelId', channel._id)
-    .eq('status', 'published')
+  const member = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  const mediaQuery = await applyViewerRatingPreference(
+    wixData.query(MEDIA).eq('creatorChannelId', channel._id).eq('status', 'published'),
+    member
+  );
+  const media = await mediaQuery
     .descending('publishedAt')
     .limit(24)
     .find({ suppressAuth: true });
@@ -163,7 +167,9 @@ export async function browseCatalog(options = {}) {
   const limit = Math.min(Math.max(Number(options.limit) || 24, 1), 50);
   const offset = Math.min(Math.max(Number(options.offset) || 0, 0), 10000);
   const query = applyMediaFilters(wixData.query(MEDIA).eq('status', 'published'), options);
-  const result = await query
+  const member = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  const filteredQuery = await applyViewerRatingPreference(query, member);
+  const result = await filteredQuery
     .descending('publishedAt')
     .skip(offset)
     .limit(limit)
@@ -180,7 +186,9 @@ export async function searchCatalog(options = {}) {
   const categoryQuery = wixData.query(MEDIA).eq('status', 'published').contains('category', term);
   const tagQuery = wixData.query(MEDIA).eq('status', 'published').hasSome('tags', [term.toLowerCase()]);
   const query = applyMediaFilters(titleQuery.or(descriptionQuery).or(categoryQuery).or(tagQuery), options);
-  const result = await query
+  const member = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  const filteredQuery = await applyViewerRatingPreference(query, member);
+  const result = await filteredQuery
     .descending('publishedAt')
     .skip(offset)
     .limit(limit)
@@ -325,7 +333,9 @@ export async function getCreatorCatalog(input = {}) {
     wixData.query(MEDIA).eq('creatorChannelId', channelId).eq('status', 'published'),
     input
   );
-  const result = await query
+  const member = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  const filteredQuery = await applyViewerRatingPreference(query, member);
+  const result = await filteredQuery
     .descending('publishedAt')
     .limit(limit)
     .find({ suppressAuth: true });

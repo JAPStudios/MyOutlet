@@ -147,6 +147,10 @@ function mediaSummary(item) {
     thumbnailUrl: item.thumbnailUrl || '',
     contentType: item.contentType,
     contentRating: item.contentRating,
+    category: item.category || 'Other',
+    tags: Array.isArray(item.tags) ? item.tags : [],
+    language: item.language || '',
+    durationSeconds: Number(item.durationSeconds) || 0,
     creatorChannelId: item.creatorChannelId,
     publishedAt: item.publishedAt || item._createdDate
   };

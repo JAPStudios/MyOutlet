@@ -1,6 +1,6 @@
 # MyOutlet CMS data collections
 
-The seven custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
+The nine custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
 
 ## MediaItems
 
@@ -42,6 +42,32 @@ Fields:
 - `failureMessage` — Text
 
 Permissions: `ADMIN` (site administrators) for direct collection access. Application access is mediated by the backend web methods. Upload URL creation and session reads are mediated by authenticated backend methods. Video files are private while awaiting moderation.
+
+## ViewerPreferences
+
+Fields:
+- `memberId` — Text, required; site-member ID that owns the preference
+- `maxContentRating` — Text: `TV-Y`, `TV-Y7`, `TV-G`, `TV-PG`, `TV-14` or `TV-MA`
+- `hideUnrated` — Boolean
+- `updatedAt` — Date and time
+
+Permissions: `ADMIN` (site administrators) for direct collection access. Application access is mediated by authenticated viewer methods. These are viewer-selected catalogue filters, not verified age controls.
+
+## ContentReports
+
+Fields:
+- `mediaItemId` — Text, required
+- `reporterMemberId` — Text, required
+- `reason` — Text: `copyright`, `harassment`, `hate`, `sexual_content`, `violence`, `self_harm`, `misinformation`, `spam` or `other`
+- `details` — Text
+- `status` — Text: `open`, `resolved` or `dismissed`
+- `createdAt` — Date and time
+- `reviewedAt` — Date and time
+- `reviewedBy` — Text
+- `resolution` — Text
+- `moderationNote` — Text
+
+Permissions: `ADMIN` (site administrators) for direct collection access. Members can create reports and read their own reports through authenticated backend methods. Only site owners can review and resolve reports.
 
 ## CreatorChannels
 
@@ -105,13 +131,15 @@ Permissions: `ADMIN` (site administrators) for direct collection access. Applica
 - Member watchlists, with published-media checks and private per-member records.
 - Continue-watching history for on-demand video/audio, with bounded playback positions and completed-item exclusion.
 - Creator follows, followed-channel lists and a published-media feed across followed channels.
+- Member-selected content-rating preferences applied to catalogue, creator, watchlist, continue-watching, following-feed and playback reads.
+- Member content reports, a private moderation queue, and owner-only report resolution with removal or rating correction.
 
 This layer uploads private MP4 files to the Wix Media Manager, records upload/transcoding events, and can request HLS or DASH playback URLs for published MyOutlet-uploaded videos. It does not provide live ingest, a custom CDN, external media transcoding, creator analytics, payment processing or rights verification. Do not publish an item until the media is ready, distribution rights and content rating have been checked, and moderation is complete. Wix backend media events do not run in site Preview.
 
 
 ## Wix data indexes
 
-All indexes listed below were confirmed `ACTIVE` on the MyOutlet site.
+The original collection indexes below were confirmed `ACTIVE` on the MyOutlet site. The newer viewer-preference and content-report indexes were requested separately and were still `BUILDING` at the last status check.
 
 - `MediaItems`: `media-status-published`, `media-channel-status-published`, `media-creator-submitted`
 - `CreatorChannels`: case-insensitive unique `creator-handle-unique`, plus `creator-member`
@@ -120,3 +148,6 @@ All indexes listed below were confirmed `ACTIVE` on the MyOutlet site.
 - `PlaybackProgress`: `playback-member-completed-last`
 - `CreatorFollows`: `follows-member-date`
 - `MediaUploadSessions`: `uploads-owner-created`
+
+- `ViewerPreferences`: unique `viewer-preferences-member-unique` (building)
+- `ContentReports`: `reports-status-created`, `reports-member-created`, `reports-media-status` (building)
