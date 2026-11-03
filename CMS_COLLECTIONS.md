@@ -1,6 +1,6 @@
 # MyOutlet CMS data collections
 
-Create these Wix CMS collections before publishing the backend module. Collection names are case-sensitive. The module intentionally does not create collections or weaken collection-level permissions.
+The seven custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
 
 ## MediaItems
 
@@ -9,7 +9,7 @@ Fields:
 - `description` — Text
 - `mediaUrl` — Text, required; HTTPS external media URLs or private Wix video URLs created by the MyOutlet upload workflow
 - `mediaUploadSessionId` — Text; associated MediaUploadSessions record ID when uploaded through MyOutlet
-- `thumbnailUrl` — URL or Text
+- `thumbnailUrl` — Text
 - `contentType` — Text: `video`, `livestream` or `audio`
 - `contentRating` — Text: `TV-Y`, `TV-Y7`, `TV-G`, `TV-PG`, `TV-14`, `TV-MA` or `Unrated`
 - `creatorChannelId` — Text
@@ -19,7 +19,7 @@ Fields:
 - `publishedAt` — Date and time
 - `moderationNote` — Text
 
-Permissions: public read is not required because public reads run through the backend module; restrict direct collection access to the site owner.
+Permissions: `ADMIN` (site administrators) for direct collection access. Application access is mediated by the backend web methods.
 
 ## MediaUploadSessions
 
