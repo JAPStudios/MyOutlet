@@ -127,18 +127,18 @@ function collectBackendFiles(directory) {
   });
 }
 const backendFiles = collectBackendFiles(backendRoot)
-  .filter(file => /\\.jsw?$/.test(file));
+  .filter(file => /\.jsw?$/.test(file));
 const backendModules = new Map();
 for (const file of backendFiles) {
-  const relative = path.relative(backendRoot, file).replace(/\\.jsw?$/, '');
+  const relative = path.relative(backendRoot, file).replace(/\.jsw?$/, '');
   assert.ok(!backendModules.has(relative),
     'Backend module name is ambiguous: ' + relative);
   backendModules.set(relative, file);
 }
 for (const file of backendFiles) {
   const source = fs.readFileSync(file, 'utf8');
-  for (const match of source.matchAll(/from\\s+['"]backend\\/([^'"]+)['"]/g)) {
-    const target = match[1].replace(/\\.jsw?$/, '');
+  for (const match of source.matchAll(/from\s+['"]backend\/([^'"]+)['"]/g)) {
+    const target = match[1].replace(/\.jsw?$/, '');
     assert.ok(backendModules.has(target),
       path.relative(root, file) + ' imports missing backend module ' + target);
   }
