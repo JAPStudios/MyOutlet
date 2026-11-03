@@ -10,7 +10,7 @@ const NOTIFICATIONS = 'Notifications';
 
 function normalizePath(value) {
   if (typeof value !== 'string') return '';
-  return value.trim().replace(/^\\/+|\\/+$/g, '').replace(/\\/index\\.m3u8$/i, '');
+  return value.trim().replace(/^\/+|\/+$/g, '').replace(/\/index\.m3u8$/i, '');
 }
 
 function matchesStreamKey(candidate, storedHash) {
