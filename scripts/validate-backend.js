@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const { execFileSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
@@ -342,3 +343,17 @@ assert.equal(chatterinoTableRowCount, 26,
 assert.ok(gitmodules.includes('path = upstream/chatterino/chatterino2'));
 assert.ok(gitmodules.includes('url = https://github.com/Chatterino/chatterino2.git'));
 assert.ok(upstreamComponents.includes('Chatterino organization repositories'));
+const obsSubmoduleCount = gitmodules.split('[submodule "upstream/obsproject/').length - 1;
+const otherSubmoduleCount = gitmodules.split('[submodule "upstream/').length - 1 -
+  chatterinoSubmoduleCount - obsSubmoduleCount;
+assert.equal(obsSubmoduleCount, 21, 'All 21 pinned OBS Project repositories must be configured');
+assert.equal(otherSubmoduleCount, 5, 'All five media and archival sources must be configured');
+assert.equal(gitmodules.split('[submodule "').length - 1, 52,
+  'The upstream configuration must contain all 52 source repositories');
+const gitTree = execFileSync('git', ['ls-tree', '-r', 'HEAD'], {
+  cwd: root,
+  encoding: 'utf8'
+});
+const gitlinkCount = gitTree.split('\\n').filter(line => line.startsWith('160000 commit ')).length;
+assert.equal(gitlinkCount, 52,
+  'Every configured upstream repository must have a committed Git submodule pointer');
