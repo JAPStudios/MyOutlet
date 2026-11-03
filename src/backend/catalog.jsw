@@ -1,6 +1,6 @@
 import wixData from 'wix-data';
 import wixUsersBackend from 'wix-users-backend';
-import { createNotification } from 'backend/notifications';
+import { createNotification } from 'backend/notificationCore';
 import { applyViewerRatingPreference } from 'backend/ratingPreferences';
 import { getVerifiedRightsForMedia, applyVerifiedRightsFilter, isMediaRightsCurrent } from 'backend/rightsCore';
 
