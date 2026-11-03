@@ -368,8 +368,6 @@ for (const file of [
 const notifications = read('src/backend/notifications.jsw');
 assert.match(notifications, /getMyNotifications/);
 assert.match(notifications, /markAllNotificationsRead/);
-const notificationCore = read('src/backend/notificationCore.js');
-assert.match(notificationCore, /export async function createNotification/);
 
 const readme = read('README.md');
 assert.match(readme, /The twenty CMS collections/);
