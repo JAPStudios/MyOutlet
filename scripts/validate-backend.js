@@ -154,6 +154,7 @@ assert.match(media, /isPrivate:\s*true/,
 assert.match(media, /getVideoPlaybackUrl/);
 assert.match(media, /getPublishedMediaPlayback/);
 assert.match(media, /isContentRatingAllowed/);
+assert.match(media, /isMediaRightsCurrent/);
 
 const uploader = read('src/public/mediaUpload.js');
 assert.match(uploader, /uploadVideoFile/);
@@ -197,6 +198,11 @@ assert.match(rights, /submitRightsDeclaration/);
 assert.match(rights, /reviewRightsDeclaration/);
 const rightsCore = read('src/backend/rightsCore.js');
 assert.match(rightsCore, /getVerifiedRightsForMedia/);
+assert.match(rightsCore, /applyVerifiedRightsFilter/);
+assert.match(rightsCore, /isMediaRightsCurrent/);
+assert.match(rightsCore, /applyVerifiedRightsFilter/);
+assert.match(rights, /rightsVerified: true/);
+assert.match(rights, /rightsVerified: false/);
 assert.match(catalog, /getVerifiedRightsForMedia/);
 
 const notifications = read('src/backend/notifications.jsw');

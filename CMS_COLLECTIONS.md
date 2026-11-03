@@ -16,6 +16,9 @@ Fields:
 - `tags` — Array of Text
 - `language` — Language code
 - `durationSeconds` — Number
+- `rightsVerified` — Boolean; set only after owner verification of a matching RightsRecords item
+- `rightsValidUntil` — Date; blank for no expiry, otherwise the final valid date (inclusive through 23:59:59 UTC)
+- `rightsRecordId` — Text; associated RightsRecords item ID
 - `creatorChannelId` — Text
 - `creatorMemberId` — Text
 - `status` — Text: `pending_review`, `published`, `rejected` or `removed`
@@ -228,7 +231,7 @@ Permissions: `ADMIN` (site administrators) for direct collection access. Applica
 
 - Public creator directory, creator search and handle-based creator profiles, alongside published catalogue browse, title/description search and per-channel catalogue reads. Creator search/profile responses expose only public channel fields and published media.
 - Member-owned creator channel creation and update.
-- Member content submission into the moderation queue, plus private submission-status tracking.\n- Creator distribution-rights declarations, private owner review, expiry checks and a mandatory verified-rights record before publication.
+- Member content submission into the moderation queue, plus private submission-status tracking.\n- Creator distribution-rights declarations, private owner review, expiry checks and a mandatory verified-rights record before publication and playback. Catalogue queries exclude media without a current verified-rights state.
 - Private MP4 uploads to the Wix Media Manager, event-driven transcoding readiness, and published-video HLS/DASH playback URLs.
 - Owner-only pending-review queue, publish/reject/remove decisions and song-request queue status controls.
 - Member song requests and a public read-only queue scoped to a specific creator channel and ordered by submission time.
@@ -249,7 +252,7 @@ This layer uploads private MP4 files to the Wix Media Manager, records upload/tr
 
 Indexes for the first nine collections were confirmed `ACTIVE` on the MyOutlet site. The two MediaMetrics indexes have also been confirmed `ACTIVE`.
 
-- `MediaItems`: `media-status-published`, `media-channel-status-published`, `media-creator-submitted`
+- `MediaItems`: `media-status-published`, `media-channel-status-published`, `media-creator-submitted`. Rights-validity fields are additionally filtered in the backend; a dedicated composite index could not be created because the collection's index quota was already full.
 - `CreatorChannels`: case-insensitive unique `creator-handle-unique`, plus `creator-member`
 - `SongRequests`: `song-channel-status-created`
 - `ViewerLibrary`: `viewer-library-member-saved`

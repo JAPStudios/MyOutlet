@@ -210,7 +210,7 @@ function boundedNumber(value, field, minimum, maximum) {
 
 async function publishedMedia(mediaId) {
   const item = await wixData.get(MEDIA, mediaId, { suppressAuth: true });
-  if (!item || item.status !== 'published') {
+  if (!item || item.status !== 'published' || !isMediaRightsCurrent(item)) {
     throw new Error('This media item is not available.');
   }
   return item;

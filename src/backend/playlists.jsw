@@ -1,6 +1,7 @@
 import wixData from 'wix-data';
 import wixUsersBackend from 'wix-users-backend';
 import { isContentRatingAllowed } from 'backend/ratingPreferences';
+import { isMediaRightsCurrent } from 'backend/rightsCore';
 
 const CHANNELS = 'CreatorChannels';
 const MEDIA = 'MediaItems';
@@ -47,7 +48,7 @@ async function ownedPlaylist(playlistId, ownerId) {
 }
 
 async function compactMedia(media, viewerId) {
-  if (!media || media.status !== 'published') return null;
+  if (!media || media.status !== 'published' || !isMediaRightsCurrent(media)) return null;
   if (!await isContentRatingAllowed(media.contentRating, viewerId)) return null;
   return {
     _id: media._id,

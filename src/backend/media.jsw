@@ -2,6 +2,7 @@ import wixData from 'wix-data';
 import wixUsersBackend from 'wix-users-backend';
 import { mediaManager } from 'wix-media-backend';
 import { isContentRatingAllowed } from 'backend/ratingPreferences';
+import { isMediaRightsCurrent } from 'backend/rightsCore';
 
 const UPLOADS = 'MediaUploadSessions';
 const MEDIA = 'MediaItems';
@@ -105,7 +106,7 @@ async function createPlaybackResponse(input, allowedTypes) {
   if (!mediaItemId || mediaItemId.length > 100) throw new Error('Media item ID is invalid.');
 
   const media = await wixData.get(MEDIA, mediaItemId, { suppressAuth: true });
-  if (!media || media.status !== 'published' || !allowedTypes.includes(media.contentType)) {
+  if (!media || media.status !== 'published' || !allowedTypes.includes(media.contentType) || !isMediaRightsCurrent(media)) {
     throw new Error('This published media item is not available.');
   }
   const viewerId = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;

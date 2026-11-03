@@ -1,6 +1,7 @@
 import wixData from 'wix-data';
 import wixUsersBackend from 'wix-users-backend';
 import { isContentRatingAllowed } from 'backend/ratingPreferences';
+import { isMediaRightsCurrent } from 'backend/rightsCore';
 import { createNotification } from 'backend/notifications';
 
 const MEDIA = 'MediaItems';
@@ -25,7 +26,7 @@ function requiredText(value, field, max) {
 
 async function publishedMedia(mediaItemId) {
   const media = await wixData.get(MEDIA, mediaItemId, { suppressAuth: true });
-  if (!media || media.status !== 'published') {
+  if (!media || media.status !== 'published' || !isMediaRightsCurrent(media)) {
     throw new Error('Published media was not found.');
   }
   const viewerId = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;

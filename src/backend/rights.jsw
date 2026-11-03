@@ -46,6 +46,12 @@ function normalizeTerritories(value) {
   return territories;
 }
 
+function endOfUtcDay(value) {
+  const end = new Date(value);
+  end.setUTCHours(23, 59, 59, 999);
+  return end;
+}
+
 function normalizeDate(value, field, optional) {
   if ((value === undefined || value === null || value === '') && optional) return null;
   const date = new Date(value);
@@ -89,10 +95,10 @@ export async function submitRightsDeclaration(input = {}) {
   const territories = normalizeTerritories(input.territories);
   const validFrom = normalizeDate(input.validFrom, 'Valid from', false);
   const validUntil = normalizeDate(input.validUntil, 'Valid until', true);
-  if (validUntil && validUntil <= validFrom) {
+  if (validUntil && validUntil < validFrom) {
     throw new Error('Rights expiry must be later than the rights start date.');
   }
-  if (validUntil && validUntil < new Date()) {
+  if (validUntil && endOfUtcDay(validUntil) < new Date()) {
     throw new Error('Expired rights cannot be submitted for verification.');
   }
   const evidenceUrl = optionalHttpsUrl(input.evidenceUrl);
@@ -125,6 +131,12 @@ export async function submitRightsDeclaration(input = {}) {
       reviewerMemberId: '',
       reviewNote: ''
     }, { suppressAuth: true });
+    await wixData.update(MEDIA, {
+      ...media,
+      rightsVerified: false,
+      rightsValidUntil: validUntil,
+      rightsRecordId: updated._id
+    }, { suppressAuth: true });
     return { ...rightsSummary(updated), submitted: true };
   }
 
@@ -143,6 +155,12 @@ export async function submitRightsDeclaration(input = {}) {
     reviewedAt: null,
     reviewerMemberId: '',
     reviewNote: ''
+  }, { suppressAuth: true });
+  await wixData.update(MEDIA, {
+    ...media,
+    rightsVerified: false,
+    rightsValidUntil: validUntil,
+    rightsRecordId: created._id
   }, { suppressAuth: true });
   return { ...rightsSummary(created), submitted: true };
 }
@@ -204,8 +222,9 @@ export async function reviewRightsDeclaration(input = {}) {
     if (record.validFrom && new Date(record.validFrom) > now) {
       throw new Error('Rights have not yet become effective.');
     }
-    if (record.validUntil && new Date(record.validUntil) < now) {
-      throw new Error('Expired rights cannot be verified.');
+    if (record.validUntil) {
+      const expiry = endOfUtcDay(record.validUntil);
+      if (expiry < now) throw new Error('Expired rights cannot be verified.');
     }
     const media = await wixData.get(MEDIA, record.mediaItemId, { suppressAuth: true });
     if (!media || media.creatorMemberId !== record.creatorMemberId) {
@@ -221,15 +240,26 @@ export async function reviewRightsDeclaration(input = {}) {
     reviewNote
   }, { suppressAuth: true });
 
-  if (status === 'revoked') {
-    const media = await wixData.get(MEDIA, record.mediaItemId, { suppressAuth: true });
-    if (media && media.status === 'published') {
-      await wixData.update(MEDIA, {
-        ...media,
-        status: 'removed',
-        moderationNote: 'Distribution rights verification was revoked.'
-      }, { suppressAuth: true });
-    }
+  const media = await wixData.get(MEDIA, record.mediaItemId, { suppressAuth: true });
+  if (media && status === 'verified') {
+    await wixData.update(MEDIA, {
+      ...media,
+      rightsVerified: true,
+      rightsValidUntil: record.validUntil || null,
+      rightsRecordId: record._id
+    }, { suppressAuth: true });
+  } else if (media && status === 'revoked') {
+    await wixData.update(MEDIA, {
+      ...media,
+      rightsVerified: false,
+      status: media.status === 'published' ? 'removed' : media.status,
+      moderationNote: 'Distribution rights verification was revoked.'
+    }, { suppressAuth: true });
+  } else if (media && status === 'rejected') {
+    await wixData.update(MEDIA, {
+      ...media,
+      rightsVerified: false
+    }, { suppressAuth: true });
   }
 
   return rightsSummary(updated);
