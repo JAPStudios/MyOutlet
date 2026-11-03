@@ -252,6 +252,22 @@ assert.match(httpFunctions, /new_live_stream/);
 assert.match(httpFunctions, /bulkInsert\(NOTIFICATIONS/);
 assert.match(httpFunctions, /const starting = stream.status !== 'live'/);
 
+for (const file of [
+  'catalog.jsw',
+  'viewer.jsw',
+  'engagement.jsw',
+  'playlists.jsw',
+  'notifications.jsw',
+  'rights.jsw',
+  'liveStreams.jsw'
+]) {
+  const source = read('src/backend/' + file);
+  if (source.includes('.totalCount')) {
+    assert.match(source, /returnTotalCount:\\s*true/,
+      file + ' must explicitly request Wix Data total counts');
+  }
+}
+
 const notifications = read('src/backend/notifications.jsw');
 assert.match(notifications, /getMyNotifications/);
 assert.match(notifications, /markAllNotificationsRead/);
