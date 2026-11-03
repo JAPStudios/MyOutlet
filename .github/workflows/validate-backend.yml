@@ -8,6 +8,7 @@ on:
       - "src/public/**"
       - "src/pages/**"
       - "CMS_COLLECTIONS.md"
+      - "README.md"
       - "wix.config.json"
       - "package.json"
       - "scripts/**"
