@@ -2,9 +2,11 @@ import wixData from 'wix-data';
 import { createHash, timingSafeEqual } from 'crypto';
 import { ok, forbidden, badRequest, serverError } from 'wix-http-functions';
 import { isMediaRightsCurrent } from 'backend/rightsCore';
+import { createNotification } from 'backend/notifications';
 
 const LIVE = 'LiveStreams';
 const MEDIA = 'MediaItems';
+const FOLLOWS = 'CreatorFollows';
 
 function normalizePath(value) {
   if (typeof value !== 'string') return '';
@@ -52,6 +54,7 @@ export async function post_streamAuth(request) {
           !matchesStreamKey(payload.password, stream.streamKeyHash)) {
         return forbidden();
       }
+      const starting = stream.status !== 'live';
       const now = new Date();
       await wixData.update(LIVE, {
         ...stream,
@@ -60,6 +63,38 @@ export async function post_streamAuth(request) {
         lastPublisherAt: now,
         updatedAt: now
       }, { suppressAuth: true });
+      if (starting) {
+        try {
+          let offset = 0;
+          while (true) {
+            const followers = await wixData.query(FOLLOWS)
+              .eq('creatorChannelId', stream.creatorChannelId)
+              .ascending('_createdDate')
+              .skip(offset)
+              .limit(1000)
+              .find({ suppressAuth: true });
+            if (!followers.items.length) break;
+            await Promise.all(followers.items.map(follow =>
+              createNotification({
+                recipientMemberId: follow.memberId,
+                actorMemberId: stream.creatorMemberId,
+                type: 'new_live_stream',
+                creatorChannelId: stream.creatorChannelId,
+                mediaItemId: media._id,
+                sourceId: stream._id,
+                message: (media.title || 'A creator you follow') + ' is live now.'
+              }).catch(error => {
+                console.error('MyOutlet live notification failed.', error);
+                return null;
+              })
+            ));
+            offset += followers.items.length;
+            if (followers.items.length < 1000) break;
+          }
+        } catch (error) {
+          console.error('MyOutlet live notification fan-out failed.', error);
+        }
+      }
       return ok();
     }
 

@@ -248,6 +248,8 @@ const httpFunctions = read('src/backend/http-functions.js');
 assert.match(httpFunctions, /post_streamAuth/);
 assert.match(httpFunctions, /timingSafeEqual/);
 assert.match(httpFunctions, /isMediaRightsCurrent/);
+assert.match(httpFunctions, /new_live_stream/);
+assert.match(httpFunctions, /const starting = stream.status !== 'live'/);
 
 const notifications = read('src/backend/notifications.jsw');
 assert.match(notifications, /getMyNotifications/);

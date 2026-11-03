@@ -154,7 +154,7 @@ Fields:
 - `notificationKey` — Text, required; deterministic event/recipient key
 - `recipientMemberId` — Text, required
 - `actorMemberId` — Text
-- `type` — Text: `new_follower`, `new_comment` or `song_request`
+- `type` — Text: `new_follower`, `new_comment`, `song_request` or `new_live_stream`
 - `mediaItemId` — Text
 - `creatorChannelId` — Text
 - `sourceId` — Text, required
@@ -162,7 +162,7 @@ Fields:
 - `readAt` — Date and time
 - `createdAt` — Date and time
 
-Permissions: `ADMIN` (site administrators) for direct collection access. Members can read and mark only their own notifications through authenticated backend methods. Notifications are generated for new follows, comments and song requests.
+Permissions: `ADMIN` (site administrators) for direct collection access. Members can read and mark only their own notifications through authenticated backend methods. Notifications are generated for new follows, comments, song requests and the first successful publish event of a followed creator's live stream.
 
 ## MediaPlaylists
 
