@@ -1,51 +1,45 @@
 import wixData from 'wix-data';
 
 const COLLECTION = 'Notifications';
-const TYPES = new Set(['new_follower', 'song_request', 'new_comment']);
 
-function requiredText(value, field, maximum) {
-  if (typeof value !== 'string') {
-    throw new Error(field + ' is required.');
-  }
-  const result = value.trim();
-  if (!result || result.length > maximum) {
-    throw new Error(field + ' must contain between 1 and ' + maximum + ' characters.');
-  }
-  return result;
+function text(value, max) {
+  return typeof value === 'string' ? value.trim().slice(0, max) : '';
 }
 
 export async function createNotification(input = {}) {
-  const recipientMemberId = requiredText(input.recipientMemberId, 'Recipient member ID', 100);
-  const actorMemberId = requiredText(input.actorMemberId, 'Actor member ID', 100);
-  const type = requiredText(input.type, 'Notification type', 40);
-  const sourceId = requiredText(input.sourceId, 'Notification source ID', 100);
-  const message = requiredText(input.message, 'Notification message', 500);
+  const recipientMemberId = text(input.recipientMemberId, 100);
+  const sourceId = text(input.sourceId, 100);
+  const type = text(input.type, 40);
+  if (!recipientMemberId || !sourceId || !type) return null;
 
-  if (!TYPES.has(type)) {
-    throw new Error('Unsupported notification type.');
-  }
-
-  const item = {
-    notificationKey: [type, recipientMemberId, sourceId].join(':'),
-    recipientMemberId,
-    actorMemberId,
-    type,
-    mediaItemId: typeof input.mediaItemId === 'string' ? input.mediaItemId.slice(0, 100) : '',
-    creatorChannelId: typeof input.creatorChannelId === 'string' ? input.creatorChannelId.slice(0, 100) : '',
-    sourceId,
-    message,
-    createdAt: new Date()
-  };
-
+  const notificationKey = [type, sourceId, recipientMemberId].join(':');
   const existing = await wixData.query(COLLECTION)
-    .eq('notificationKey', item.notificationKey)
+    .eq('notificationKey', notificationKey)
     .limit(1)
     .find({ suppressAuth: true });
+  if (existing.items.length) return existing.items[0]._id;
 
-  if (existing.items.length) {
-    return { notificationId: existing.items[0]._id, created: false };
+  const record = {
+    notificationKey,
+    recipientMemberId,
+    actorMemberId: text(input.actorMemberId, 100),
+    type,
+    mediaItemId: text(input.mediaItemId, 100),
+    creatorChannelId: text(input.creatorChannelId, 100),
+    sourceId,
+    message: text(input.message, 240),
+    readAt: null,
+    createdAt: new Date()
+  };
+  try {
+    const created = await wixData.insert(COLLECTION, record, { suppressAuth: true });
+    return created._id;
+  } catch (error) {
+    const duplicate = await wixData.query(COLLECTION)
+      .eq('notificationKey', notificationKey)
+      .limit(1)
+      .find({ suppressAuth: true });
+    if (duplicate.items.length) return duplicate.items[0]._id;
+    throw error;
   }
-
-  const created = await wixData.insert(COLLECTION, item, { suppressAuth: true });
-  return { notificationId: created._id, created: true };
 }
