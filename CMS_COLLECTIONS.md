@@ -50,6 +50,15 @@ Fields:
 
 Permissions: site owner only. Watchlist operations are mediated by authenticated viewer methods.
 
+## CreatorFollows
+
+Fields:
+- `memberId` — Text, required; site-member ID that owns the follow
+- `creatorChannelId` — Text, required; followed CreatorChannels record ID
+- `followedAt` — Date and time
+
+Permissions: site owner only. Follow/unfollow and following-feed operations are mediated by authenticated viewer methods.
+
 ## PlaybackProgress
 
 Fields:
@@ -68,6 +77,6 @@ Permissions: site owner only. Playback progress is mediated by authenticated vie
 - Member-owned creator channel creation and update.
 - Member content submission into the moderation queue, plus private submission-status tracking.
 - Owner-only pending-review queue, publish/reject/remove decisions and song-request queue status controls.
-- Member song requests and a public read-only queue, ordered by submission time.\n- Member watchlists, with published-media checks and private per-member records.\n- Continue-watching history for on-demand video/audio, with bounded playback positions and completed-item exclusion.
+- Member song requests and a public read-only queue, ordered by submission time.\n- Member watchlists, with published-media checks and private per-member records.\n- Continue-watching history for on-demand video/audio, with bounded playback positions and completed-item exclusion.\n- Creator follows, followed-channel lists and a published-media feed across followed channels.
 
 This is a metadata and workflow layer. It does not upload or transcode media, host video, provide adaptive-bitrate playback, run a live ingest server, process payments or verify music rights. Those require separate infrastructure and integrations. Do not mark an item published until the media URL, distribution rights, content rating and moderation decision have been checked.
