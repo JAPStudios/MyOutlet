@@ -1,0 +1,15 @@
+[submodule "upstream/disney-plus-clone"]
+	path = upstream/disney-plus-clone
+	url = https://github.com/Amplejohnny/disney_plus_clone.git
+[submodule "upstream/youtube-data-project"]
+	path = upstream/youtube-data-project
+	url = https://github.com/Mohanapriyar5/DS_Python_youtubedata_project.git
+[submodule "upstream/heritrix3"]
+	path = upstream/heritrix3
+	url = https://github.com/internetarchive/heritrix3.git
+[submodule "upstream/moviepy"]
+	path = upstream/moviepy
+	url = https://github.com/internetarchive/moviepy.git
+[submodule "upstream/video-archiving-insights"]
+	path = upstream/video-archiving-insights
+	url = https://github.com/internetarchive/video_archiving_insights.git
