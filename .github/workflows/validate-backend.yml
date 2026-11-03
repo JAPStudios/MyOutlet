@@ -11,6 +11,10 @@ on:
       - "wix.config.json"
       - "package.json"
       - "scripts/**"
+      - "LIVE_STREAMING.md"
+      - "live-streaming/**"
+      - "LIVE_STREAMING.md"
+      - "live-streaming/**"
       - ".github/workflows/validate-backend.yml"
   pull_request:
     paths:
@@ -21,6 +25,8 @@ on:
       - "wix.config.json"
       - "package.json"
       - "scripts/**"
+      - "LIVE_STREAMING.md"
+      - "live-streaming/**"
       - ".github/workflows/validate-backend.yml"
   workflow_dispatch:
 
@@ -46,3 +52,9 @@ jobs:
           done < <(find src/backend src/public src/pages -type f \( -name '*.js' -o -name '*.jsw' \) -print0)
       - name: Validate backend contracts
         run: node scripts/validate-backend.js
+      - name: Validate MediaMTX configuration
+        run: |
+          mkdir -p live-streaming/certs
+          openssl req -x509 -nodes -newkey rsa:2048 -keyout live-streaming/certs/privkey.pem -out live-streaming/certs/fullchain.pem -subj /CN=localhost -days 1
+          docker run --rm -v "$PWD/live-streaming/mediamtx.yml:/etc/mediamtx/mediamtx.yml:ro" -v "$PWD/live-streaming/certs:/etc/mediamtx/certs:ro" -w /etc/mediamtx bluenviron/mediamtx:1.21.3 --validate-conf=/etc/mediamtx/mediamtx.yml
+          docker compose -f live-streaming/compose.yaml config --quiet

@@ -8,6 +8,7 @@ const MEDIA = 'MediaItems';
 const CHANNELS = 'CreatorChannels';
 const SONGS = 'SongRequests';
 const UPLOADS = 'MediaUploadSessions';
+const LIVE = 'LiveStreams';
 
 function cleanText(value, field, max) {
   if (typeof value !== 'string') throw new Error(field + ' must be text.');
@@ -385,6 +386,25 @@ export async function moderateContent(input = {}) {
     publishedAt: status === 'published' ? new Date() : existing.publishedAt,
     moderationNote: typeof input.note === 'string' ? input.note.trim().slice(0, 1000) : ''
   }, { suppressAuth: true });
+
+  if (existing.contentType === 'livestream') {
+    const streams = await wixData.query(LIVE)
+      .eq('mediaItemId', existing._id)
+      .limit(1)
+      .find({ suppressAuth: true });
+    if (streams.items.length) {
+      const stream = streams.items[0];
+      const nextStatus = status === 'published'
+        ? (stream.status === 'live' ? 'live' : 'ready')
+        : 'cancelled';
+      await wixData.update(LIVE, {
+        ...stream,
+        status: nextStatus,
+        endedAt: status === 'published' ? stream.endedAt || null : new Date(),
+        updatedAt: new Date()
+      }, { suppressAuth: true });
+    }
+  }
   return { _id: updated._id, status: updated.status };
 }
 

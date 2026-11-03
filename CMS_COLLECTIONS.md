@@ -1,6 +1,6 @@
 # MyOutlet CMS data collections
 
-The sixteen custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
+The seventeen custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
 
 ## MediaItems
 
@@ -92,6 +92,24 @@ Fields:
 - `reviewHistory` — Text; JSON history of the last 10 prior declaration/review states
 
 Permissions: `ADMIN` for direct read, insert, update and remove. Creators submit and read their own declarations through authenticated methods; only site owners can review declarations. A declaration is not itself a licence or legal determination.
+
+## LiveStreams
+
+Fields:
+- `streamPath` — Text, unique; unguessable MediaMTX path
+- `streamKeyHash` — Text; SHA-256 hash of the per-session publisher key, never the plaintext key
+- `creatorChannelId` — Text, required
+- `creatorMemberId` — Text, required
+- `mediaItemId` — Text, required; associated MediaItems record
+- `status` — Text: `awaiting_moderation`, `ready`, `live`, `ended` or `cancelled`
+- `protocol` — Text; `RTMPS`
+- `createdAt` — Date and time
+- `startedAt` — Date and time
+- `endedAt` — Date and time
+- `lastPublisherAt` — Date and time
+- `updatedAt` — Date and time
+
+Permissions: `ADMIN` for direct read, insert, update and remove. Creator session operations are mediated by authenticated backend methods. MediaMTX authorization is mediated by the server-to-server `post_streamAuth` HTTP function.
 
 ## CreatorChannels
 
@@ -233,6 +251,7 @@ Permissions: `ADMIN` (site administrators) for direct collection access. Applica
 - Public creator directory, creator search and handle-based creator profiles, alongside published catalogue browse, title/description search and per-channel catalogue reads. Creator search/profile responses expose only public channel fields and published media.
 - Member-owned creator channel creation and update.
 - Member content submission into the moderation queue, plus private submission-status tracking.\n- Creator distribution-rights declarations, private owner review, expiry checks and a mandatory verified-rights record before publication and playback. Catalogue queries exclude media without a current verified-rights state.
+- Creator-owned RTMPS live-stream sessions, owner moderation before ingest, and MediaMTX HTTP-authenticated HLS playback.
 - Private MP4 uploads to the Wix Media Manager, event-driven transcoding readiness, and published-video HLS/DASH playback URLs.
 - Owner-only pending-review queue, publish/reject/remove decisions and song-request queue status controls.
 - Member song requests and a public read-only queue scoped to a specific creator channel and ordered by submission time.
@@ -246,7 +265,7 @@ Permissions: `ADMIN` (site administrators) for direct collection access. Applica
 - Creator-owned public, unlisted and private playlists with ordered items, reordering and owner controls.
 - Private member notifications for new creator follows, comments and song requests, with unread counts and mark-read operations.
 
-This layer uploads private MP4 files to the Wix Media Manager, records upload/transcoding events, and can request HLS or DASH playback URLs for published MyOutlet-uploaded videos. It does not provide live ingest, a custom CDN, external media transcoding, payment processing or operational monitoring. Creator analytics are available, but rely on client-reported playback progress and are approximate. The rights workflow stores creator declarations and site-owner review decisions; it does not independently establish legal ownership or licensing. Do not publish an item until the media is ready, the rights declaration has been reviewed, content rating has been checked, and moderation is complete. Wix backend media events do not run in site Preview.
+This layer uploads private MP4 files to the Wix Media Manager, records upload/transcoding events, and can request HLS or DASH playback URLs for published MyOutlet-uploaded videos. It does not provide a custom CDN, external media transcoding, payment processing or operational monitoring. Creator analytics are available, but rely on client-reported playback progress and are approximate. The rights workflow stores creator declarations and site-owner review decisions; it does not independently establish legal ownership or licensing. Do not publish an item until the media is ready, the rights declaration has been reviewed, content rating has been checked, and moderation is complete. Wix backend media events do not run in site Preview.
 
 
 ## Wix data indexes
@@ -268,4 +287,4 @@ Indexes for the first nine collections were confirmed `ACTIVE` on the MyOutlet s
 - `MediaComments`: `media-comments-status-created`, `media-comments-member-created`
 - `MediaPlaylists`: `playlists-owner-updated`, `playlists-visibility-updated`
 - `PlaylistItems`: unique `playlist-item-key-unique`, plus `playlist-items-position` and `playlist-items-media`
-- `Notifications`: unique `notifications-key-unique`, plus `notifications-recipient-created` and `notifications-recipient-read`\n- `RightsRecords`: unique `rights-media-unique`, plus `rights-creator-created` and `rights-status-created`
+- `Notifications`: unique `notifications-key-unique`, plus `notifications-recipient-created` and `notifications-recipient-read`\n- `LiveStreams`: unique `live-stream-path-unique` (created; allow its Wix index status to reach `ACTIVE` before opening creator sessions)\n- `RightsRecords`: unique `rights-media-unique`, plus `rights-creator-created` and `rights-status-created`

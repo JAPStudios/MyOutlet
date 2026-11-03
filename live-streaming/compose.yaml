@@ -1,0 +1,17 @@
+services:
+  mediamtx:
+    image: bluenviron/mediamtx:1.21.3
+    restart: unless-stopped
+    working_dir: /etc/mediamtx
+    command: ["./mediamtx.yml"]
+    ports:
+      - "1936:1936/tcp"
+      - "8888:8888/tcp"
+    volumes:
+      - ./mediamtx.yml:/etc/mediamtx/mediamtx.yml:ro
+      - ${MYOUTLET_TLS_CERT_DIR:-./certs}:/etc/mediamtx/certs:ro
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true

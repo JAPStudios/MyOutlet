@@ -1,0 +1,236 @@
+import wixData from 'wix-data';
+import wixUsersBackend from 'wix-users-backend';
+import { getSecret } from 'wix-secrets-backend';
+import { randomBytes, createHash } from 'crypto';
+import { isMediaRightsCurrent } from 'backend/rightsCore';
+
+const LIVE = 'LiveStreams';
+const MEDIA = 'MediaItems';
+const CHANNELS = 'CreatorChannels';
+const RATINGS = ['TV-Y', 'TV-Y7', 'TV-G', 'TV-PG', 'TV-14', 'TV-MA', 'Unrated'];
+
+function memberId() {
+  const id = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  if (!id) throw new Error('A signed-in site member is required.');
+  return id;
+}
+
+function requiredText(value, field, max) {
+  if (typeof value !== 'string') throw new Error(field + ' must be text.');
+  const result = value.trim();
+  if (!result || result.length > max) {
+    throw new Error(field + ' is required and must be at most ' + max + ' characters.');
+  }
+  return result;
+}
+
+function optionalHttpsUrl(value, field) {
+  if (value === undefined || value === null || value === '') return '';
+  const raw = requiredText(value, field, 2048);
+  if (raw.startsWith('wix:image://')) return raw;
+  let parsed;
+  try { parsed = new URL(raw); } catch (_) { throw new Error(field + ' must be a valid HTTPS URL.'); }
+  if (parsed.protocol !== 'https:') throw new Error(field + ' must use HTTPS.');
+  return parsed.toString();
+}
+
+function normalizeBaseUrl(value, protocol, field) {
+  if (typeof value !== 'string' || !value.trim()) {
+    throw new Error('Configure the ' + field + ' secret in Wix Secrets Manager.');
+  }
+  let parsed;
+  try { parsed = new URL(value.trim()); } catch (_) {
+    throw new Error(field + ' must be a valid URL.');
+  }
+  if (parsed.protocol !== protocol || parsed.username || parsed.password || parsed.search || parsed.hash) {
+    throw new Error(field + ' must use ' + protocol + ' and must not contain credentials, a query or a fragment.');
+  }
+  return parsed.toString().replace(/\/+$/, '');
+}
+
+async function streamBases() {
+  let rtmps;
+  let hls;
+  try {
+    [rtmps, hls] = await Promise.all([
+      getSecret('MYOUTLET_RTMPS_BASE_URL'),
+      getSecret('MYOUTLET_HLS_BASE_URL')
+    ]);
+  } catch (_) {
+    throw new Error('Configure MYOUTLET_RTMPS_BASE_URL and MYOUTLET_HLS_BASE_URL in Wix Secrets Manager.');
+  }
+  return {
+    rtmps: normalizeBaseUrl(rtmps, 'rtmps:', 'MYOUTLET_RTMPS_BASE_URL'),
+    hls: normalizeBaseUrl(hls, 'https:', 'MYOUTLET_HLS_BASE_URL')
+  };
+}
+
+function publicSession(stream, media) {
+  const playable = stream.status === 'live' && media &&
+    media.status === 'published' && isMediaRightsCurrent(media);
+  return {
+    _id: stream._id,
+    mediaItemId: stream.mediaItemId,
+    creatorChannelId: stream.creatorChannelId,
+    streamPath: stream.streamPath,
+    status: stream.status,
+    protocol: stream.protocol,
+    title: media ? media.title : '',
+    contentRating: media ? media.contentRating : '',
+    createdAt: stream.createdAt,
+    startedAt: stream.startedAt || null,
+    endedAt: stream.endedAt || null,
+    playbackUrl: playable ? media.mediaUrl : ''
+  };
+}
+
+export async function createLiveStream(input = {}) {
+  const creatorMemberId = memberId();
+  const creatorChannelId = requiredText(input.creatorChannelId, 'Creator channel ID', 100);
+  const channel = await wixData.get(CHANNELS, creatorChannelId, { suppressAuth: true });
+  if (!channel || channel.memberId !== creatorMemberId) {
+    throw new Error('A live stream can only be created for a channel owned by this member.');
+  }
+
+  const awaiting = wixData.query(LIVE)
+    .eq('creatorChannelId', creatorChannelId)
+    .eq('status', 'awaiting_moderation');
+  const ready = wixData.query(LIVE)
+    .eq('creatorChannelId', creatorChannelId)
+    .eq('status', 'ready');
+  const live = wixData.query(LIVE)
+    .eq('creatorChannelId', creatorChannelId)
+    .eq('status', 'live');
+  const active = await awaiting.or(ready).or(live)
+    .limit(1)
+    .find({ suppressAuth: true });
+  if (active.items.length) {
+    throw new Error('This channel already has a live-stream session awaiting review or currently active.');
+  }
+
+  const title = requiredText(input.title, 'Stream title', 120);
+  const description = typeof input.description === 'string' ? input.description.trim().slice(0, 2000) : '';
+  const contentRating = requiredText(input.contentRating, 'Content rating', 20);
+  if (!RATINGS.includes(contentRating)) throw new Error('Unsupported content rating.');
+  const category = typeof input.category === 'string' && input.category.trim()
+    ? input.category.trim().slice(0, 50)
+    : 'Live';
+  const tags = Array.isArray(input.tags)
+    ? [...new Set(input.tags.map(tag => requiredText(tag, 'Tag', 30).toLowerCase()))].slice(0, 10)
+    : [];
+  const language = typeof input.language === 'string' ? input.language.trim().toLowerCase() : '';
+  if (language && !/^[a-z]{2}(?:-[a-z]{2})?$/.test(language)) {
+    throw new Error('Language must use an ISO 639-1 code with an optional region.');
+  }
+  const thumbnailUrl = optionalHttpsUrl(input.thumbnailUrl, 'Thumbnail URL');
+  const bases = await streamBases();
+
+  const streamPath = randomBytes(16).toString('hex');
+  const streamKey = randomBytes(32).toString('hex');
+  const streamKeyHash = createHash('sha256').update(streamKey).digest('hex');
+  const mediaUrl = bases.hls + '/' + streamPath + '/index.m3u8';
+  const now = new Date();
+
+  const media = await wixData.insert(MEDIA, {
+    title,
+    description,
+    mediaUrl,
+    thumbnailUrl,
+    contentType: 'livestream',
+    contentRating,
+    category,
+    tags,
+    language,
+    durationSeconds: 0,
+    creatorChannelId,
+    creatorMemberId,
+    status: 'pending_review',
+    submittedAt: now,
+    rightsVerified: false,
+    rightsValidUntil: null,
+    rightsRecordId: ''
+  }, { suppressAuth: true });
+
+  let stream;
+  try {
+    stream = await wixData.insert(LIVE, {
+      streamPath,
+      streamKeyHash,
+      creatorChannelId,
+      creatorMemberId,
+      mediaItemId: media._id,
+      status: 'awaiting_moderation',
+      protocol: 'RTMPS',
+      createdAt: now,
+      startedAt: null,
+      endedAt: null,
+      lastPublisherAt: null,
+      updatedAt: now
+    }, { suppressAuth: true });
+  } catch (error) {
+    await wixData.update(MEDIA, {
+      ...media,
+      status: 'removed',
+      moderationNote: 'The live-stream session could not be created.'
+    }, { suppressAuth: true });
+    throw error;
+  }
+
+  const ingestUrl = bases.rtmps + '/' + streamPath +
+    '?user=' + encodeURIComponent(creatorChannelId) +
+    '&pass=' + encodeURIComponent(streamKey);
+
+  return {
+    streamId: stream._id,
+    mediaItemId: media._id,
+    status: stream.status,
+    ingestUrl,
+    playbackUrl: mediaUrl
+  };
+}
+
+export async function getMyLiveStreams(options = {}) {
+  const creatorMemberId = memberId();
+  const requested = Number(options.limit);
+  const limit = Math.min(Math.max(Number.isFinite(requested) && requested ? requested : 30, 1), 100);
+  const result = await wixData.query(LIVE)
+    .eq('creatorMemberId', creatorMemberId)
+    .descending('createdAt')
+    .limit(limit)
+    .find({ suppressAuth: true });
+  const items = await Promise.all(result.items.map(async stream => {
+    const media = await wixData.get(MEDIA, stream.mediaItemId, { suppressAuth: true });
+    return publicSession(stream, media);
+  }));
+  return { items, total: result.totalCount };
+}
+
+export async function endLiveStream(input = {}) {
+  const creatorMemberId = memberId();
+  const streamId = requiredText(input.streamId, 'Live-stream ID', 100);
+  const stream = await wixData.get(LIVE, streamId, { suppressAuth: true });
+  if (!stream || stream.creatorMemberId !== creatorMemberId) {
+    throw new Error('The live-stream session is not available to this account.');
+  }
+  if (stream.status === 'ended' || stream.status === 'cancelled') {
+    return { _id: stream._id, status: stream.status };
+  }
+
+  const now = new Date();
+  const updated = await wixData.update(LIVE, {
+    ...stream,
+    status: 'ended',
+    endedAt: now,
+    updatedAt: now
+  }, { suppressAuth: true });
+
+  const media = await wixData.get(MEDIA, stream.mediaItemId, { suppressAuth: true });
+  if (media && media.status !== 'removed') {
+    await wixData.update(MEDIA, {
+      ...media,
+      status: 'removed',
+      moderationNote: 'The creator ended this live stream.'
+    }, { suppressAuth: true });
+  }
+  return { _id: updated._id, status: updated.status };
+}

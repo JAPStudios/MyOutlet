@@ -4,3 +4,8 @@ node_modules/
 .idea/
 .wix/
 jsconfig.json
+
+# local live-stream service secrets and runtime data
+.env
+live-streaming/certs/
+live-streaming/recordings/

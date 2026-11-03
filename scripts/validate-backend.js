@@ -71,6 +71,9 @@ const memberMethods = new Set([
   'backend/notifications.jsw:getMyNotifications',
   'backend/notifications.jsw:markNotificationRead',
   'backend/notifications.jsw:markAllNotificationsRead',
+  'backend/liveStreams.jsw:createLiveStream',
+  'backend/liveStreams.jsw:getMyLiveStreams',
+  'backend/liveStreams.jsw:endLiveStream',
   'backend/rights.jsw:submitRightsDeclaration',
   'backend/rights.jsw:getMyRightsRecords'
 ]);
@@ -94,7 +97,8 @@ const modules = [
   'engagement.jsw',
   'playlists.jsw',
   'notifications.jsw',
-  'rights.jsw'
+  'rights.jsw',
+  'liveStreams.jsw'
 ];
 let methodCount = 0;
 for (const file of modules) {
@@ -207,6 +211,7 @@ assert.match(rights, /reviewHistory/);
 assert.match(rights, /history\.slice\(-10\)/);
 assert.match(rights, /Only pending or previously verified rights declarations can be verified/);
 assert.match(catalog, /getVerifiedRightsForMedia/);
+assert.match(catalog, /const LIVE = 'LiveStreams'/);
 assert.match(catalog, /applyVerifiedRightsFilter/);
 assert.match(viewer, /applyVerifiedRightsFilter/);
 assert.match(viewer, /applyViewerRatingPreference/);
@@ -215,6 +220,17 @@ assert.match(viewer, /setMyViewingPreferences/);
 assert.match(viewer, /isMediaRightsCurrent/);
 assert.match(engagement, /isMediaRightsCurrent/);
 assert.match(playlists, /isMediaRightsCurrent/);
+
+const liveStreams = read('src/backend/liveStreams.jsw');
+assert.match(liveStreams, /createLiveStream/);
+assert.match(liveStreams, /getMyLiveStreams/);
+assert.match(liveStreams, /endLiveStream/);
+assert.match(liveStreams, /MYOUTLET_RTMPS_BASE_URL/);
+assert.match(liveStreams, /MYOUTLET_HLS_BASE_URL/);
+const httpFunctions = read('src/backend/http-functions.js');
+assert.match(httpFunctions, /post_streamAuth/);
+assert.match(httpFunctions, /timingSafeEqual/);
+assert.match(httpFunctions, /isMediaRightsCurrent/);
 
 const notifications = read('src/backend/notifications.jsw');
 assert.match(notifications, /getMyNotifications/);
