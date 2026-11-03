@@ -495,19 +495,19 @@ export async function enqueueSongs(input = {}) {
   }
 
   if (channel.memberId !== requesterId) {
-    for (const item of created) {
-      try {
-        await createNotification({
-          recipientMemberId: channel.memberId,
-          actorMemberId: requesterId,
-          type: 'song_request',
-          creatorChannelId: channelId,
-          sourceId: item._id,
-          message: 'A new song request was added to the channel queue.'
-        });
-      } catch (error) {
-        console.error('MyOutlet song-request notification failed.', error);
-      }
+    try {
+      await createNotification({
+        recipientMemberId: channel.memberId,
+        actorMemberId: requesterId,
+        type: 'song_request',
+        creatorChannelId: channelId,
+        sourceId: created[0]._id,
+        message: songs.length === 1
+          ? 'A new song request was added to the channel queue.'
+          : songs.length + ' song requests were added to the channel queue.'
+      });
+    } catch (error) {
+      console.error('MyOutlet song-request notification failed.', error);
     }
   }
 
