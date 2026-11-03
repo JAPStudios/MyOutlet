@@ -376,8 +376,8 @@ export async function moderateContent(input = {}) {
   if (!existing) throw new Error('Content item was not found.');
   if (status === 'published') {
     const verifiedRights = await getVerifiedRightsForMedia(existing._id);
-    if (!verifiedRights) {
-      throw new Error('This media cannot be published until its distribution rights have been verified and are currently valid.');
+    if (!verifiedRights || existing.rightsVerified !== true || !existing.rightsRecordId) {
+      throw new Error('This media cannot be published until its distribution rights have been verified, linked to the media record and are currently valid.');
     }
   }
   const updated = await wixData.update(MEDIA, {

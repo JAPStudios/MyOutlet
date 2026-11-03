@@ -245,7 +245,7 @@ Permissions: `ADMIN` (site administrators) for direct collection access. Applica
 - Creator-owned public, unlisted and private playlists with ordered items, reordering and owner controls.
 - Private member notifications for new creator follows, comments and song requests, with unread counts and mark-read operations.
 
-This layer uploads private MP4 files to the Wix Media Manager, records upload/transcoding events, and can request HLS or DASH playback URLs for published MyOutlet-uploaded videos. It does not provide live ingest, a custom CDN, external media transcoding, creator analytics, payment processing or rights verification. Do not publish an item until the media is ready, distribution rights and content rating have been checked, and moderation is complete. Wix backend media events do not run in site Preview.
+This layer uploads private MP4 files to the Wix Media Manager, records upload/transcoding events, and can request HLS or DASH playback URLs for published MyOutlet-uploaded videos. It does not provide live ingest, a custom CDN, external media transcoding, payment processing or operational monitoring. Creator analytics are available, but rely on client-reported playback progress and are approximate. The rights workflow stores creator declarations and site-owner review decisions; it does not independently establish legal ownership or licensing. Do not publish an item until the media is ready, the rights declaration has been reviewed, content rating has been checked, and moderation is complete. Wix backend media events do not run in site Preview.
 
 
 ## Wix data indexes
