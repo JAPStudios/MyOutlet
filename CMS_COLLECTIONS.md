@@ -119,6 +119,7 @@ Fields:
 - `mediaItemId` — Text, required; the associated MediaItems record
 - `creatorChannelId` — Text, required
 - `senderMemberId` — Text, required; authenticated Wix site-member ID
+- `senderName` — Text; server-resolved public member nickname/title, never accepted from the message request
 - `body` — Text, required; plain-text message, maximum 500 characters
 - `status` — Text: `published` or `removed`
 - `createdAt` — Date and time, required
