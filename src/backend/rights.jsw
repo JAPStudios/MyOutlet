@@ -122,6 +122,12 @@ export async function submitRightsDeclaration(input = {}) {
     if (previous.status === 'verified') {
       throw new Error('Verified rights must be revoked by a site owner before a replacement declaration can be submitted.');
     }
+    await wixData.update(MEDIA, {
+      ...media,
+      rightsVerified: false,
+      rightsValidUntil: validUntil,
+      rightsRecordId: previous._id
+    }, { suppressAuth: true });
     const history = reviewHistory(previous);
     history.push({
       status: previous.status,
@@ -144,16 +150,20 @@ export async function submitRightsDeclaration(input = {}) {
       reviewedAt: null,
       reviewerMemberId: '',
       reviewNote: '',
-      reviewHistory: JSON.stringify(history.slice(-20))
-    }, { suppressAuth: true });
-    await wixData.update(MEDIA, {
-      ...media,
-      rightsVerified: false,
-      rightsValidUntil: validUntil,
-      rightsRecordId: updated._id
+      reviewHistory: JSON.stringify(history.slice(-10).map(entry => ({
+        ...entry,
+        reviewNote: typeof entry.reviewNote === 'string' ? entry.reviewNote.slice(0, 250) : ''
+      })))
     }, { suppressAuth: true });
     return { ...rightsSummary(updated), submitted: true };
   }
+
+  await wixData.update(MEDIA, {
+    ...media,
+    rightsVerified: false,
+    rightsValidUntil: validUntil,
+    rightsRecordId: ''
+  }, { suppressAuth: true });
 
   const created = await wixData.insert(RIGHTS, {
     mediaItemId,
@@ -223,8 +233,8 @@ export async function reviewRightsDeclaration(input = {}) {
 
   const record = await wixData.get(RIGHTS, rightsId, { suppressAuth: true });
   if (!record) throw new Error('Rights declaration was not found.');
-  if (status === 'verified' && record.status !== 'pending_review') {
-    throw new Error('Only pending rights declarations can be verified.');
+  if (status === 'verified' && !['pending_review', 'verified'].includes(record.status)) {
+    throw new Error('Only pending or previously verified rights declarations can be verified.');
   }
   if (status === 'revoked' && record.status !== 'verified') {
     throw new Error('Only verified rights declarations can be revoked.');
@@ -234,20 +244,45 @@ export async function reviewRightsDeclaration(input = {}) {
   }
 
   const now = new Date();
+  const media = await wixData.get(MEDIA, record.mediaItemId, { suppressAuth: true });
+  if (!media || media.creatorMemberId !== record.creatorMemberId) {
+    throw new Error('The media item and rights declaration do not match.');
+  }
+
   if (status === 'verified') {
+    if (!['pending_review', 'published'].includes(media.status)) {
+      throw new Error('The media item is no longer reviewable.');
+    }
     if (record.validFrom && new Date(record.validFrom) > now) {
       throw new Error('Rights have not yet become effective.');
     }
-    if (record.validUntil) {
-      const expiry = endOfUtcDay(record.validUntil);
-      if (expiry < now) throw new Error('Expired rights cannot be verified.');
+    if (record.validUntil && endOfUtcDay(record.validUntil) < now) {
+      throw new Error('Expired rights cannot be verified.');
     }
-    const media = await wixData.get(MEDIA, record.mediaItemId, { suppressAuth: true });
-    if (!media || media.creatorMemberId !== record.creatorMemberId ||
-        !['pending_review', 'published'].includes(media.status)) {
-      throw new Error('The media item and rights declaration do not match or the media is no longer reviewable.');
-    }
+
+    const updated = record.status === 'verified'
+      ? record
+      : await wixData.update(RIGHTS, {
+          ...record,
+          status: 'verified',
+          reviewedAt: now,
+          reviewerMemberId,
+          reviewNote
+        }, { suppressAuth: true });
+
+    await wixData.update(MEDIA, {
+      ...media,
+      rightsVerified: true,
+      rightsValidUntil: record.validUntil || null,
+      rightsRecordId: record._id
+    }, { suppressAuth: true });
+    return rightsSummary(updated);
   }
+
+  await wixData.update(MEDIA, {
+    ...media,
+    rightsVerified: false
+  }, { suppressAuth: true });
 
   const updated = await wixData.update(RIGHTS, {
     ...record,
@@ -256,26 +291,6 @@ export async function reviewRightsDeclaration(input = {}) {
     reviewerMemberId,
     reviewNote
   }, { suppressAuth: true });
-
-  const media = await wixData.get(MEDIA, record.mediaItemId, { suppressAuth: true });
-  if (media && status === 'verified') {
-    await wixData.update(MEDIA, {
-      ...media,
-      rightsVerified: true,
-      rightsValidUntil: record.validUntil || null,
-      rightsRecordId: record._id
-    }, { suppressAuth: true });
-  } else if (media && status === 'revoked') {
-    await wixData.update(MEDIA, {
-      ...media,
-      rightsVerified: false
-    }, { suppressAuth: true });
-  } else if (media && status === 'rejected') {
-    await wixData.update(MEDIA, {
-      ...media,
-      rightsVerified: false
-    }, { suppressAuth: true });
-  }
 
   return rightsSummary(updated);
 }
