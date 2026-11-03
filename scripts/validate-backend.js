@@ -325,6 +325,9 @@ assert.match(notifications, /markAllNotificationsRead/);
 const notificationWriter = read('src/backend/notifications.js');
 assert.match(notificationWriter, /createNotification/);
 
+const readme = read('README.md');
+assert.match(readme, /The nineteen CMS collections/);
+assert.match(readme, /OBS Browser Source chat overlays/);
 console.log('MyOutlet source validation passed: ' + methodCount +
   ' web methods, ' + collectionNames.size + ' documented collections.');
 

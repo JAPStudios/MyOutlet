@@ -44,7 +44,7 @@ The backend and CMS schema are present, but this repository change does not crea
 
 Each new creator live-stream session receives a separate random chat-overlay token. The backend stores only its SHA-256 hash and returns a creator-only URL at creation time. The creator can rotate the URL through `getMyLiveChatOverlay`; rotating it invalidates the previous URL.
 
-The URL opens a transparent, self-contained browser overlay at `/_functions/chatOverlay`. It polls `/_functions/chatOverlayMessages` every 2.5 seconds, displays the latest 30 published chat messages in chronological order, and writes sender names and message bodies with DOM `textContent` rather than HTML injection. The overlay is read-only and never exposes the RTMPS publisher key. The tokenized URL should be treated as a secret and pasted into OBS Browser Source.
+After the updated Velo backend is synchronized to the Wix site and published, the URL opens a transparent, self-contained browser overlay at `/_functions/chatOverlay`. It polls `/_functions/chatOverlayMessages` every 2.5 seconds, displays the latest 30 published chat messages in chronological order, and writes sender names and message bodies with DOM `textContent` rather than HTML injection. The overlay is read-only and never exposes the RTMPS publisher key. The tokenized URL should be treated as a secret and pasted into OBS Browser Source.
 
 The overlay is implemented in the Wix HTTP functions and is not yet a separate downloadable OBS plug-in. Its production URL depends on the current MyOutlet Wix site URL.
 
@@ -56,7 +56,7 @@ This is queue functionality only. It does not yet search NoiseGround, charge the
 
 ## OBS Studio
 
-In OBS, choose a custom streaming service. Paste the complete `ingestUrl` returned by `createLiveStream` into the Server field and leave the separate Stream Key field empty. The URL includes the per-session channel credential and must be treated as a secret. It is returned only by session creation; `getMyLiveStreams` never returns it.
+In OBS, choose the Custom service. Paste the complete `ingestUrl` returned by `createLiveStream` into the Server field and leave the separate Stream Key field empty. OBS passes the RTMP path and `user`/`pass` query parameters to MediaMTX. The URL includes the per-session channel credential and must be treated as a secret. It is returned only by session creation; `getMyLiveStreams` never returns it.
 
 Use an H.264 video encoder and AAC audio. MediaMTX repackages the incoming stream as HLS; this configuration does not perform transcoding or adaptive-bitrate ladder generation.
 
