@@ -12,6 +12,8 @@ on:
       - "package.json"
       - "scripts/**"
       - "LIVE_STREAMING.md"
+      - "UPSTREAM_COMPONENTS.md"
+      - ".gitmodules"
       - "live-streaming/**"
       - ".github/workflows/validate-backend.yml"
   pull_request:
