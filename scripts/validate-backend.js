@@ -153,6 +153,7 @@ const engagement = read('src/backend/engagement.jsw');
 assert.match(engagement, /export async function likeMedia/);
 assert.match(engagement, /export async function addComment/);
 assert.match(engagement, /export async function moderateComment/);
+assert.match(engagement, /export async function listPendingComments/);
 const playlists = read('src/backend/playlists.jsw');
 assert.match(playlists, /export async function getPlaylist/);
 assert.match(playlists, /export async function reorderPlaylistItems/);

@@ -494,6 +494,17 @@
         "anonymous": {
           "invoke": false
         }
+      },
+      "listPendingComments": {
+        "siteOwner": {
+          "invoke": true
+        },
+        "siteMember": {
+          "invoke": false
+        },
+        "anonymous": {
+          "invoke": false
+        }
       }
     },
     "backend/playlists.jsw": {
