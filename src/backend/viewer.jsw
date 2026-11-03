@@ -30,14 +30,18 @@ export async function followCreator(input = {}) {
     creatorChannelId: channelId,
     followedAt: new Date()
   }, { suppressAuth: true });
-  await createNotification({
-    recipientMemberId: channel.memberId,
-    actorMemberId: viewerId,
-    type: 'new_follower',
-    creatorChannelId: channelId,
-    sourceId: follow._id,
-    message: 'A viewer followed your creator channel.'
-  });
+  try {
+    await createNotification({
+      recipientMemberId: channel.memberId,
+      actorMemberId: viewerId,
+      type: 'new_follower',
+      creatorChannelId: channelId,
+      sourceId: follow._id,
+      message: 'A viewer followed your creator channel.'
+    });
+  } catch (error) {
+    console.error('MyOutlet follower notification failed.', error);
+  }
   return { creatorChannelId: channelId, following: true };
 }
 

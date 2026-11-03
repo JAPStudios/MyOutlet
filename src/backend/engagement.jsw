@@ -120,15 +120,19 @@ export async function addComment(input = {}) {
   }, { suppressAuth: true });
   const channel = await wixData.get(CHANNELS, media.creatorChannelId, { suppressAuth: true });
   if (channel && channel.memberId !== viewerId) {
-    await createNotification({
-      recipientMemberId: channel.memberId,
-      actorMemberId: viewerId,
-      type: 'new_comment',
-      mediaItemId,
-      creatorChannelId: channel._id,
-      sourceId: created._id,
-      message: 'A viewer commented on your media.'
-    });
+    try {
+      await createNotification({
+        recipientMemberId: channel.memberId,
+        actorMemberId: viewerId,
+        type: 'new_comment',
+        mediaItemId,
+        creatorChannelId: channel._id,
+        sourceId: created._id,
+        message: 'A viewer commented on your media.'
+      });
+    } catch (error) {
+      console.error('MyOutlet comment notification failed.', error);
+    }
   }
   return { _id: created._id, mediaItemId, body: created.body, status: created.status, createdAt: created.createdAt };
 }
