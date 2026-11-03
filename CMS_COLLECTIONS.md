@@ -1,6 +1,6 @@
 # MyOutlet CMS data collections
 
-The seventeen custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
+The eighteen custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
 
 ## MediaItems
 
@@ -111,6 +111,22 @@ Fields:
 - `updatedAt` — Date and time
 
 Permissions: `ADMIN` for direct read, insert, update and remove. Creator session operations are mediated by authenticated backend methods. MediaMTX authorization is mediated by the server-to-server `post_streamAuth` HTTP function.
+
+## LiveChatMessages
+
+Fields:
+- `liveStreamId` — Text, required; the active LiveStreams record that owns the chat
+- `mediaItemId` — Text, required; the associated MediaItems record
+- `creatorChannelId` — Text, required
+- `senderMemberId` — Text, required; authenticated Wix site-member ID
+- `body` — Text, required; plain-text message, maximum 500 characters
+- `status` — Text: `published` or `removed`
+- `createdAt` — Date and time, required
+- `moderatedAt` — Date and time
+- `moderatedBy` — Text
+- `moderationNote` — Text
+
+Permissions: `ADMIN` for direct read, insert, update and remove. Public reads, authenticated member sends, creator-channel-owner moderation and site-owner moderation are mediated by `src/backend/liveChat.jsw`. Messages are accepted only for a live stream with published media and current verified worldwide rights. Each member is limited to five messages per stream per ten seconds. Removed messages are excluded from public chat reads.
 
 ## CreatorChannels
 
