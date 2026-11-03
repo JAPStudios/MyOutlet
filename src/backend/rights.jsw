@@ -59,6 +59,15 @@ function normalizeDate(value, field, optional) {
   return date;
 }
 
+function reviewHistory(item) {
+  try {
+    const history = JSON.parse(item.reviewHistory || '[]');
+    return Array.isArray(history) ? history : [];
+  } catch (_) {
+    return [];
+  }
+}
+
 function rightsSummary(item) {
   return {
     _id: item._id,
@@ -73,7 +82,8 @@ function rightsSummary(item) {
     status: item.status,
     declaredAt: item.declaredAt,
     reviewedAt: item.reviewedAt || null,
-    reviewNote: item.reviewNote || ''
+    reviewNote: item.reviewNote || '',
+    reviewHistory: reviewHistory(item)
   };
 }
 
@@ -112,9 +122,13 @@ export async function submitRightsDeclaration(input = {}) {
     if (previous.status === 'verified') {
       throw new Error('Verified rights must be revoked by a site owner before a replacement declaration can be submitted.');
     }
-    if (previous.status === 'revoked') {
-      throw new Error('Revoked rights declarations cannot be replaced.');
-    }
+    const history = reviewHistory(previous);
+    history.push({
+      status: previous.status,
+      declaredAt: previous.declaredAt || null,
+      reviewedAt: previous.reviewedAt || null,
+      reviewNote: previous.reviewNote || ''
+    });
     const updated = await wixData.update(RIGHTS, {
       ...previous,
       creatorMemberId,
@@ -129,7 +143,8 @@ export async function submitRightsDeclaration(input = {}) {
       declaredAt: new Date(),
       reviewedAt: null,
       reviewerMemberId: '',
-      reviewNote: ''
+      reviewNote: '',
+      reviewHistory: JSON.stringify(history.slice(-20))
     }, { suppressAuth: true });
     await wixData.update(MEDIA, {
       ...media,
@@ -154,7 +169,8 @@ export async function submitRightsDeclaration(input = {}) {
     declaredAt: new Date(),
     reviewedAt: null,
     reviewerMemberId: '',
-    reviewNote: ''
+    reviewNote: '',
+    reviewHistory: '[]'
   }, { suppressAuth: true });
   await wixData.update(MEDIA, {
     ...media,
@@ -252,9 +268,7 @@ export async function reviewRightsDeclaration(input = {}) {
   } else if (media && status === 'revoked') {
     await wixData.update(MEDIA, {
       ...media,
-      rightsVerified: false,
-      status: media.status === 'published' ? 'removed' : media.status,
-      moderationNote: 'Distribution rights verification was revoked.'
+      rightsVerified: false
     }, { suppressAuth: true });
   } else if (media && status === 'rejected') {
     await wixData.update(MEDIA, {

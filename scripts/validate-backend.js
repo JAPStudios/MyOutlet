@@ -203,6 +203,8 @@ assert.match(rightsCore, /isMediaRightsCurrent/);
 assert.match(rightsCore, /applyVerifiedRightsFilter/);
 assert.match(rights, /rightsVerified: true/);
 assert.match(rights, /rightsVerified: false/);
+assert.match(rights, /reviewHistory/);
+assert.match(rights, /history\.slice\(-20\)/);
 assert.match(catalog, /getVerifiedRightsForMedia/);
 assert.match(catalog, /applyVerifiedRightsFilter/);
 assert.match(viewer, /applyVerifiedRightsFilter/);
