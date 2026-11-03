@@ -7,7 +7,8 @@ Create these Wix CMS collections before publishing the backend module. Collectio
 Fields:
 - `title` — Text, required
 - `description` — Text
-- `mediaUrl` — Text, required; HTTPS external media URLs or Wix video URLs created by the MyOutlet upload workflow
+- `mediaUrl` — Text, required; HTTPS external media URLs or private Wix video URLs created by the MyOutlet upload workflow
+- `mediaUploadSessionId` — Text; associated MediaUploadSessions record ID when uploaded through MyOutlet
 - `thumbnailUrl` — URL or Text
 - `contentType` — Text: `video`, `livestream` or `audio`
 - `contentRating` — Text: `TV-Y`, `TV-Y7`, `TV-G`, `TV-PG`, `TV-14`, `TV-MA` or `Unrated`
@@ -93,8 +94,12 @@ Permissions: site owner only. Playback progress is mediated by authenticated vie
 
 - Public creator directory, creator search and handle-based creator profiles, alongside published catalogue browse, title/description search and per-channel catalogue reads. Creator search/profile responses expose only public channel fields and published media.
 - Member-owned creator channel creation and update.
-- Member content submission into the moderation queue, plus private submission-status tracking.\n- Private MP4 uploads to the Wix Media Manager, event-driven transcoding readiness, and published-video HLS/DASH playback URLs.
+- Member content submission into the moderation queue, plus private submission-status tracking.
+- Private MP4 uploads to the Wix Media Manager, event-driven transcoding readiness, and published-video HLS/DASH playback URLs.
 - Owner-only pending-review queue, publish/reject/remove decisions and song-request queue status controls.
-- Member song requests and a public read-only queue, ordered by submission time.\n- Member watchlists, with published-media checks and private per-member records.\n- Continue-watching history for on-demand video/audio, with bounded playback positions and completed-item exclusion.\n- Creator follows, followed-channel lists and a published-media feed across followed channels.
+- Member song requests and a public read-only queue, ordered by submission time.
+- Member watchlists, with published-media checks and private per-member records.
+- Continue-watching history for on-demand video/audio, with bounded playback positions and completed-item exclusion.
+- Creator follows, followed-channel lists and a published-media feed across followed channels.
 
-This is a metadata and workflow layer. It does not upload or transcode media, host video, provide adaptive-bitrate playback, run a live ingest server, process payments or verify music rights. Those require separate infrastructure and integrations. Do not mark an item published until the media URL, distribution rights, content rating and moderation decision have been checked.
+This layer uploads private MP4 files to the Wix Media Manager, records upload/transcoding events, and can request HLS or DASH playback URLs for published MyOutlet-uploaded videos. It does not provide live ingest, a custom CDN, external media transcoding, creator analytics, payment processing or rights verification. Do not publish an item until the media is ready, distribution rights and content rating have been checked, and moderation is complete. Wix backend media events do not run in site Preview.

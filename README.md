@@ -8,17 +8,17 @@ The Wix Velo site source is under `src/`. The browser extension files at the rep
 
 ## Backend catalogue and creator workflows
 
-The first backend service layer is in `src/backend/catalog.jsw`. It provides published catalogue browsing and search, member-owned channels, content submission for moderation, owner-only moderation decisions and member song requests. See [CMS_COLLECTIONS.md](CMS_COLLECTIONS.md) for the exact Wix CMS collection fields and required access controls.
+The backend service layer includes `src/backend/catalog.jsw` for creator discovery, published catalogue browsing/search, channel management, submissions, moderation and song requests; `src/backend/viewer.jsw` for watchlists, playback progress, creator follows and a followed-creator feed; and `src/backend/media.jsw` for private MP4 uploads and published-video playback URLs. `src/backend/events.js` records upload and video-transcoding completion. See [CMS_COLLECTIONS.md](CMS_COLLECTIONS.md) for the required Wix CMS collection fields and access controls.
 
 Before publishing:
-1. Create the three CMS collections described in `CMS_COLLECTIONS.md`.
+1. Create every CMS collection described in `CMS_COLLECTIONS.md`.
 2. Set each collection's direct permissions to site-owner only.
 3. Sync the Wix site with the repository and publish the Velo backend module.
 4. Exercise anonymous catalogue reads, member-only channel and submission operations and owner-only moderation with separate test accounts.
 
 ## Functional boundaries
 
-The catalogue stores metadata and workflow state. It does not itself store media bytes or deliver live streams. A production service still requires authenticated media ingest, object storage, transcoding, adaptive-bitrate packaging, CDN delivery, playback, live streaming infrastructure, content-rights records, age/rating enforcement, creator analytics, payment processing and operational monitoring.
+The current media workflow accepts private MP4 uploads into the Wix Media Manager, waits for Wix's video-transcoding event, and returns HLS or DASH playback URLs only for published uploaded videos. It does not yet provide live ingest, a custom CDN, external transcoding, content-rights records, age/rating enforcement, creator analytics, payment processing or operational monitoring.
 
 No payment is collected by the current backend. Song requests are queued as metadata only; they do not charge viewers. No third-party media is licensed by the presence of a URL or catalogue record.
 
