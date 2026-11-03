@@ -32,6 +32,14 @@ docker compose -f compose.yaml up -d
 
 The RTMPS listener is exposed on TCP 1936 and HTTPS HLS on TCP 8888. Plain RTMP, RTSP, WebRTC, SRT, MoQ, the MediaMTX control API, metrics and profiling endpoints are disabled. Both RTMPS and HLS use the supplied TLS certificate. MediaMTX delegates every publish/read/playback authorization decision to the MyOutlet Wix HTTP function.
 
+## Live chat backend
+
+The live-chat service is implemented in `src/backend/liveChat.jsw` and uses the `LiveChatMessages` CMS collection. `getLiveChatMessages` returns the latest messages or messages after a timestamp cursor; `sendLiveChatMessage` accepts authenticated member messages up to 500 characters; `moderateMyChannelChatMessage` lets a creator moderate their own channel's chat; and `moderateChatMessage` is restricted to site owners. Sender names are resolved from the Wix public-member profile collection rather than accepted from client input.
+
+Chat reads and writes require the stream to remain live and its media to remain published with current verified worldwide rights. The current best-effort rate limit is five messages per member per stream per ten seconds. Removed messages remain part of the rate-limit count. The two composite CMS indexes for stream/status/time and stream/member/time were created on November 3, 2026; Wix reported them as `BUILDING` at the last check, so they must reach `ACTIVE` before relying on indexed query performance.
+
+The backend and CMS schema are present, but this repository change does not create or wire a visible chat panel into the Wix Editor page. The page-level chat interface still needs to be connected to these web methods.
+
 ## OBS Studio
 
 In OBS, choose a custom streaming service. Paste the complete `ingestUrl` returned by `createLiveStream` into the Server field and leave the separate Stream Key field empty. The URL includes the per-session channel credential and must be treated as a secret. It is returned only by session creation; `getMyLiveStreams` never returns it.
