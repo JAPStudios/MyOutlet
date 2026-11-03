@@ -228,8 +228,7 @@ assert.match(liveStreams, /getLiveStream/);
 assert.match(liveStreams, /getPublicLiveSession/);
 assert.match(liveStreams, /isMediaRightsCurrent/);
 assert.match(liveStreams, /isContentRatingAllowed/);
-
-const liveStreams = read('src/backend/liveStreams.jsw');
+assert.match(liveStreams, /createLiveStream/);
 assert.match(liveStreams, /createLiveStream/);
 assert.match(liveStreams, /getMyLiveStreams/);
 assert.match(liveStreams, /endLiveStream/);
