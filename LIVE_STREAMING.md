@@ -40,6 +40,12 @@ Chat reads and writes require the stream to remain live and its media to remain 
 
 The backend and CMS schema are present, but this repository change does not create or wire a visible chat panel into the Wix Editor page. The page-level chat interface still needs to be connected to these web methods.
 
+## Ordered song-request queue
+
+The catalogue backend exposes `enqueueSong` for one track and `enqueueSongs` for an ordered batch of one to five tracks. The batch method checks the active stream and verified media rights, enforces the 50-item stream queue and five-pending-requests-per-member limits, inserts the selected tracks sequentially in the submitted order, and marks already inserted items cancelled if a later insert fails. The creator receives one notification for the batch.
+
+This is queue functionality only. It does not yet search NoiseGround, charge the viewer, or transfer the requested amount to the creator. Those integrations remain explicitly unimplemented.
+
 ## OBS Studio
 
 In OBS, choose a custom streaming service. Paste the complete `ingestUrl` returned by `createLiveStream` into the Server field and leave the separate Stream Key field empty. The URL includes the per-session channel credential and must be treated as a secret. It is returned only by session creation; `getMyLiveStreams` never returns it.
