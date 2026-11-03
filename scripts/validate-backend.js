@@ -261,6 +261,10 @@ assert.match(liveChat, /moderateMyChannelChatMessage/);
 assert.match(liveChat, /moderateChatMessage/);
 assert.match(liveChat, /reportLiveChatMessage/);
 assert.match(liveChat, /getMyLiveChatReports/);
+const reporterHistoryStart = liveChat.indexOf('export async function getMyLiveChatReports');
+const ownerReportListStart = liveChat.indexOf('export async function listLiveChatReports');
+assert.ok(!liveChat.slice(reporterHistoryStart, ownerReportListStart).includes('reviewNote:'),
+  'Internal site-owner review notes must not be returned to reporters');
 assert.match(liveChat, /listLiveChatReports/);
 assert.match(liveChat, /resolveLiveChatReport/);
 assert.match(liveChat, /banLiveChatMember/);
