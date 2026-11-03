@@ -89,7 +89,7 @@ Fields:
 - `reviewedAt` — Date and time
 - `reviewerMemberId` — Text
 - `reviewNote` — Text
-- `reviewHistory` — Text; JSON history of the last 20 prior declaration/review states
+- `reviewHistory` — Text; JSON history of the last 10 prior declaration/review states
 
 Permissions: `ADMIN` for direct read, insert, update and remove. Creators submit and read their own declarations through authenticated methods; only site owners can review declarations. A declaration is not itself a licence or legal determination.
 
