@@ -9,6 +9,6 @@
     "postinstall": "wix sync-types",
     "dev": "wix dev",
     "lint": "eslint .",
-    "test": "node scripts/validate-backend.js"
+    "test": "node scripts/validate-backend.js && node scripts/validate-live-auth.js"
   }
 }
