@@ -45,7 +45,7 @@ function publicMessage(item, stream, channel) {
   return {
     _id: item._id,
     liveStreamId: item.liveStreamId,
-    senderName: item.senderMemberId === stream.creatorMemberId ? channel.name : 'Viewer',
+    senderName: item.senderName || (item.senderMemberId === stream.creatorMemberId ? channel.name : 'Viewer'),
     isCreator: item.senderMemberId === stream.creatorMemberId,
     body: item.body,
     createdAt: item.createdAt
@@ -90,6 +90,18 @@ export async function sendLiveChatMessage(input = {}) {
     throw new Error('Messages cannot contain control characters.');
   }
   const { stream, channel } = await getLiveContext(streamId);
+  let senderName = senderMemberId === stream.creatorMemberId ? channel.name : 'Viewer';
+  if (senderMemberId !== stream.creatorMemberId) {
+    try {
+      const profile = await wixData.get('Members/PublicData', senderMemberId, { suppressAuth: true });
+      const publicName = profile && (profile.nickname || profile.title);
+      if (typeof publicName === 'string' && publicName.trim()) {
+        senderName = publicName.trim().slice(0, 80);
+      }
+    } catch (_) {
+      senderName = 'Viewer';
+    }
+  }
   const cutoff = new Date(Date.now() - 10000);
   const recent = await wixData.query(CHAT)
     .eq('liveStreamId', streamId)
@@ -108,6 +120,7 @@ export async function sendLiveChatMessage(input = {}) {
     mediaItemId: stream.mediaItemId,
     creatorChannelId: stream.creatorChannelId,
     senderMemberId,
+    senderName,
     body,
     status: 'published',
     createdAt
