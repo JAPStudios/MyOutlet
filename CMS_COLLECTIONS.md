@@ -12,6 +12,10 @@ Fields:
 - `thumbnailUrl` — Text
 - `contentType` — Text: `video`, `livestream` or `audio`
 - `contentRating` — Text: `TV-Y`, `TV-Y7`, `TV-G`, `TV-PG`, `TV-14`, `TV-MA` or `Unrated`
+- `category` — Text
+- `tags` — Array of Text
+- `language` — Language code
+- `durationSeconds` — Number
 - `creatorChannelId` — Text
 - `creatorMemberId` — Text
 - `status` — Text: `pending_review`, `published`, `rejected` or `removed`
@@ -107,7 +111,7 @@ This layer uploads private MP4 files to the Wix Media Manager, records upload/tr
 
 ## Wix data indexes
 
-The following indexes have been requested on the MyOutlet site. Wix initially reports them as `BUILDING`; they become query-ready when their status changes to `ACTIVE`.
+All indexes listed below were confirmed `ACTIVE` on the MyOutlet site.
 
 - `MediaItems`: `media-status-published`, `media-channel-status-published`, `media-creator-submitted`
 - `CreatorChannels`: case-insensitive unique `creator-handle-unique`, plus `creator-member`

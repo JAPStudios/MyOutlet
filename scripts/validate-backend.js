@@ -124,6 +124,10 @@ assert.match(uploader, /request\.upload\.onprogress/,
   'The browser uploader must expose upload progress');
 
 const catalog = read('src/backend/catalog.jsw');
+for (const field of ['category', 'tags', 'language', 'durationSeconds']) {
+  assert.ok(catalog.includes(field), 'Catalogue must support ' + field);
+  assert.ok(cms.includes('`' + field + '`'), 'CMS schema must document ' + field);
+}
 assert.match(catalog, /session\.status\s*!==\s*'ready'/,
   'Content submission must wait for successful transcoding');
 

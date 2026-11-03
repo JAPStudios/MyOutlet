@@ -21,6 +21,54 @@ function safeHttpsUrl(value, field) {
   return parsed.toString();
 }
 
+function optionalText(value, field, max) {
+  if (value === undefined || value === null || value === '') return '';
+  return cleanText(value, field, max);
+}
+
+function normalizeTags(value) {
+  if (value === undefined || value === null) return [];
+  if (!Array.isArray(value)) throw new Error('Tags must be an array of text values.');
+  return [...new Set(value.map(tag => cleanText(tag, 'Tag', 30).toLowerCase()))].slice(0, 10);
+}
+
+function normalizeLanguage(value) {
+  const raw = optionalText(value, 'Language', 5);
+  if (!raw) return '';
+  if (!/^[a-z]{2}(?:-[a-z]{2})?$/i.test(raw)) {
+    throw new Error('Language must use an ISO 639-1 code, optionally followed by an ISO 3166-1 alpha-2 region.');
+  }
+  const parts = raw.split('-');
+  return parts[0].toLowerCase() + (parts[1] ? '-' + parts[1].toUpperCase() : '');
+}
+
+function normalizeDuration(value) {
+  if (value === undefined || value === null || value === '') return 0;
+  const duration = Number(value);
+  if (!Number.isInteger(duration) || duration < 0 || duration > 86400) {
+    throw new Error('Duration must be a whole number between 0 and 86400 seconds.');
+  }
+  return duration;
+}
+
+function applyMediaFilters(query, options = {}) {
+  const category = optionalText(options.category, 'Category', 50);
+  const contentType = optionalText(options.contentType, 'Content type', 20);
+  const contentRating = optionalText(options.contentRating, 'Content rating', 20);
+  const language = normalizeLanguage(options.language);
+  const tag = optionalText(options.tag, 'Tag', 30).toLowerCase();
+
+  if (contentType && !TYPES.includes(contentType)) throw new Error('Unsupported content type filter.');
+  if (contentRating && !RATINGS.includes(contentRating)) throw new Error('Unsupported content rating filter.');
+
+  if (category) query = query.eq('category', category);
+  if (contentType) query = query.eq('contentType', contentType);
+  if (contentRating) query = query.eq('contentRating', contentRating);
+  if (language) query = query.eq('language', language);
+  if (tag) query = query.hasSome('tags', [tag]);
+  return query;
+}
+
 function memberId() {
   const id = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
   if (!id) throw new Error('A signed-in site member is required.');
@@ -36,6 +84,10 @@ function publicMedia(item) {
     thumbnailUrl: item.thumbnailUrl || '',
     contentType: item.contentType,
     contentRating: item.contentRating,
+    category: item.category || 'Other',
+    tags: Array.isArray(item.tags) ? item.tags : [],
+    language: item.language || '',
+    durationSeconds: Number(item.durationSeconds) || 0,
     creatorChannelId: item.creatorChannelId,
     publishedAt: item.publishedAt || item._createdDate
   };
@@ -110,8 +162,8 @@ export async function getCreatorProfile(input = {}) {
 export async function browseCatalog(options = {}) {
   const limit = Math.min(Math.max(Number(options.limit) || 24, 1), 50);
   const offset = Math.min(Math.max(Number(options.offset) || 0, 0), 10000);
-  const result = await wixData.query(MEDIA)
-    .eq('status', 'published')
+  const query = applyMediaFilters(wixData.query(MEDIA).eq('status', 'published'), options);
+  const result = await query
     .descending('publishedAt')
     .skip(offset)
     .limit(limit)
@@ -125,7 +177,10 @@ export async function searchCatalog(options = {}) {
   const offset = Math.min(Math.max(Number(options.offset) || 0, 0), 10000);
   const titleQuery = wixData.query(MEDIA).eq('status', 'published').contains('title', term);
   const descriptionQuery = wixData.query(MEDIA).eq('status', 'published').contains('description', term);
-  const result = await titleQuery.or(descriptionQuery)
+  const categoryQuery = wixData.query(MEDIA).eq('status', 'published').contains('category', term);
+  const tagQuery = wixData.query(MEDIA).eq('status', 'published').hasSome('tags', [term.toLowerCase()]);
+  const query = applyMediaFilters(titleQuery.or(descriptionQuery).or(categoryQuery).or(tagQuery), options);
+  const result = await query
     .descending('publishedAt')
     .skip(offset)
     .limit(limit)
@@ -170,6 +225,10 @@ export async function submitContent(input = {}) {
   const contentRating = cleanText(input.contentRating, 'Content rating', 20);
   if (!TYPES.includes(contentType)) throw new Error('Unsupported content type.');
   if (!RATINGS.includes(contentRating)) throw new Error('Unsupported content rating.');
+  const category = optionalText(input.category, 'Category', 50) || 'Other';
+  const tags = normalizeTags(input.tags);
+  const language = normalizeLanguage(input.language);
+  const durationSeconds = normalizeDuration(input.durationSeconds);
   const channelId = cleanText(input.creatorChannelId, 'Creator channel', 100);
   const channel = await wixData.get(CHANNELS, channelId, { suppressAuth: true });
   if (!channel || channel.memberId !== creatorId) throw new Error('The selected channel is not available to this account.');
@@ -194,6 +253,7 @@ export async function submitContent(input = {}) {
 
   const created = await wixData.insert(MEDIA, {
     title, description, mediaUrl, thumbnailUrl, contentType, contentRating,
+    category, tags, language, durationSeconds,
     creatorChannelId: channelId, creatorMemberId: creatorId,
     mediaUploadSessionId: uploadSessionId,
     status: 'pending_review', submittedAt: new Date()
@@ -261,9 +321,11 @@ export async function moderateContent(input = {}) {
 export async function getCreatorCatalog(input = {}) {
   const channelId = cleanText(input.creatorChannelId, 'Creator channel', 100);
   const limit = Math.min(Math.max(Number(input.limit) || 24, 1), 50);
-  const result = await wixData.query(MEDIA)
-    .eq('creatorChannelId', channelId)
-    .eq('status', 'published')
+  const query = applyMediaFilters(
+    wixData.query(MEDIA).eq('creatorChannelId', channelId).eq('status', 'published'),
+    input
+  );
+  const result = await query
     .descending('publishedAt')
     .limit(limit)
     .find({ suppressAuth: true });
@@ -281,7 +343,9 @@ export async function getMySubmissions(options = {}) {
   return {
     items: result.items.map(item => ({
       _id: item._id, title: item.title, contentType: item.contentType,
-      contentRating: item.contentRating, status: item.status,
+      contentRating: item.contentRating, category: item.category || 'Other',
+      tags: Array.isArray(item.tags) ? item.tags : [], language: item.language || '',
+      durationSeconds: Number(item.durationSeconds) || 0, status: item.status,
       submittedAt: item.submittedAt, moderationNote: item.moderationNote || ''
     }))
   };
@@ -298,7 +362,9 @@ export async function listPendingContent(options = {}) {
     items: result.items.map(item => ({
       _id: item._id, title: item.title, description: item.description || '',
       mediaUrl: item.mediaUrl, contentType: item.contentType,
-      contentRating: item.contentRating, creatorChannelId: item.creatorChannelId,
+      contentRating: item.contentRating, category: item.category || 'Other',
+      tags: Array.isArray(item.tags) ? item.tags : [], language: item.language || '',
+      durationSeconds: Number(item.durationSeconds) || 0, creatorChannelId: item.creatorChannelId,
       submittedAt: item.submittedAt
     }))
   };
