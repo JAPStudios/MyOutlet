@@ -67,7 +67,10 @@ const memberMethods = new Set([
   'backend/playlists.jsw:addMediaToPlaylist',
   'backend/playlists.jsw:removeMediaFromPlaylist',
   'backend/playlists.jsw:reorderPlaylistItems',
-  'backend/playlists.jsw:getMyPlaylists'
+  'backend/playlists.jsw:getMyPlaylists',
+  'backend/notifications.jsw:getMyNotifications',
+  'backend/notifications.jsw:markNotificationRead',
+  'backend/notifications.jsw:markAllNotificationsRead'
 ]);
 
 const ownerMethods = new Set([
@@ -124,7 +127,7 @@ for (const file of modules) {
 }
 
 const collectionNames = new Set();
-for (const file of [...modules, 'ratingPreferences.js']) {
+for (const file of [...modules, 'ratingPreferences.js', 'notifications.js']) {
   const source = read('src/backend/' + file);
   for (const match of source.matchAll(/const\s+[A-Z_]+\s*=\s*['"]([A-Za-z0-9_-]+)['"]/g)) {
     collectionNames.add(match[1]);
@@ -183,6 +186,11 @@ assert.match(engagement, /listPendingComments/);
 const playlists = read('src/backend/playlists.jsw');
 assert.match(playlists, /getPlaylist/);
 assert.match(playlists, /reorderPlaylistItems/);
+const notifications = read('src/backend/notifications.jsw');
+assert.match(notifications, /getMyNotifications/);
+assert.match(notifications, /markAllNotificationsRead/);
+const notificationWriter = read('src/backend/notifications.js');
+assert.match(notificationWriter, /createNotification/);
 
 console.log('MyOutlet source validation passed: ' + methodCount +
   ' web methods, ' + collectionNames.size + ' documented collections.');

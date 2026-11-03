@@ -1,0 +1,85 @@
+import wixData from 'wix-data';
+import wixUsersBackend from 'wix-users-backend';
+
+const COLLECTION = 'Notifications';
+
+function memberId() {
+  const id = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  if (!id) throw new Error('A signed-in site member is required.');
+  return id;
+}
+
+export async function getMyNotifications(options = {}) {
+  const viewerId = memberId();
+  const requested = Number(options.limit);
+  const requestedOffset = Number(options.offset);
+  const limit = Math.min(Math.max(Number.isFinite(requested) && requested ? requested : 30, 1), 100);
+  const offset = Math.min(Math.max(Number.isFinite(requestedOffset) ? requestedOffset : 0, 0), 10000);
+  const [result, unreadCount] = await Promise.all([
+    wixData.query(COLLECTION)
+      .eq('recipientMemberId', viewerId)
+      .descending('createdAt')
+      .skip(offset)
+      .limit(limit)
+      .find({ suppressAuth: true }),
+    wixData.query(COLLECTION)
+      .eq('recipientMemberId', viewerId)
+      .isEmpty('readAt')
+      .count({ suppressAuth: true })
+  ]);
+  return {
+    items: result.items.map(item => ({
+      _id: item._id,
+      actorMemberId: item.actorMemberId || '',
+      type: item.type,
+      mediaItemId: item.mediaItemId || '',
+      creatorChannelId: item.creatorChannelId || '',
+      sourceId: item.sourceId,
+      message: item.message || '',
+      readAt: item.readAt || null,
+      createdAt: item.createdAt
+    })),
+    total: result.totalCount,
+    unreadCount,
+    offset,
+    limit
+  };
+}
+
+export async function markNotificationRead(input = {}) {
+  const viewerId = memberId();
+  const notificationId = typeof input.notificationId === 'string' ? input.notificationId.trim() : '';
+  if (!notificationId || notificationId.length > 100) throw new Error('Notification ID is invalid.');
+  const item = await wixData.get(COLLECTION, notificationId, { suppressAuth: true });
+  if (!item || item.recipientMemberId !== viewerId) {
+    throw new Error('Notification was not found for this member.');
+  }
+  if (!item.readAt) {
+    const updated = await wixData.update(COLLECTION, {
+      ...item,
+      readAt: new Date()
+    }, { suppressAuth: true });
+    return { notificationId: updated._id, readAt: updated.readAt };
+  }
+  return { notificationId: item._id, readAt: item.readAt };
+}
+
+export async function markAllNotificationsRead() {
+  const viewerId = memberId();
+  let updatedCount = 0;
+  while (true) {
+    const result = await wixData.query(COLLECTION)
+      .eq('recipientMemberId', viewerId)
+      .isEmpty('readAt')
+      .ascending('createdAt')
+      .limit(1000)
+      .find({ suppressAuth: true });
+    if (!result.items.length) break;
+    await Promise.all(result.items.map(item =>
+      wixData.update(COLLECTION, { ...item, readAt: new Date() }, { suppressAuth: true })
+    ));
+    updatedCount += result.items.length;
+    if (result.items.length < 1000) break;
+  }
+  return { updatedCount };
+}

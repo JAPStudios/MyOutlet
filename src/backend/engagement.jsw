@@ -1,10 +1,12 @@
 import wixData from 'wix-data';
 import wixUsersBackend from 'wix-users-backend';
 import { isContentRatingAllowed } from 'backend/ratingPreferences';
+import { createNotification } from 'backend/notifications';
 
 const MEDIA = 'MediaItems';
 const LIKES = 'MediaLikes';
 const COMMENTS = 'MediaComments';
+const CHANNELS = 'CreatorChannels';
 
 function memberId() {
   const id = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
@@ -105,7 +107,7 @@ export async function getMediaEngagement(input = {}) {
 export async function addComment(input = {}) {
   const viewerId = memberId();
   const mediaItemId = requiredText(input.mediaItemId, 'Media item ID', 100);
-  await publishedMedia(mediaItemId);
+  const media = await publishedMedia(mediaItemId);
   const body = requiredText(input.body, 'Comment', 2000);
   const now = new Date();
   const created = await wixData.insert(COMMENTS, {
@@ -116,6 +118,18 @@ export async function addComment(input = {}) {
     createdAt: now,
     updatedAt: now
   }, { suppressAuth: true });
+  const channel = await wixData.get(CHANNELS, media.creatorChannelId, { suppressAuth: true });
+  if (channel && channel.memberId !== viewerId) {
+    await createNotification({
+      recipientMemberId: channel.memberId,
+      actorMemberId: viewerId,
+      type: 'new_comment',
+      mediaItemId,
+      creatorChannelId: channel._id,
+      sourceId: created._id,
+      message: 'A viewer commented on your media.'
+    });
+  }
   return { _id: created._id, mediaItemId, body: created.body, status: created.status, createdAt: created.createdAt };
 }
 

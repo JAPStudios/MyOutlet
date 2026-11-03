@@ -607,6 +607,41 @@
           "invoke": false
         }
       }
+    },
+    "backend/notifications.jsw": {
+      "getMyNotifications": {
+        "siteOwner": {
+          "invoke": true
+        },
+        "siteMember": {
+          "invoke": true
+        },
+        "anonymous": {
+          "invoke": false
+        }
+      },
+      "markNotificationRead": {
+        "siteOwner": {
+          "invoke": true
+        },
+        "siteMember": {
+          "invoke": true
+        },
+        "anonymous": {
+          "invoke": false
+        }
+      },
+      "markAllNotificationsRead": {
+        "siteOwner": {
+          "invoke": true
+        },
+        "siteMember": {
+          "invoke": true
+        },
+        "anonymous": {
+          "invoke": false
+        }
+      }
     }
   }
 }

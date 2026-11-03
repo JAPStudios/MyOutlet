@@ -25,11 +25,19 @@ export async function followCreator(input = {}) {
     return { creatorChannelId: channelId, following: true };
   }
 
-  await wixData.insert(FOLLOWS, {
+  const follow = await wixData.insert(FOLLOWS, {
     memberId: viewerId,
     creatorChannelId: channelId,
     followedAt: new Date()
   }, { suppressAuth: true });
+  await createNotification({
+    recipientMemberId: channel.memberId,
+    actorMemberId: viewerId,
+    type: 'new_follower',
+    creatorChannelId: channelId,
+    sourceId: follow._id,
+    message: 'A viewer followed your creator channel.'
+  });
   return { creatorChannelId: channelId, following: true };
 }
 

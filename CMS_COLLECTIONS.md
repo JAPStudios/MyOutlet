@@ -1,6 +1,6 @@
 # MyOutlet CMS data collections
 
-The fourteen custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
+The fifteen custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
 
 ## MediaItems
 
@@ -105,6 +105,22 @@ Fields:
 
 Permissions: `ADMIN` (site administrators) for direct collection access. Application access is mediated by the backend web methods. Watchlist operations are mediated by authenticated viewer methods.
 
+## Notifications
+
+Fields:
+- `notificationKey` — Text, required; deterministic event/recipient key
+- `recipientMemberId` — Text, required
+- `actorMemberId` — Text
+- `type` — Text: `new_follower`, `new_comment` or `song_request`
+- `mediaItemId` — Text
+- `creatorChannelId` — Text
+- `sourceId` — Text, required
+- `message` — Text
+- `readAt` — Date and time
+- `createdAt` — Date and time
+
+Permissions: `ADMIN` (site administrators) for direct collection access. Members can read and mark only their own notifications through authenticated backend methods. Notifications are generated for new follows, comments and song requests.
+
 ## MediaPlaylists
 
 Fields:
@@ -204,6 +220,7 @@ Permissions: `ADMIN` (site administrators) for direct collection access. Applica
 - Member content reports, a private moderation queue, and owner-only report resolution with removal or rating correction.
 - Member likes, comments, comment editing/deletion, and owner moderation of edited or reported comments.
 - Creator-owned public, unlisted and private playlists with ordered items, reordering and owner controls.
+- Private member notifications for new creator follows, comments and song requests, with unread counts and mark-read operations.
 
 This layer uploads private MP4 files to the Wix Media Manager, records upload/transcoding events, and can request HLS or DASH playback URLs for published MyOutlet-uploaded videos. It does not provide live ingest, a custom CDN, external media transcoding, creator analytics, payment processing or rights verification. Do not publish an item until the media is ready, distribution rights and content rating have been checked, and moderation is complete. Wix backend media events do not run in site Preview.
 
@@ -227,3 +244,4 @@ Indexes for the first nine collections were confirmed `ACTIVE` on the MyOutlet s
 - `MediaComments`: `media-comments-status-created`, `media-comments-member-created`
 - `MediaPlaylists`: `playlists-owner-updated`, `playlists-visibility-updated`
 - `PlaylistItems`: unique `playlist-item-key-unique`, plus `playlist-items-position` and `playlist-items-media`
+- `Notifications`: unique `notifications-key-unique`, plus `notifications-recipient-created` and `notifications-recipient-read` (building)
