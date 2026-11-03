@@ -287,4 +287,4 @@ Indexes for the first nine collections were confirmed `ACTIVE` on the MyOutlet s
 - `MediaComments`: `media-comments-status-created`, `media-comments-member-created`
 - `MediaPlaylists`: `playlists-owner-updated`, `playlists-visibility-updated`
 - `PlaylistItems`: unique `playlist-item-key-unique`, plus `playlist-items-position` and `playlist-items-media`
-- `Notifications`: unique `notifications-key-unique`, plus `notifications-recipient-created` and `notifications-recipient-read`\n- `LiveStreams`: unique `live-stream-path-unique` (created; allow its Wix index status to reach `ACTIVE` before opening creator sessions)\n- `RightsRecords`: unique `rights-media-unique`, plus `rights-creator-created` and `rights-status-created`
+- `Notifications`: unique `notifications-key-unique`, plus `notifications-recipient-created` and `notifications-recipient-read`\n- `LiveStreams`: unique `live-stream-path-unique`, plus `live-status-started` (composite status/start-time index; wait for Wix status `ACTIVE` before relying on indexed live discovery)\n- `RightsRecords`: unique `rights-media-unique`, plus `rights-creator-created` and `rights-status-created`
