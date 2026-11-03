@@ -18,7 +18,7 @@ Current MyOutlet site state:
 
 ## Functional boundaries
 
-The current media workflow accepts private MP4 uploads into the Wix Media Manager, waits for Wix's video-transcoding event, and returns HLS or DASH playback URLs only for published uploaded videos. It does not yet provide live ingest, a custom CDN, external transcoding, content-rights records, verified age checks, payment processing or operational monitoring. Content-rating preferences are viewer-selected filters, not age verification. Creator analytics report playback starts, bounded client-reported watch time and completions; they are not audited audience measurements.
+The current media workflow accepts private MP4 uploads into the Wix Media Manager, waits for Wix's video-transcoding event, and returns HLS or DASH playback URLs only for published uploaded videos. It does not yet provide live ingest, a custom CDN, external transcoding, content-rights records, verified age checks, payment processing or operational monitoring. Content-rating preferences are viewer-selected filters, not age verification. Creator analytics report playback starts, bounded client-reported watch time and completions; they are not audited audience measurements. Creator analytics report playback starts, bounded client-reported watch time and completions; they are not audited audience measurements.
 
 No payment is collected by the current backend. Song requests are queued as metadata only; they do not charge viewers. No third-party media is licensed by the presence of a URL or catalogue record.
 
