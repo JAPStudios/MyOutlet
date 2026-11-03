@@ -10,11 +10,11 @@ The Wix Velo site source is under `src/`. The browser extension files at the rep
 
 The backend service layer includes `src/backend/catalog.jsw` for creator discovery, published catalogue browsing/search, channel management, submissions, moderation and song requests; `src/backend/viewer.jsw` for watchlists, playback progress, creator follows and a followed-creator feed; and `src/backend/media.jsw` for private MP4 uploads and published-video playback URLs. `src/backend/events.js` records upload and video-transcoding completion. The reusable front-end uploader in `src/public/mediaUpload.js` sends MP4 files to the signed upload URL and reports byte-level progress; the returned upload-session ID can then be passed to `submitContent` after the session reaches `ready`. See [CMS_COLLECTIONS.md](CMS_COLLECTIONS.md) for the required Wix CMS collection fields and access controls.
 
-Before publishing:
-1. Create every CMS collection described in `CMS_COLLECTIONS.md`.
-2. Set each collection's direct permissions to site-owner only.
-3. Sync the Wix site with the repository and publish the Velo backend module.
-4. Exercise anonymous catalogue reads, member-only channel and submission operations and owner-only moderation with separate test accounts.
+Current MyOutlet site state:
+1. The seven CMS collections in `CMS_COLLECTIONS.md` have been created on the MyOutlet site.
+2. Their direct collection permissions are set to `ADMIN`; application-level public, member and site-owner access is controlled by `src/backend/permissions.json`.
+3. The repository's Wix site binding now targets MyOutlet.
+4. The automated source-contract check is available as `npm test`; live Velo runtime behavior still requires execution against the site.
 
 ## Functional boundaries
 

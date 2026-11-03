@@ -37,7 +37,7 @@ Fields:
 - `mediaItemId` — Text
 - `failureMessage` — Text
 
-Permissions: site owner only. Upload URL creation and session reads are mediated by authenticated backend methods. Video files are private while awaiting moderation.
+Permissions: `ADMIN` (site administrators) for direct collection access. Application access is mediated by the backend web methods. Upload URL creation and session reads are mediated by authenticated backend methods. Video files are private while awaiting moderation.
 
 ## CreatorChannels
 
@@ -47,7 +47,7 @@ Fields:
 - `description` — Text
 - `memberId` — Text
 
-Permissions: site owner only. Channel creation and updates are mediated by the member-authenticated backend methods.
+Permissions: `ADMIN` (site administrators) for direct collection access. Application access is mediated by the backend web methods. Channel creation and updates are mediated by the member-authenticated backend methods.
 
 ## SongRequests
 
@@ -58,7 +58,7 @@ Fields:
 - `requesterMemberId` — Text
 - `status` — Text: `queued`, `played`, `skipped` or `cancelled`
 
-Permissions: site owner only. Queue reads and member submissions are mediated by the backend module.
+Permissions: `ADMIN` (site administrators) for direct collection access. Application access is mediated by the backend web methods. Queue reads and member submissions are mediated by the backend module.
 
 ## ViewerLibrary
 
@@ -67,7 +67,7 @@ Fields:
 - `mediaItemId` — Text, required; ID of a published MediaItems record
 - `savedAt` — Date and time
 
-Permissions: site owner only. Watchlist operations are mediated by authenticated viewer methods.
+Permissions: `ADMIN` (site administrators) for direct collection access. Application access is mediated by the backend web methods. Watchlist operations are mediated by authenticated viewer methods.
 
 ## CreatorFollows
 
@@ -76,7 +76,7 @@ Fields:
 - `creatorChannelId` — Text, required; followed CreatorChannels record ID
 - `followedAt` — Date and time
 
-Permissions: site owner only. Follow/unfollow and following-feed operations are mediated by authenticated viewer methods.
+Permissions: `ADMIN` (site administrators) for direct collection access. Application access is mediated by the backend web methods. Follow/unfollow and following-feed operations are mediated by authenticated viewer methods.
 
 ## PlaybackProgress
 
@@ -88,7 +88,7 @@ Fields:
 - `completed` — Boolean, required
 - `lastPlayedAt` — Date and time, required
 
-Permissions: site owner only. Playback progress is mediated by authenticated viewer methods. The client must send progress only while the member is actually watching; progress values are user-reported and are not proof of viewing.
+Permissions: `ADMIN` (site administrators) for direct collection access. Application access is mediated by the backend web methods. Playback progress is mediated by authenticated viewer methods. The client must send progress only while the member is actually watching; progress values are user-reported and are not proof of viewing.
 
 ## Implemented backend operations
 
