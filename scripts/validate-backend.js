@@ -214,6 +214,8 @@ assert.match(rightsCore, /isMediaRightsCurrent/);
 assert.match(rightsCore, /applyVerifiedRightsFilter/);
 assert.match(rights, /rightsVerified: true/);
 assert.match(rights, /rightsVerified: false/);
+assert.match(rights, /Distribution rights verification was revoked/);
+assert.match(rights, /status: 'cancelled'/);
 assert.match(rights, /reviewHistory/);
 assert.match(rights, /history\.slice\(-10\)/);
 assert.match(rights, /Only pending or previously verified rights declarations can be verified/);

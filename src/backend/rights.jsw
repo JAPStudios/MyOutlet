@@ -3,6 +3,7 @@ import wixUsersBackend from 'wix-users-backend';
 
 const RIGHTS = 'RightsRecords';
 const MEDIA = 'MediaItems';
+const LIVE = 'LiveStreams';
 const BASES = ['original_work', 'licensed', 'public_domain', 'commissioned', 'other'];
 
 function memberId() {
@@ -279,10 +280,29 @@ export async function reviewRightsDeclaration(input = {}) {
     return rightsSummary(updated);
   }
 
-  await wixData.update(MEDIA, {
+  const mediaUpdate = {
     ...media,
     rightsVerified: false
-  }, { suppressAuth: true });
+  };
+  if (status === 'revoked' && media.status === 'published') {
+    mediaUpdate.status = 'removed';
+    mediaUpdate.moderationNote = 'Distribution rights verification was revoked.';
+  }
+  await wixData.update(MEDIA, mediaUpdate, { suppressAuth: true });
+
+  if (status === 'revoked') {
+    const sessions = await wixData.query(LIVE)
+      .eq('mediaItemId', media._id)
+      .limit(100)
+      .find({ suppressAuth: true });
+    await Promise.all(sessions.items
+      .filter(session => !['ended', 'cancelled'].includes(session.status))
+      .map(session => wixData.update(LIVE, {
+        ...session,
+        status: 'cancelled',
+        endedAt: now
+      }, { suppressAuth: true })));
+  }
 
   const updated = await wixData.update(RIGHTS, {
     ...record,
