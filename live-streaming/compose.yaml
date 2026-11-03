@@ -10,6 +10,7 @@ services:
     volumes:
       - ./mediamtx.yml:/etc/mediamtx/mediamtx.yml:ro
       - ${MYOUTLET_TLS_CERT_DIR:-./certs}:/etc/mediamtx/certs:ro
+      - ./recordings:/recordings
     read_only: true
     tmpfs:
       - /tmp

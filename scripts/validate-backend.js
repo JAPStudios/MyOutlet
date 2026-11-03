@@ -301,6 +301,13 @@ assert.match(httpFunctions, /post_streamAuth/);
 assert.match(httpFunctions, /timingSafeEqual/);
 assert.match(httpFunctions, /isMediaRightsCurrent/);
 assert.match(httpFunctions, /new_live_stream/);
+const mediamtx = read('live-streaming/mediamtx.yml');
+const compose = read('live-streaming/compose.yaml');
+assert.match(mediamtx, /record: true/);
+assert.match(mediamtx, /recordFormat: fmp4/);
+assert.match(mediamtx, /recordSegmentDuration: 1h/);
+assert.match(mediamtx, /recordDeleteAfter: 7d/);
+assert.match(compose, /\\.\\/recordings:\\/recordings/);
 assert.match(httpFunctions, /bulkInsert\(NOTIFICATIONS/);
 assert.match(httpFunctions, /const starting = stream.status !== 'live'/);
 
