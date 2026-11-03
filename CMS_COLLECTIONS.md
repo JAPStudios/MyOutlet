@@ -278,7 +278,7 @@ Indexes for the first nine collections were confirmed `ACTIVE` on the MyOutlet s
 - `SongRequests`: `song-channel-status-created`, `song-stream-status-created`
 - `ViewerLibrary`: `viewer-library-member-saved`
 - `PlaybackProgress`: `playback-member-completed-last`
-- `CreatorFollows`: `follows-member-date`
+- `CreatorFollows`: `follows-member-date`, `follows-channel-created`
 - `MediaUploadSessions`: `uploads-owner-created`
 
 - `ViewerPreferences`: unique `viewer-preferences-member-unique`
