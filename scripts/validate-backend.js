@@ -119,6 +119,31 @@ const modules = [
   'liveStreams.jsw',
   'liveChat.jsw'
 ];
+const backendRoot = path.join(root, 'src/backend');
+function collectBackendFiles(directory) {
+  return fs.readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
+    const absolute = path.join(directory, entry.name);
+    return entry.isDirectory() ? collectBackendFiles(absolute) : [absolute];
+  });
+}
+const backendFiles = collectBackendFiles(backendRoot)
+  .filter(file => /\\.jsw?$/.test(file));
+const backendModules = new Map();
+for (const file of backendFiles) {
+  const relative = path.relative(backendRoot, file).replace(/\\.jsw?$/, '');
+  assert.ok(!backendModules.has(relative),
+    'Backend module name is ambiguous: ' + relative);
+  backendModules.set(relative, file);
+}
+for (const file of backendFiles) {
+  const source = fs.readFileSync(file, 'utf8');
+  for (const match of source.matchAll(/from\\s+['"]backend\\/([^'"]+)['"]/g)) {
+    const target = match[1].replace(/\\.jsw?$/, '');
+    assert.ok(backendModules.has(target),
+      path.relative(root, file) + ' imports missing backend module ' + target);
+  }
+}
+
 let methodCount = 0;
 for (const file of modules) {
   const key = 'backend/' + file;
