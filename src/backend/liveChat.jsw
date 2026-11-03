@@ -1,0 +1,146 @@
+import wixData from 'wix-data';
+import wixUsersBackend from 'wix-users-backend';
+import { isContentRatingAllowed } from 'backend/ratingPreferences';
+import { isMediaRightsCurrent } from 'backend/rightsCore';
+
+const CHAT = 'LiveChatMessages';
+const LIVE = 'LiveStreams';
+const MEDIA = 'MediaItems';
+const CHANNELS = 'CreatorChannels';
+
+function memberId() {
+  const id = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  if (!id) throw new Error('A signed-in site member is required.');
+  return id;
+}
+
+function requiredText(value, field, max) {
+  if (typeof value !== 'string') throw new Error(field + ' must be text.');
+  const result = value.trim();
+  if (!result || result.length > max) {
+    throw new Error(field + ' is required and must be at most ' + max + ' characters.');
+  }
+  return result;
+}
+
+async function getLiveContext(streamId) {
+  const stream = await wixData.get(LIVE, streamId, { suppressAuth: true });
+  if (!stream || stream.status !== 'live') {
+    throw new Error('Live chat is available only while the stream is live.');
+  }
+  const media = await wixData.get(MEDIA, stream.mediaItemId, { suppressAuth: true });
+  if (!media || media.status !== 'published' || !isMediaRightsCurrent(media)) {
+    throw new Error('Live chat is unavailable because the stream or its distribution rights are unavailable.');
+  }
+  const viewerId = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  if (!await isContentRatingAllowed(media.contentRating, viewerId)) {
+    throw new Error('This stream exceeds the selected content-rating preference.');
+  }
+  const channel = await wixData.get(CHANNELS, stream.creatorChannelId, { suppressAuth: true });
+  if (!channel) throw new Error('The creator channel for this stream was not found.');
+  return { stream, media, channel };
+}
+
+function publicMessage(item, stream, channel) {
+  return {
+    _id: item._id,
+    liveStreamId: item.liveStreamId,
+    senderName: item.senderMemberId === stream.creatorMemberId ? channel.name : 'Viewer',
+    isCreator: item.senderMemberId === stream.creatorMemberId,
+    body: item.body,
+    createdAt: item.createdAt
+  };
+}
+
+export async function getLiveChatMessages(input = {}) {
+  const streamId = requiredText(input.streamId, 'Live-stream ID', 100);
+  const { stream, channel } = await getLiveContext(streamId);
+  const requested = Number(input.limit);
+  const limit = Math.min(Math.max(Number.isFinite(requested) && requested ? requested : 50, 1), 100);
+  const after = input.after === undefined || input.after === null || input.after === ''
+    ? null
+    : new Date(input.after);
+  if (after && !Number.isFinite(after.getTime())) {
+    throw new Error('The chat cursor must be a valid date and time.');
+  }
+
+  let query = wixData.query(CHAT)
+    .eq('liveStreamId', streamId)
+    .eq('status', 'published');
+  if (after) {
+    query = query.gt('createdAt', after).ascending('createdAt');
+  } else {
+    query = query.descending('createdAt');
+  }
+  const result = await query.limit(limit).find({ suppressAuth: true });
+  const items = after ? result.items : result.items.reverse();
+  return {
+    liveStreamId: streamId,
+    items: items.map(item => publicMessage(item, stream, channel)),
+    nextAfter: items.length ? items[items.length - 1].createdAt : (after || null),
+    live: true
+  };
+}
+
+export async function sendLiveChatMessage(input = {}) {
+  const senderMemberId = memberId();
+  const streamId = requiredText(input.streamId, 'Live-stream ID', 100);
+  const body = requiredText(input.body, 'Message', 500);
+  if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(body)) {
+    throw new Error('Messages cannot contain control characters.');
+  }
+  const { stream, channel } = await getLiveContext(streamId);
+  const cutoff = new Date(Date.now() - 10000);
+  const recent = await wixData.query(CHAT)
+    .eq('liveStreamId', streamId)
+    .eq('senderMemberId', senderMemberId)
+    .eq('status', 'published')
+    .ge('createdAt', cutoff)
+    .limit(5)
+    .find({ suppressAuth: true });
+  if (recent.items.length >= 5) {
+    throw new Error('The live-chat rate limit is five messages per ten seconds.');
+  }
+
+  const createdAt = new Date();
+  const created = await wixData.insert(CHAT, {
+    liveStreamId: streamId,
+    mediaItemId: stream.mediaItemId,
+    creatorChannelId: stream.creatorChannelId,
+    senderMemberId,
+    body,
+    status: 'published',
+    createdAt
+  }, { suppressAuth: true });
+  return publicMessage(created, stream, channel);
+}
+
+async function removeMessage(input, moderatorMemberId, channelOwnerOnly) {
+  const messageId = requiredText(input.messageId, 'Chat message ID', 100);
+  const message = await wixData.get(CHAT, messageId, { suppressAuth: true });
+  if (!message || message.status !== 'published') {
+    throw new Error('The live-chat message is not available for moderation.');
+  }
+  if (channelOwnerOnly) {
+    const channel = await wixData.get(CHANNELS, message.creatorChannelId, { suppressAuth: true });
+    if (!channel || channel.memberId !== moderatorMemberId) {
+      throw new Error('Only the owner of this creator channel can moderate its live chat.');
+    }
+  }
+  const updated = await wixData.update(CHAT, {
+    ...message,
+    status: 'removed',
+    moderatedAt: new Date(),
+    moderatedBy: moderatorMemberId,
+    moderationNote: typeof input.note === 'string' ? input.note.trim().slice(0, 500) : ''
+  }, { suppressAuth: true });
+  return { messageId: updated._id, status: updated.status };
+}
+
+export async function moderateMyChannelChatMessage(input = {}) {
+  return removeMessage(input, memberId(), true);
+}
+
+export async function moderateChatMessage(input = {}) {
+  return removeMessage(input, memberId(), false);
+}
