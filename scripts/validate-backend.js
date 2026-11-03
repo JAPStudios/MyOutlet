@@ -295,7 +295,7 @@ const httpFunctions = read('src/backend/http-functions.js');
 assert.match(httpFunctions, /get_chatOverlay/);
 assert.match(httpFunctions, /get_chatOverlayMessages/);
 assert.match(httpFunctions, /textContent/);
-assert.match(httpFunctions, /matchesStreamKey\\(token, stream\\.chatOverlayTokenHash\\)/);
+assert.ok(httpFunctions.includes('matchesStreamKey(token, stream.chatOverlayTokenHash)'));
 assert.match(httpFunctions, /post_streamAuth/);
 assert.match(httpFunctions, /timingSafeEqual/);
 assert.match(httpFunctions, /isMediaRightsCurrent/);
