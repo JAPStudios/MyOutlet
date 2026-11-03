@@ -231,6 +231,8 @@ assert.match(liveStreams, /isContentRatingAllowed/);
 assert.match(liveStreams, /pendingSongs/);
 assert.match(catalog, /liveStreamId/);
 assert.match(catalog, /Song requests are available only while this creator is live/);
+assert.match(catalog, /isMediaRightsCurrent/);
+assert.match(catalog, /maximum of five queued song requests/);
 assert.match(liveStreams, /createLiveStream/);
 assert.match(liveStreams, /createLiveStream/);
 assert.match(liveStreams, /getMyLiveStreams/);

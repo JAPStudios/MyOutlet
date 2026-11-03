@@ -137,7 +137,7 @@ Fields:
 - `requesterMemberId` — Text
 - `status` — Text: `queued`, `played`, `skipped` or `cancelled`
 
-Permissions: `ADMIN` (site administrators) for direct collection access. Application access is mediated by the backend web methods. Queue reads and member submissions are mediated by the backend module.
+Permissions: `ADMIN` (site administrators) for direct collection access. Application access is mediated by the backend web methods. Queue reads and member submissions are mediated by the backend module. Each request belongs to one `liveStreamId`; requests are accepted only while that session is live and its media rights remain current. Queues are limited to 50 pending requests and five pending requests per viewer. Ending a stream cancels its remaining queued requests.
 
 ## ViewerLibrary
 

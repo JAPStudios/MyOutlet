@@ -2,7 +2,7 @@ import wixData from 'wix-data';
 import wixUsersBackend from 'wix-users-backend';
 import { createNotification } from 'backend/notifications';
 import { applyViewerRatingPreference } from 'backend/ratingPreferences';
-import { getVerifiedRightsForMedia, applyVerifiedRightsFilter } from 'backend/rightsCore';
+import { getVerifiedRightsForMedia, applyVerifiedRightsFilter, isMediaRightsCurrent } from 'backend/rightsCore';
 
 const MEDIA = 'MediaItems';
 const CHANNELS = 'CreatorChannels';
@@ -333,6 +333,10 @@ export async function getSongQueue(options = {}) {
     .find({ suppressAuth: true });
   if (!activeStream.items.length) return { items: [], live: false };
   const stream = activeStream.items[0];
+  const liveMedia = await wixData.get(MEDIA, stream.mediaItemId, { suppressAuth: true });
+  if (!liveMedia || liveMedia.status !== 'published' || !isMediaRightsCurrent(liveMedia)) {
+    return { items: [], live: false };
+  }
   const limit = Math.min(Math.max(Number(options.limit) || 50, 1), 100);
   const result = await wixData.query(SONGS)
     .eq('liveStreamId', stream._id)
@@ -369,6 +373,10 @@ export async function enqueueSong(input = {}) {
     .find({ suppressAuth: true });
   const activeStream = activeStreamResult.items[0];
   if (!activeStream) throw new Error('Song requests are available only while this creator is live.');
+  const liveMedia = await wixData.get(MEDIA, activeStream.mediaItemId, { suppressAuth: true });
+  if (!liveMedia || liveMedia.status !== 'published' || !isMediaRightsCurrent(liveMedia)) {
+    throw new Error('This live stream is not accepting requests because its media or distribution rights are unavailable.');
+  }
 
   const queue = await wixData.query(SONGS)
     .eq('liveStreamId', activeStream._id)
