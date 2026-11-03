@@ -3,6 +3,7 @@ import wixUsersBackend from 'wix-users-backend';
 import { getSecret } from 'wix-secrets-backend';
 import { randomBytes, createHash } from 'crypto';
 import { isMediaRightsCurrent } from 'backend/rightsCore';
+import { isContentRatingAllowed } from 'backend/ratingPreferences';
 
 const LIVE = 'LiveStreams';
 const MEDIA = 'MediaItems';
@@ -233,4 +234,64 @@ export async function endLiveStream(input = {}) {
     }, { suppressAuth: true });
   }
   return { _id: updated._id, status: updated.status };
+}
+
+
+async function getPublicLiveSession(stream) {
+  const media = await wixData.get(MEDIA, stream.mediaItemId, { suppressAuth: true });
+  if (!media || media.status !== 'published' || !isMediaRightsCurrent(media)) return null;
+  const viewerId = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  if (!await isContentRatingAllowed(media.contentRating, viewerId)) return null;
+  if (stream.status !== 'live') return null;
+  return {
+    _id: stream._id,
+    mediaItemId: stream.mediaItemId,
+    creatorChannelId: stream.creatorChannelId,
+    status: stream.status,
+    protocol: stream.protocol,
+    title: media.title,
+    description: media.description || '',
+    thumbnailUrl: media.thumbnailUrl || '',
+    contentRating: media.contentRating,
+    category: media.category || 'Live',
+    tags: Array.isArray(media.tags) ? media.tags : [],
+    language: media.language || '',
+    startedAt: stream.startedAt || null,
+    playbackUrl: media.mediaUrl
+  };
+}
+
+export async function browseLiveStreams(options = {}) {
+  const requestedLimit = Number(options.limit);
+  const requestedOffset = Number(options.offset);
+  const limit = Math.min(Math.max(Number.isFinite(requestedLimit) && requestedLimit ? requestedLimit : 24, 1), 100);
+  const offset = Math.min(Math.max(Number.isFinite(requestedOffset) ? requestedOffset : 0, 0), 100000);
+  const result = await wixData.query(LIVE)
+    .eq('status', 'live')
+    .descending('startedAt')
+    .skip(offset)
+    .limit(limit)
+    .find({ suppressAuth: true });
+  const items = await Promise.all(result.items.map(getPublicLiveSession));
+  const visible = items.filter(Boolean);
+  return {
+    items: visible,
+    total: result.totalCount,
+    offset,
+    limit
+  };
+}
+
+export async function getLiveStream(input = {}) {
+  const streamId = requiredText(input.streamId, 'Live-stream ID', 100);
+  let stream;
+  try {
+    stream = await wixData.get(LIVE, streamId, { suppressAuth: true });
+  } catch (_) {
+    stream = null;
+  }
+  if (!stream || stream.status !== 'live') throw new Error('This live stream is not available.');
+  const session = await getPublicLiveSession(stream);
+  if (!session) throw new Error('This live stream is not available.');
+  return session;
 }

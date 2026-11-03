@@ -722,6 +722,28 @@
         "anonymous": {
           "invoke": false
         }
+      },
+      "browseLiveStreams": {
+        "siteOwner": {
+          "invoke": true
+        },
+        "siteMember": {
+          "invoke": true
+        },
+        "anonymous": {
+          "invoke": true
+        }
+      },
+      "getLiveStream": {
+        "siteOwner": {
+          "invoke": true
+        },
+        "siteMember": {
+          "invoke": true
+        },
+        "anonymous": {
+          "invoke": true
+        }
       }
     }
   }

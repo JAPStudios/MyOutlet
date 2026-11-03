@@ -25,6 +25,8 @@ const publicMethods = new Set([
   'backend/catalog.jsw:searchCatalog',
   'backend/catalog.jsw:getSongQueue',
   'backend/catalog.jsw:getCreatorCatalog',
+  'backend/liveStreams.jsw:browseLiveStreams',
+  'backend/liveStreams.jsw:getLiveStream',
   'backend/media.jsw:getPublishedVideoPlayback',
   'backend/media.jsw:getPublishedMediaPlayback',
   'backend/engagement.jsw:getMediaEngagement',
@@ -220,6 +222,12 @@ assert.match(viewer, /setMyViewingPreferences/);
 assert.match(viewer, /isMediaRightsCurrent/);
 assert.match(engagement, /isMediaRightsCurrent/);
 assert.match(playlists, /isMediaRightsCurrent/);
+const liveStreams = read('src/backend/liveStreams.jsw');
+assert.match(liveStreams, /browseLiveStreams/);
+assert.match(liveStreams, /getLiveStream/);
+assert.match(liveStreams, /getPublicLiveSession/);
+assert.match(liveStreams, /isMediaRightsCurrent/);
+assert.match(liveStreams, /isContentRatingAllowed/);
 
 const liveStreams = read('src/backend/liveStreams.jsw');
 assert.match(liveStreams, /createLiveStream/);
