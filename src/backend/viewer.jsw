@@ -1,5 +1,7 @@
 import wixData from 'wix-data';
 import wixUsersBackend from 'wix-users-backend';
+import { applyViewerRatingPreference, getViewerRatingPreference, saveViewerRatingPreference, isContentRatingAllowed } from 'backend/ratingPreferences';
+import { applyVerifiedRightsFilter, isMediaRightsCurrent } from 'backend/rightsCore';
 
 const MEDIA = 'MediaItems';
 const WATCHLIST = 'ViewerLibrary';
@@ -8,6 +10,14 @@ const PROGRESS = 'PlaybackProgress';
 const CHANNELS = 'CreatorChannels';
 const FOLLOWS = 'CreatorFollows';
 const METRICS = 'MediaMetrics';
+
+export async function getMyViewingPreferences() {
+  return getViewerRatingPreference(memberId());
+}
+
+export async function setMyViewingPreferences(input = {}) {
+  return saveViewerRatingPreference(memberId(), input);
+}
 
 export async function followCreator(input = {}) {
   const viewerId = memberId();
@@ -163,9 +173,11 @@ export async function getFollowingFeed(options = {}) {
   const channelIds = follows.items.map(item => item.creatorChannelId).filter(Boolean);
   if (!channelIds.length) return { items: [], total: 0 };
 
-  const result = await wixData.query(MEDIA)
-    .hasSome('creatorChannelId', channelIds)
-    .eq('status', 'published')
+  const rightsQuery = applyVerifiedRightsFilter(
+    wixData.query(MEDIA).hasSome('creatorChannelId', channelIds).eq('status', 'published')
+  );
+  const filteredQuery = await applyViewerRatingPreference(rightsQuery, viewerId);
+  const result = await filteredQuery
     .descending('publishedAt')
     .limit(limit)
     .find({ suppressAuth: true });
@@ -212,6 +224,10 @@ async function publishedMedia(mediaId) {
   const item = await wixData.get(MEDIA, mediaId, { suppressAuth: true });
   if (!item || item.status !== 'published' || !isMediaRightsCurrent(item)) {
     throw new Error('This media item is not available.');
+  }
+  const viewerId = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  if (!await isContentRatingAllowed(item.contentRating, viewerId)) {
+    throw new Error('This media exceeds the selected content-rating preference.');
   }
   return item;
 }
