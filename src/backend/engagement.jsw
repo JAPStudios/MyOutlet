@@ -59,6 +59,7 @@ export async function likeMedia(input = {}) {
       .limit(1)
       .find({ suppressAuth: true });
     if (!duplicate.items.length) throw error;
+    return { liked: true, alreadyLiked: true };
   }
   return { liked: true, alreadyLiked: false };
 }
@@ -126,7 +127,7 @@ export async function editComment(input = {}) {
   if (!comment || comment.memberId !== viewerId) {
     throw new Error('Only the comment author can edit this comment.');
   }
-  const media = await publishedMedia(comment.mediaItemId);
+  await publishedMedia(comment.mediaItemId);
   const updated = await wixData.update(COMMENTS, {
     ...comment,
     body,

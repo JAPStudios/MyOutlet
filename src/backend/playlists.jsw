@@ -143,6 +143,10 @@ export async function addMediaToPlaylist(input = {}) {
   if (!media || media.status !== 'published') {
     throw new Error('Only published media can be added to a playlist.');
   }
+  const itemCount = await wixData.query(ITEMS)
+    .eq('playlistId', playlistId)
+    .count({ suppressAuth: true });
+  if (itemCount >= 1000) throw new Error('A playlist can contain at most 1000 media items.');
   const itemKey = playlistId + ':' + mediaItemId;
   const existing = await wixData.query(ITEMS)
     .eq('itemKey', itemKey)
@@ -157,13 +161,23 @@ export async function addMediaToPlaylist(input = {}) {
     .limit(1)
     .find({ suppressAuth: true });
   const position = last.items.length ? Number(last.items[0].position) + 1 : 0;
-  const created = await wixData.insert(ITEMS, {
-    playlistId,
-    mediaItemId,
-    itemKey,
-    position,
-    addedAt: new Date()
-  }, { suppressAuth: true });
+  let created;
+  try {
+    created = await wixData.insert(ITEMS, {
+      playlistId,
+      mediaItemId,
+      itemKey,
+      position,
+      addedAt: new Date()
+    }, { suppressAuth: true });
+  } catch (error) {
+    const duplicate = await wixData.query(ITEMS)
+      .eq('itemKey', itemKey)
+      .limit(1)
+      .find({ suppressAuth: true });
+    if (!duplicate.items.length) throw error;
+    return { _id: duplicate.items[0]._id, alreadyAdded: true, position: duplicate.items[0].position };
+  }
   await wixData.update(PLAYLISTS, { ...playlist, updatedAt: new Date() }, { suppressAuth: true });
   return { _id: created._id, alreadyAdded: false, position };
 }
@@ -223,6 +237,9 @@ export async function getPlaylist(input = {}) {
   const playlist = await wixData.get(PLAYLISTS, playlistId, { suppressAuth: true });
   if (!playlist) throw new Error('Playlist was not found.');
   const viewerId = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  if (!['public', 'unlisted', 'private'].includes(playlist.visibility)) {
+    throw new Error('Playlist visibility is invalid.');
+  }
   if (playlist.visibility === 'private' && playlist.creatorMemberId !== viewerId) {
     throw new Error('This playlist is private.');
   }
