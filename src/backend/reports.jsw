@@ -97,10 +97,19 @@ export async function listContentReports(options = {}) {
     .ascending('createdAt')
     .limit(limit)
     .find({ suppressAuth: true });
-  return {
-    items: result.items.map(item => ({
+  const items = await Promise.all(result.items.map(async item => {
+    let media = null;
+    try {
+      media = await wixData.get(MEDIA, item.mediaItemId, { suppressAuth: true });
+    } catch (_) {
+      media = null;
+    }
+    return {
       _id: item._id,
       mediaItemId: item.mediaItemId,
+      mediaTitle: media ? media.title : '',
+      creatorChannelId: media ? media.creatorChannelId : '',
+      contentRating: media ? media.contentRating : '',
       reporterMemberId: item.reporterMemberId,
       reason: item.reason,
       details: item.details || '',
@@ -108,8 +117,9 @@ export async function listContentReports(options = {}) {
       createdAt: item.createdAt,
       resolution: item.resolution || '',
       moderationNote: item.moderationNote || ''
-    }))
-  };
+    };
+  }));
+  return { items };
 }
 
 export async function resolveContentReport(input = {}) {
