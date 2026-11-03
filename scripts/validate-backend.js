@@ -354,6 +354,6 @@ const gitTree = execFileSync('git', ['ls-tree', '-r', 'HEAD'], {
   cwd: root,
   encoding: 'utf8'
 });
-const gitlinkCount = gitTree.split('\\n').filter(line => line.startsWith('160000 commit ')).length;
+const gitlinkCount = gitTree.split('\n').filter(line => line.startsWith('160000 commit ')).length;
 assert.equal(gitlinkCount, 52,
   'Every configured upstream repository must have a committed Git submodule pointer');
