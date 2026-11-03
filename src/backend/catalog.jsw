@@ -4,6 +4,7 @@ import wixUsersBackend from 'wix-users-backend';
 const MEDIA = 'MediaItems';
 const CHANNELS = 'CreatorChannels';
 const SONGS = 'SongRequests';
+const UPLOADS = 'MediaUploadSessions';
 
 function cleanText(value, field, max) {
   if (typeof value !== 'string') throw new Error(field + ' must be text.');
@@ -164,7 +165,6 @@ export async function submitContent(input = {}) {
   const creatorId = memberId();
   const title = cleanText(input.title, 'Title', 120);
   const description = typeof input.description === 'string' ? input.description.trim().slice(0, 2000) : '';
-  const mediaUrl = safeHttpsUrl(input.mediaUrl, 'Media URL');
   const thumbnailUrl = input.thumbnailUrl ? safeHttpsUrl(input.thumbnailUrl, 'Thumbnail URL') : '';
   const contentType = cleanText(input.contentType, 'Content type', 20);
   const contentRating = cleanText(input.contentRating, 'Content rating', 20);
@@ -173,11 +173,41 @@ export async function submitContent(input = {}) {
   const channelId = cleanText(input.creatorChannelId, 'Creator channel', 100);
   const channel = await wixData.get(CHANNELS, channelId, { suppressAuth: true });
   if (!channel || channel.memberId !== creatorId) throw new Error('The selected channel is not available to this account.');
+
+  let mediaUrl;
+  let uploadSessionId = '';
+  if (input.mediaUploadSessionId) {
+    uploadSessionId = cleanText(input.mediaUploadSessionId, 'Media upload session', 100);
+    if (contentType !== 'video') throw new Error('Uploaded MP4 sessions can only be submitted as video.');
+    const session = await wixData.get(UPLOADS, uploadSessionId, { suppressAuth: true });
+    if (!session || session.ownerMemberId !== creatorId || session.status !== 'ready' || !session.fileUrl) {
+      throw new Error('The video upload is not ready for submission.');
+    }
+    if (session.mediaType !== 'video' || !session.fileUrl.startsWith('wix:video://')) {
+      throw new Error('The uploaded file is not a ready Wix video.');
+    }
+    if (session.mediaItemId) throw new Error('This uploaded video has already been submitted.');
+    mediaUrl = session.fileUrl;
+  } else {
+    mediaUrl = safeHttpsUrl(input.mediaUrl, 'Media URL');
+  }
+
   const created = await wixData.insert(MEDIA, {
     title, description, mediaUrl, thumbnailUrl, contentType, contentRating,
     creatorChannelId: channelId, creatorMemberId: creatorId,
+    mediaUploadSessionId: uploadSessionId,
     status: 'pending_review', submittedAt: new Date()
   }, { suppressAuth: true });
+
+  if (uploadSessionId) {
+    const session = await wixData.get(UPLOADS, uploadSessionId, { suppressAuth: true });
+    await wixData.update(UPLOADS, {
+      ...session,
+      status: 'submitted',
+      mediaItemId: created._id,
+      submittedAt: new Date()
+    }, { suppressAuth: true });
+  }
   return { _id: created._id, status: created.status, title: created.title };
 }
 

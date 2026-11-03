@@ -1,0 +1,121 @@
+import wixData from 'wix-data';
+import wixUsersBackend from 'wix-users-backend';
+import { mediaManager } from 'wix-media-backend';
+
+const UPLOADS = 'MediaUploadSessions';
+const MEDIA = 'MediaItems';
+
+function memberId() {
+  const id = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  if (!id) throw new Error('A signed-in site member is required.');
+  return id;
+}
+
+function cleanFileName(value) {
+  if (typeof value !== 'string') throw new Error('File name is required.');
+  const name = value.trim();
+  if (!name || name.length > 120 || !/^[A-Za-z0-9][A-Za-z0-9._-]*\.mp4$/i.test(name)) {
+    throw new Error('Use an MP4 file name containing only letters, numbers, periods, underscores or hyphens.');
+  }
+  return name;
+}
+
+export async function createVideoUpload(input = {}) {
+  const ownerMemberId = memberId();
+  const fileName = cleanFileName(input.fileName);
+  const mimeType = 'video/mp4';
+
+  const session = await wixData.insert(UPLOADS, {
+    ownerMemberId,
+    fileName,
+    mimeType,
+    mediaType: 'video',
+    status: 'creating',
+    createdAt: new Date()
+  }, { suppressAuth: true });
+
+  try {
+    const upload = await mediaManager.getUploadUrl('/myoutlet/creator-video', {
+      mediaOptions: {
+        mimeType,
+        mediaType: 'video'
+      },
+      metadataOptions: {
+        isPrivate: true,
+        isVisitorUpload: false,
+        context: {
+          origin: 'myoutlet-creator-upload',
+          uploadSessionId: session._id,
+          ownerMemberId
+        }
+      }
+    });
+
+    await wixData.update(UPLOADS, {
+      ...session,
+      status: 'uploading'
+    }, { suppressAuth: true });
+
+    return {
+      uploadSessionId: session._id,
+      uploadUrl: upload.uploadUrl,
+      fileName,
+      mimeType,
+      method: 'POST',
+      multipartFieldName: 'file'
+    };
+  } catch (error) {
+    await wixData.update(UPLOADS, {
+      ...session,
+      status: 'failed',
+      failureMessage: String(error && error.message ? error.message : 'Upload URL creation failed').slice(0, 500)
+    }, { suppressAuth: true });
+    throw error;
+  }
+}
+
+export async function getMyVideoUploads(options = {}) {
+  const ownerMemberId = memberId();
+  const requested = Number(options.limit);
+  const limit = Math.min(Math.max(Number.isFinite(requested) && requested ? requested : 30, 1), 100);
+  const result = await wixData.query(UPLOADS)
+    .eq('ownerMemberId', ownerMemberId)
+    .descending('createdAt')
+    .limit(limit)
+    .find({ suppressAuth: true });
+
+  return {
+    items: result.items.map(item => ({
+      _id: item._id,
+      fileName: item.fileName,
+      status: item.status,
+      createdAt: item.createdAt,
+      uploadedAt: item.uploadedAt,
+      readyAt: item.readyAt,
+      sizeInBytes: item.sizeInBytes,
+      mediaItemId: item.mediaItemId,
+      failureMessage: item.failureMessage || ''
+    }))
+  };
+}
+
+export async function getPublishedVideoPlayback(input = {}) {
+  const mediaItemId = typeof input.mediaItemId === 'string' ? input.mediaItemId.trim() : '';
+  if (!mediaItemId || mediaItemId.length > 100) throw new Error('Media item ID is invalid.');
+
+  const media = await wixData.get(MEDIA, mediaItemId, { suppressAuth: true });
+  if (!media || media.status !== 'published' || media.contentType !== 'video') {
+    throw new Error('This published video is not available.');
+  }
+  if (typeof media.mediaUrl !== 'string' || !media.mediaUrl.startsWith('wix:video://')) {
+    throw new Error('This item is not stored as a MyOutlet Media Manager video.');
+  }
+
+  const requestedFormat = typeof input.format === 'string' ? input.format.toLowerCase() : 'hls';
+  if (!['hls', 'dash'].includes(requestedFormat)) {
+    throw new Error('Playback format must be HLS or DASH.');
+  }
+
+  const url = await mediaManager.getVideoPlaybackUrl(media.mediaUrl, requestedFormat);
+  return { mediaItemId, format: requestedFormat, url };
+}

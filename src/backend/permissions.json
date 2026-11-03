@@ -291,6 +291,41 @@
           "invoke": false
         }
       }
+    },
+    "backend/media.jsw": {
+      "createVideoUpload": {
+        "siteOwner": {
+          "invoke": true
+        },
+        "siteMember": {
+          "invoke": true
+        },
+        "anonymous": {
+          "invoke": false
+        }
+      },
+      "getMyVideoUploads": {
+        "siteOwner": {
+          "invoke": true
+        },
+        "siteMember": {
+          "invoke": true
+        },
+        "anonymous": {
+          "invoke": false
+        }
+      },
+      "getPublishedVideoPlayback": {
+        "siteOwner": {
+          "invoke": true
+        },
+        "siteMember": {
+          "invoke": true
+        },
+        "anonymous": {
+          "invoke": true
+        }
+      }
     }
   }
 }

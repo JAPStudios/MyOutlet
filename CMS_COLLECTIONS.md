@@ -7,7 +7,7 @@ Create these Wix CMS collections before publishing the backend module. Collectio
 Fields:
 - `title` — Text, required
 - `description` — Text
-- `mediaUrl` — URL or Text, required; HTTPS only
+- `mediaUrl` — Text, required; HTTPS external media URLs or Wix video URLs created by the MyOutlet upload workflow
 - `thumbnailUrl` — URL or Text
 - `contentType` — Text: `video`, `livestream` or `audio`
 - `contentRating` — Text: `TV-Y`, `TV-Y7`, `TV-G`, `TV-PG`, `TV-14`, `TV-MA` or `Unrated`
@@ -19,6 +19,24 @@ Fields:
 - `moderationNote` — Text
 
 Permissions: public read is not required because public reads run through the backend module; restrict direct collection access to the site owner.
+
+## MediaUploadSessions
+
+Fields:
+- `ownerMemberId` — Text, required
+- `fileName` — Text, required
+- `mimeType` — Text, required
+- `mediaType` — Text, required
+- `status` — Text: `creating`, `uploading`, `uploaded`, `ready`, `submitted` or `failed`
+- `fileUrl` — Text
+- `sizeInBytes` — Number
+- `createdAt` — Date and time
+- `uploadedAt` — Date and time
+- `readyAt` — Date and time
+- `mediaItemId` — Text
+- `failureMessage` — Text
+
+Permissions: site owner only. Upload URL creation and session reads are mediated by authenticated backend methods. Video files are private while awaiting moderation.
 
 ## CreatorChannels
 
@@ -75,7 +93,7 @@ Permissions: site owner only. Playback progress is mediated by authenticated vie
 
 - Public creator directory, creator search and handle-based creator profiles, alongside published catalogue browse, title/description search and per-channel catalogue reads. Creator search/profile responses expose only public channel fields and published media.
 - Member-owned creator channel creation and update.
-- Member content submission into the moderation queue, plus private submission-status tracking.
+- Member content submission into the moderation queue, plus private submission-status tracking.\n- Private MP4 uploads to the Wix Media Manager, event-driven transcoding readiness, and published-video HLS/DASH playback URLs.
 - Owner-only pending-review queue, publish/reject/remove decisions and song-request queue status controls.
 - Member song requests and a public read-only queue, ordered by submission time.\n- Member watchlists, with published-media checks and private per-member records.\n- Continue-watching history for on-demand video/audio, with bounded playback positions and completed-item exclusion.\n- Creator follows, followed-channel lists and a published-media feed across followed channels.
 
