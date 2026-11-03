@@ -106,7 +106,6 @@ export async function sendLiveChatMessage(input = {}) {
   const recent = await wixData.query(CHAT)
     .eq('liveStreamId', streamId)
     .eq('senderMemberId', senderMemberId)
-    .eq('status', 'published')
     .ge('createdAt', cutoff)
     .limit(5)
     .find({ suppressAuth: true });
