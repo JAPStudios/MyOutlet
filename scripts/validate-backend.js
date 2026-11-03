@@ -267,6 +267,7 @@ assert.match(liveChat, /banLiveChatMember/);
 assert.match(liveChat, /unbanLiveChatMember/);
 assert.match(liveChat, /getMyLiveChatBans/);
 assert.match(liveChat, /assertNotBannedFromChannel/);
+assert.ok(liveChat.includes('new Date(current.expiresAt).getTime() <= Date.now()'));
 assert.match(liveChat, /43,200 minutes/);
 assert.match(liveChat, /ten reports per 24 hours/);
 assert.match(liveChat, /remove_message/);
