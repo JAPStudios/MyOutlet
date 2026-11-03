@@ -426,6 +426,102 @@ export async function enqueueSong(input = {}) {
   };
 }
 
+export async function enqueueSongs(input = {}) {
+  const requesterId = memberId();
+  const channelId = cleanText(input.creatorChannelId, 'Creator channel', 100);
+  if (!Array.isArray(input.songs) || input.songs.length < 1 || input.songs.length > 5) {
+    throw new Error('Select between one and five songs per request batch.');
+  }
+  const songs = input.songs.map((song, index) => {
+    if (!song || typeof song !== 'object') throw new Error('Song ' + (index + 1) + ' is invalid.');
+    return {
+      title: cleanText(song.title, 'Song ' + (index + 1) + ' title', 120),
+      artist: cleanText(song.artist, 'Song ' + (index + 1) + ' artist', 120)
+    };
+  });
+
+  const channel = await wixData.get(CHANNELS, channelId, { suppressAuth: true });
+  if (!channel) throw new Error('Creator channel was not found.');
+  const activeStreamResult = await wixData.query(LIVE)
+    .eq('creatorChannelId', channelId)
+    .eq('status', 'live')
+    .limit(1)
+    .find({ suppressAuth: true });
+  const activeStream = activeStreamResult.items[0];
+  if (!activeStream) throw new Error('Song requests are available only while this creator is live.');
+  const liveMedia = await wixData.get(MEDIA, activeStream.mediaItemId, { suppressAuth: true });
+  if (!liveMedia || liveMedia.status !== 'published' || !isMediaRightsCurrent(liveMedia)) {
+    throw new Error('This live stream is not accepting requests because its media or distribution rights are unavailable.');
+  }
+
+  const [queue, requesterQueue] = await Promise.all([
+    wixData.query(SONGS)
+      .eq('liveStreamId', activeStream._id)
+      .eq('status', 'queued')
+      .limit(1)
+      .find({ suppressAuth: true, returnTotalCount: true }),
+    wixData.query(SONGS)
+      .eq('liveStreamId', activeStream._id)
+      .eq('requesterMemberId', requesterId)
+      .eq('status', 'queued')
+      .limit(1)
+      .find({ suppressAuth: true, returnTotalCount: true })
+  ]);
+  if (queue.totalCount + songs.length > 50) {
+    throw new Error('This live stream does not have enough queue capacity for the selected songs.');
+  }
+  if (requesterQueue.totalCount + songs.length > 5) {
+    throw new Error('A maximum of five queued song requests per viewer is allowed per live stream.');
+  }
+
+  const created = [];
+  try {
+    for (const song of songs) {
+      created.push(await wixData.insert(SONGS, {
+        title: song.title,
+        artist: song.artist,
+        creatorChannelId: channelId,
+        liveStreamId: activeStream._id,
+        requesterMemberId: requesterId,
+        status: 'queued'
+      }, { suppressAuth: true }));
+    }
+  } catch (error) {
+    await Promise.all(created.map(item => wixData.update(SONGS, {
+      ...item,
+      status: 'cancelled'
+    }, { suppressAuth: true })));
+    throw error;
+  }
+
+  if (channel.memberId !== requesterId) {
+    for (const item of created) {
+      try {
+        await createNotification({
+          recipientMemberId: channel.memberId,
+          actorMemberId: requesterId,
+          type: 'song_request',
+          creatorChannelId: channelId,
+          sourceId: item._id,
+          message: 'A new song request was added to the channel queue.'
+        });
+      } catch (error) {
+        console.error('MyOutlet song-request notification failed.', error);
+      }
+    }
+  }
+
+  return {
+    liveStreamId: activeStream._id,
+    items: created.map(item => ({
+      _id: item._id,
+      title: item.title,
+      artist: item.artist,
+      status: item.status
+    }))
+  };
+}
+
 export async function moderateContent(input = {}) {
   const id = cleanText(input.contentId, 'Content ID', 100);
   const status = cleanText(input.status, 'Status', 30);
