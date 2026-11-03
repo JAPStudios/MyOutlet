@@ -249,6 +249,8 @@ assert.match(liveChat, /moderateChatMessage/);
 assert.match(liveChat, /five messages per ten seconds/);
 assert.match(liveChat, /isMediaRightsCurrent/);
 assert.match(liveChat, /isContentRatingAllowed/);
+assert.match(liveChat, /Members\/PublicData/);
+assert.match(liveChat, /senderName/);
 assert.match(liveStreams, /browseLiveStreams/);
 assert.match(liveStreams, /getLiveStream/);
 assert.match(liveStreams, /getPublicLiveSession/);
