@@ -27,6 +27,7 @@ const publicMethods = new Set([
   'backend/catalog.jsw:getCreatorCatalog',
   'backend/liveStreams.jsw:browseLiveStreams',
   'backend/liveStreams.jsw:getLiveStream',
+  'backend/liveChat.jsw:getLiveChatMessages',
   'backend/media.jsw:getPublishedVideoPlayback',
   'backend/media.jsw:getPublishedMediaPlayback',
   'backend/engagement.jsw:getMediaEngagement',
@@ -78,6 +79,8 @@ const memberMethods = new Set([
   'backend/liveStreams.jsw:createLiveStream',
   'backend/liveStreams.jsw:getMyLiveStreams',
   'backend/liveStreams.jsw:endLiveStream',
+  'backend/liveChat.jsw:sendLiveChatMessage',
+  'backend/liveChat.jsw:moderateMyChannelChatMessage',
   'backend/rights.jsw:submitRightsDeclaration',
   'backend/rights.jsw:getMyRightsRecords'
 ]);
@@ -90,7 +93,8 @@ const ownerMethods = new Set([
   'backend/engagement.jsw:moderateComment',
   'backend/engagement.jsw:listPendingComments',
   'backend/rights.jsw:listPendingRights',
-  'backend/rights.jsw:reviewRightsDeclaration'
+  'backend/rights.jsw:reviewRightsDeclaration',
+  'backend/liveChat.jsw:moderateChatMessage'
 ]);
 
 const modules = [
@@ -102,7 +106,8 @@ const modules = [
   'playlists.jsw',
   'notifications.jsw',
   'rights.jsw',
-  'liveStreams.jsw'
+  'liveStreams.jsw',
+  'liveChat.jsw'
 ];
 let methodCount = 0;
 for (const file of modules) {
@@ -236,6 +241,14 @@ assert.match(viewer, /isMediaRightsCurrent/);
 assert.match(engagement, /isMediaRightsCurrent/);
 assert.match(playlists, /isMediaRightsCurrent/);
 const liveStreams = read('src/backend/liveStreams.jsw');
+const liveChat = read('src/backend/liveChat.jsw');
+assert.match(liveChat, /getLiveChatMessages/);
+assert.match(liveChat, /sendLiveChatMessage/);
+assert.match(liveChat, /moderateMyChannelChatMessage/);
+assert.match(liveChat, /moderateChatMessage/);
+assert.match(liveChat, /five messages per ten seconds/);
+assert.match(liveChat, /isMediaRightsCurrent/);
+assert.match(liveChat, /isContentRatingAllowed/);
 assert.match(liveStreams, /browseLiveStreams/);
 assert.match(liveStreams, /getLiveStream/);
 assert.match(liveStreams, /getPublicLiveSession/);
