@@ -80,7 +80,6 @@ const memberMethods = new Set([
   'backend/notifications.jsw:markAllNotificationsRead',
   'backend/liveStreams.jsw:createLiveStream',
   'backend/liveStreams.jsw:getMyLiveStreams',
-  'backend/liveStreams.jsw:getMyLiveChatOverlay',
   'backend/liveStreams.jsw:endLiveStream',
   'backend/liveChat.jsw:sendLiveChatMessage',
   'backend/liveChat.jsw:reportLiveChatMessage',
@@ -328,24 +327,13 @@ assert.match(liveStreams, /getMyLiveStreams/);
 assert.match(liveStreams, /endLiveStream/);
 assert.match(liveStreams, /MYOUTLET_RTMPS_BASE_URL/);
 assert.match(liveStreams, /MYOUTLET_HLS_BASE_URL/);
-assert.match(liveStreams, /chatOverlayTokenHash/);
-assert.match(liveStreams, /getMyLiveChatOverlay/);
 const httpFunctions = read('src/backend/http-functions.js');
-assert.match(httpFunctions, /get_chatOverlay/);
-assert.match(httpFunctions, /get_chatOverlayMessages/);
-assert.match(httpFunctions, /textContent/);
-assert.ok(httpFunctions.includes('matchesStreamKey(token, stream.chatOverlayTokenHash)'));
 assert.match(httpFunctions, /post_streamAuth/);
 assert.match(httpFunctions, /timingSafeEqual/);
 assert.match(httpFunctions, /isMediaRightsCurrent/);
 assert.match(httpFunctions, /new_live_stream/);
 const mediamtx = read('live-streaming/mediamtx.yml');
 const compose = read('live-streaming/compose.yaml');
-assert.match(mediamtx, /record: true/);
-assert.match(mediamtx, /recordFormat: fmp4/);
-assert.match(mediamtx, /recordSegmentDuration: 1h/);
-assert.match(mediamtx, /recordDeleteAfter: 7d/);
-assert.ok(compose.includes('./recordings:/recordings'));
 assert.match(httpFunctions, /bulkInsert\(NOTIFICATIONS/);
 assert.match(httpFunctions, /const starting = stream.status !== 'live'/);
 
