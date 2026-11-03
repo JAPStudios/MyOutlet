@@ -66,6 +66,7 @@ export async function post_streamAuth(request) {
       if (starting) {
         try {
           let offset = 0;
+          const seenRecipients = new Set();
           while (true) {
             const followers = await wixData.query(FOLLOWS)
               .eq('creatorChannelId', stream.creatorChannelId)
@@ -75,10 +76,14 @@ export async function post_streamAuth(request) {
               .find({ suppressAuth: true });
             if (!followers.items.length) break;
 
+            const recipients = followers.items
+              .map(follow => follow.memberId)
+              .filter(memberId => typeof memberId === 'string' && memberId && !seenRecipients.has(memberId));
+            recipients.forEach(memberId => seenRecipients.add(memberId));
             const now = new Date();
-            const notifications = followers.items.map(follow => ({
+            const notifications = recipients.map(memberId => ({
                 notificationKey: ['new_live_stream', stream._id, follow.memberId].join(':'),
-                recipientMemberId: follow.memberId,
+                recipientMemberId: memberId,
                 actorMemberId: stream.creatorMemberId,
                 type: 'new_live_stream',
                 creatorChannelId: stream.creatorChannelId,
