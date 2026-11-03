@@ -41,12 +41,33 @@ Fields:
 
 Permissions: site owner only. Queue reads and member submissions are mediated by the backend module.
 
+## ViewerLibrary
+
+Fields:
+- `memberId` — Text, required; site-member ID that owns the saved item
+- `mediaItemId` — Text, required; ID of a published MediaItems record
+- `savedAt` — Date and time
+
+Permissions: site owner only. Watchlist operations are mediated by authenticated viewer methods.
+
+## PlaybackProgress
+
+Fields:
+- `memberId` — Text, required; site-member ID that owns the progress record
+- `mediaItemId` — Text, required; ID of a published MediaItems record
+- `positionSeconds` — Number, required
+- `durationSeconds` — Number, required
+- `completed` — Boolean, required
+- `lastPlayedAt` — Date and time, required
+
+Permissions: site owner only. Playback progress is mediated by authenticated viewer methods. The client must send progress only while the member is actually watching; progress values are user-reported and are not proof of viewing.
+
 ## Implemented backend operations
 
 - Public catalogue browse, title/description search and per-channel catalogue reads, limited to published records.
 - Member-owned creator channel creation and update.
 - Member content submission into the moderation queue, plus private submission-status tracking.
 - Owner-only pending-review queue, publish/reject/remove decisions and song-request queue status controls.
-- Member song requests and a public read-only queue, ordered by submission time.
+- Member song requests and a public read-only queue, ordered by submission time.\n- Member watchlists, with published-media checks and private per-member records.\n- Continue-watching history for on-demand video/audio, with bounded playback positions and completed-item exclusion.
 
 This is a metadata and workflow layer. It does not upload or transcode media, host video, provide adaptive-bitrate playback, run a live ingest server, process payments or verify music rights. Those require separate infrastructure and integrations. Do not mark an item published until the media URL, distribution rights, content rating and moderation decision have been checked.

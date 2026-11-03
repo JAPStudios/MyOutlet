@@ -1,0 +1,195 @@
+import wixData from 'wix-data';
+import wixUsersBackend from 'wix-users-backend';
+
+const MEDIA = 'MediaItems';
+const WATCHLIST = 'ViewerLibrary';
+const PROGRESS = 'PlaybackProgress';
+
+function memberId() {
+  const id = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  if (!id) throw new Error('A signed-in site member is required.');
+  return id;
+}
+
+function requiredId(value, field) {
+  if (typeof value !== 'string') throw new Error(field + ' is required.');
+  const result = value.trim();
+  if (!result || result.length > 100) throw new Error(field + ' is invalid.');
+  return result;
+}
+
+function boundedNumber(value, field, minimum, maximum) {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number < minimum || number > maximum) {
+    throw new Error(field + ' must be a number between ' + minimum + ' and ' + maximum + '.');
+  }
+  return number;
+}
+
+async function publishedMedia(mediaId) {
+  const item = await wixData.get(MEDIA, mediaId, { suppressAuth: true });
+  if (!item || item.status !== 'published') {
+    throw new Error('This media item is not available.');
+  }
+  return item;
+}
+
+function mediaSummary(item) {
+  return {
+    _id: item._id,
+    title: item.title,
+    description: item.description || '',
+    mediaUrl: item.mediaUrl,
+    thumbnailUrl: item.thumbnailUrl || '',
+    contentType: item.contentType,
+    contentRating: item.contentRating,
+    creatorChannelId: item.creatorChannelId,
+    publishedAt: item.publishedAt || item._createdDate
+  };
+}
+
+export async function addToWatchlist(input = {}) {
+  const viewerId = memberId();
+  const mediaId = requiredId(input.mediaItemId, 'Media item ID');
+  await publishedMedia(mediaId);
+
+  const existing = await wixData.query(WATCHLIST)
+    .eq('memberId', viewerId)
+    .eq('mediaItemId', mediaId)
+    .limit(1)
+    .find({ suppressAuth: true });
+
+  if (existing.items.length) {
+    return { _id: existing.items[0]._id, mediaItemId: mediaId, saved: true };
+  }
+
+  const created = await wixData.insert(WATCHLIST, {
+    memberId: viewerId,
+    mediaItemId: mediaId,
+    savedAt: new Date()
+  }, { suppressAuth: true });
+
+  return { _id: created._id, mediaItemId: mediaId, saved: true };
+}
+
+export async function removeFromWatchlist(input = {}) {
+  const viewerId = memberId();
+  const mediaId = requiredId(input.mediaItemId, 'Media item ID');
+  const existing = await wixData.query(WATCHLIST)
+    .eq('memberId', viewerId)
+    .eq('mediaItemId', mediaId)
+    .limit(100)
+    .find({ suppressAuth: true });
+
+  for (const item of existing.items) {
+    await wixData.remove(WATCHLIST, item._id, { suppressAuth: true });
+  }
+  return { mediaItemId: mediaId, saved: false };
+}
+
+export async function getMyWatchlist(options = {}) {
+  const viewerId = memberId();
+  const requested = Number(options.limit);
+  const limit = Math.min(Math.max(Number.isFinite(requested) && requested ? requested : 50, 1), 100);
+  const result = await wixData.query(WATCHLIST)
+    .eq('memberId', viewerId)
+    .descending('savedAt')
+    .limit(limit)
+    .find({ suppressAuth: true });
+
+  const items = await Promise.all(result.items.map(async entry => {
+    try {
+      const media = await publishedMedia(entry.mediaItemId);
+      return { ...mediaSummary(media), savedAt: entry.savedAt };
+    } catch (_) {
+      return null;
+    }
+  }));
+
+  return { items: items.filter(Boolean), total: result.totalCount };
+}
+
+export async function recordPlaybackProgress(input = {}) {
+  const viewerId = memberId();
+  const mediaId = requiredId(input.mediaItemId, 'Media item ID');
+  const media = await publishedMedia(mediaId);
+  if (!['video', 'audio'].includes(media.contentType)) {
+    throw new Error('Playback progress is available for on-demand video and audio.');
+  }
+
+  const duration = boundedNumber(input.durationSeconds, 'Duration', 1, 86400);
+  const position = boundedNumber(input.positionSeconds, 'Playback position', 0, duration + 5);
+  const safePosition = Math.min(position, duration);
+  const completed = safePosition / duration >= 0.95;
+
+  const existing = await wixData.query(PROGRESS)
+    .eq('memberId', viewerId)
+    .eq('mediaItemId', mediaId)
+    .limit(1)
+    .find({ suppressAuth: true });
+
+  const record = {
+    memberId: viewerId,
+    mediaItemId: mediaId,
+    positionSeconds: safePosition,
+    durationSeconds: duration,
+    completed,
+    lastPlayedAt: new Date()
+  };
+
+  const saved = existing.items.length
+    ? await wixData.update(PROGRESS, { ...existing.items[0], ...record }, { suppressAuth: true })
+    : await wixData.insert(PROGRESS, record, { suppressAuth: true });
+
+  return {
+    _id: saved._id,
+    mediaItemId: mediaId,
+    positionSeconds: saved.positionSeconds,
+    durationSeconds: saved.durationSeconds,
+    completed: saved.completed,
+    lastPlayedAt: saved.lastPlayedAt
+  };
+}
+
+export async function getContinueWatching(options = {}) {
+  const viewerId = memberId();
+  const requested = Number(options.limit);
+  const limit = Math.min(Math.max(Number.isFinite(requested) && requested ? requested : 30, 1), 100);
+  const result = await wixData.query(PROGRESS)
+    .eq('memberId', viewerId)
+    .eq('completed', false)
+    .descending('lastPlayedAt')
+    .limit(limit)
+    .find({ suppressAuth: true });
+
+  const items = await Promise.all(result.items.map(async progress => {
+    try {
+      const media = await publishedMedia(progress.mediaItemId);
+      return {
+        ...mediaSummary(media),
+        positionSeconds: progress.positionSeconds,
+        durationSeconds: progress.durationSeconds,
+        lastPlayedAt: progress.lastPlayedAt
+      };
+    } catch (_) {
+      return null;
+    }
+  }));
+
+  return { items: items.filter(Boolean) };
+}
+
+export async function clearPlaybackProgress(input = {}) {
+  const viewerId = memberId();
+  const mediaId = requiredId(input.mediaItemId, 'Media item ID');
+  const existing = await wixData.query(PROGRESS)
+    .eq('memberId', viewerId)
+    .eq('mediaItemId', mediaId)
+    .limit(100)
+    .find({ suppressAuth: true });
+
+  for (const item of existing.items) {
+    await wixData.remove(PROGRESS, item._id, { suppressAuth: true });
+  }
+  return { mediaItemId: mediaId, cleared: true };
+}
