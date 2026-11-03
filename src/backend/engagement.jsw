@@ -13,7 +13,9 @@ const CHANNELS = 'CreatorChannels';
 export async function listMyPendingComments(options = {}) {
   const ownerId = memberId();
   const requested = Number(options.limit);
+  const requestedOffset = Number(options.offset);
   const limit = Math.min(Math.max(Number.isFinite(requested) && requested ? requested : 50, 1), 100);
+  const offset = Math.min(Math.max(Number.isFinite(requestedOffset) ? requestedOffset : 0, 0), 10000);
   const channels = await wixData.query(CHANNELS)
     .eq('memberId', ownerId)
     .limit(100)
@@ -29,14 +31,14 @@ export async function listMyPendingComments(options = {}) {
   if (!mediaIds.length) return { items: [], total: 0 };
 
   const pending = await wixData.query(COMMENTS)
+    .hasSome('mediaItemId', mediaIds)
     .eq('status', 'pending_review')
     .ascending('updatedAt')
-    .limit(1000)
-    .find({ suppressAuth: true });
+    .skip(offset)
+    .limit(limit)
+    .find({ suppressAuth: true, returnTotalCount: true });
   const mediaById = new Map(mediaResult.items.map(media => [media._id, media]));
   const items = pending.items
-    .filter(comment => mediaById.has(comment.mediaItemId))
-    .slice(0, limit)
     .map(comment => {
       const media = mediaById.get(comment.mediaItemId);
       return {
@@ -49,7 +51,7 @@ export async function listMyPendingComments(options = {}) {
         updatedAt: comment.updatedAt
       };
     });
-  return { items, total: pending.items.filter(comment => mediaById.has(comment.mediaItemId)).length };
+  return { items, total: pending.totalCount, offset, limit };
 }
 
 export async function moderateMyChannelComment(input = {}) {
