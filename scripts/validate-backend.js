@@ -195,7 +195,8 @@ assert.match(playlists, /reorderPlaylistItems/);
 const rights = read('src/backend/rights.jsw');
 assert.match(rights, /submitRightsDeclaration/);
 assert.match(rights, /reviewRightsDeclaration/);
-assert.match(rights, /getVerifiedRightsForMedia/);
+const rightsCore = read('src/backend/rightsCore.js');
+assert.match(rightsCore, /getVerifiedRightsForMedia/);
 assert.match(catalog, /getVerifiedRightsForMedia/);
 
 const notifications = read('src/backend/notifications.jsw');

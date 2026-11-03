@@ -2,7 +2,7 @@ import wixData from 'wix-data';
 import wixUsersBackend from 'wix-users-backend';
 import { createNotification } from 'backend/notifications';
 import { applyViewerRatingPreference } from 'backend/ratingPreferences';
-import { getVerifiedRightsForMedia } from 'backend/rights';
+import { getVerifiedRightsForMedia } from 'backend/rightsCore';
 
 const MEDIA = 'MediaItems';
 const CHANNELS = 'CreatorChannels';
