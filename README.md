@@ -1,6 +1,6 @@
 # MyOutlet
 
-MyOutlet is an audiovisual publishing, streaming and creator platform. Its scope includes creator channels, on-demand and live media, live chat, viewer chat reports, OBS Browser Source chat overlays, search, moderation, content ratings, creator tools and audience song requests.
+MyOutlet is an audiovisual publishing, streaming and creator platform. Its scope includes creator channels, on-demand and live media, live chat, viewer chat reports, creator timeouts and bans, OBS Browser Source chat overlays, search, moderation, content ratings, creator tools and audience song requests.
 
 ## Current repository structure
 
@@ -14,7 +14,7 @@ Current MyOutlet site state:
 1. The twenty CMS collections in `CMS_COLLECTIONS.md` have been created on the MyOutlet site.
 2. Their direct collection permissions are set to `ADMIN`; application-level public, member and site-owner access is controlled by `src/backend/permissions.json`.
 3. The repository's Wix site binding now targets MyOutlet.
-4. The automated source-contract check is available as `npm test`; live Velo runtime behavior still requires execution against the site; the live-chat and live-chat-report collections have been created on the MyOutlet site; the report query indexes are active; and the live-stream collection includes the hashed chat-overlay token field.
+4. The automated source-contract check is available as `npm test`; live Velo runtime behavior still requires execution against the site; the live-chat, live-chat-report and live-chat-ban collections have been created on the MyOutlet site; all chat-report and chat-ban query indexes are active; and the live-stream collection includes the hashed chat-overlay token field.
 
 ## Functional boundaries
 

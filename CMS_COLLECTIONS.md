@@ -171,6 +171,7 @@ Permissions: `ADMIN` for direct read, insert, update and remove. Only the creato
 Indexes:
 - `live-chat-bans-channel-member-status`
 - `live-chat-bans-channel-status-created`
+Both indexes were verified as `ACTIVE` on November 3, 2026.
 
 ## CreatorChannels
 
