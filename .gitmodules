@@ -13,3 +13,66 @@
 [submodule "upstream/video-archiving-insights"]
 	path = upstream/video-archiving-insights
 	url = https://github.com/internetarchive/video_archiving_insights.git
+[submodule "upstream/obsproject/obs-studio"]
+	path = upstream/obsproject/obs-studio
+	url = https://github.com/obsproject/obs-studio.git
+[submodule "upstream/obsproject/obs-websocket"]
+	path = upstream/obsproject/obs-websocket
+	url = https://github.com/obsproject/obs-websocket.git
+[submodule "upstream/obsproject/obs-browser"]
+	path = upstream/obsproject/obs-browser
+	url = https://github.com/obsproject/obs-browser.git
+[submodule "upstream/obsproject/obs-plugintemplate"]
+	path = upstream/obsproject/obs-plugintemplate
+	url = https://github.com/obsproject/obs-plugintemplate.git
+[submodule "upstream/obsproject/obs-amd-encoder"]
+	path = upstream/obsproject/obs-amd-encoder
+	url = https://github.com/obsproject/obs-amd-encoder.git
+[submodule "upstream/obsproject/libdshowcapture"]
+	path = upstream/obsproject/libdshowcapture
+	url = https://github.com/obsproject/libdshowcapture.git
+[submodule "upstream/obsproject/obs-vst"]
+	path = upstream/obsproject/obs-vst
+	url = https://github.com/obsproject/obs-vst.git
+[submodule "upstream/obsproject/rfcs"]
+	path = upstream/obsproject/rfcs
+	url = https://github.com/obsproject/rfcs.git
+[submodule "upstream/obsproject/obs-deps"]
+	path = upstream/obsproject/obs-deps
+	url = https://github.com/obsproject/obs-deps.git
+[submodule "upstream/obsproject/loganalyzer"]
+	path = upstream/obsproject/loganalyzer
+	url = https://github.com/obsproject/loganalyzer.git
+[submodule "upstream/obsproject/obs-bot"]
+	path = upstream/obsproject/obs-bot
+	url = https://github.com/obsproject/obs-bot.git
+[submodule "upstream/obsproject/cef"]
+	path = upstream/obsproject/cef
+	url = https://github.com/obsproject/cef.git
+[submodule "upstream/obsproject/design"]
+	path = upstream/obsproject/design
+	url = https://github.com/obsproject/design.git
+[submodule "upstream/obsproject/bouf"]
+	path = upstream/obsproject/bouf
+	url = https://github.com/obsproject/bouf.git
+[submodule "upstream/obsproject/obscommits"]
+	path = upstream/obsproject/obscommits
+	url = https://github.com/obsproject/obscommits.git
+[submodule "upstream/obsproject/obs-crowdin-sync"]
+	path = upstream/obsproject/obs-crowdin-sync
+	url = https://github.com/obsproject/obs-crowdin-sync.git
+[submodule "upstream/obsproject/github-meta"]
+	path = upstream/obsproject/github-meta
+	url = https://github.com/obsproject/.github.git
+[submodule "upstream/obsproject/FFmpeg"]
+	path = upstream/obsproject/FFmpeg
+	url = https://github.com/obsproject/FFmpeg.git
+[submodule "upstream/obsproject/homebrew-tools"]
+	path = upstream/obsproject/homebrew-tools
+	url = https://github.com/obsproject/homebrew-tools.git
+[submodule "upstream/obsproject/obs-deps-buildstream"]
+	path = upstream/obsproject/obs-deps-buildstream
+	url = https://github.com/obsproject/obs-deps-buildstream.git
+[submodule "upstream/obsproject/obs-oauth-cf"]
+	path = upstream/obsproject/obs-oauth-cf
+	url = https://github.com/obsproject/obs-oauth-cf.git
