@@ -132,5 +132,19 @@ for (const field of ['category', 'tags', 'language', 'durationSeconds']) {
 assert.match(catalog, /session\.status\s*!==\s*'ready'/,
   'Content submission must wait for successful transcoding');
 
+const ratingPreferences = read('src/backend/ratingPreferences.js');
+assert.match(ratingPreferences, /applyViewerRatingPreference/);
+assert.match(ratingPreferences, /hideUnrated/);
+
+const viewerSource = read('src/backend/viewer.jsw');
+assert.match(viewerSource, /getMyCreatorAnalytics/);
+assert.match(viewerSource, /watchTimeSeconds/);
+assert.match(viewerSource, /previous\.completed === true && safePosition <= 5/);
+
+const reports = read('src/backend/reports.jsw');
+assert.match(reports, /export async function reportContent/);
+assert.match(reports, /export async function resolveContentReport/);
+
+
 console.log('MyOutlet source validation passed: ' + methodCount +
   ' web methods, ' + collectionNames.size + ' documented collections.');

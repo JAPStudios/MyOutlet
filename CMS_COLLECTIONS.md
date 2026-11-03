@@ -154,7 +154,7 @@ This layer uploads private MP4 files to the Wix Media Manager, records upload/tr
 
 ## Wix data indexes
 
-Indexes for the first nine collections were confirmed `ACTIVE` on the MyOutlet site. The two new MediaMetrics indexes were still `BUILDING` at the last status check.
+Indexes for the first nine collections were confirmed `ACTIVE` on the MyOutlet site. The two MediaMetrics indexes have also been confirmed `ACTIVE`.
 
 - `MediaItems`: `media-status-published`, `media-channel-status-published`, `media-creator-submitted`
 - `CreatorChannels`: case-insensitive unique `creator-handle-unique`, plus `creator-member`
@@ -166,4 +166,4 @@ Indexes for the first nine collections were confirmed `ACTIVE` on the MyOutlet s
 
 - `ViewerPreferences`: unique `viewer-preferences-member-unique`
 - `ContentReports`: `reports-status-created`, `reports-member-created`, `reports-media-status`
-- `MediaMetrics`: unique `media-metrics-media-unique`, plus `media-metrics-channel` (building)
+- `MediaMetrics`: unique `media-metrics-media-unique`, plus `media-metrics-channel`

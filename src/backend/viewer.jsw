@@ -305,7 +305,7 @@ export async function recordPlaybackProgress(input = {}) {
   const previous = existing.items[0] || null;
   const previousPosition = previous ? Number(previous.positionSeconds) || 0 : 0;
   const isNewPlayback = !previous ||
-    previous.completed === true ||
+    (previous.completed === true && safePosition <= 5) ||
     (safePosition <= 5 && previousPosition > 30);
   const previousTimestamp = previous && previous.lastPlayedAt
     ? new Date(previous.lastPlayedAt).getTime()
