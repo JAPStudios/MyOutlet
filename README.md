@@ -25,3 +25,7 @@ No payment is collected by the current backend. Song requests are queued as meta
 ## Upstream code
 
 See [UPSTREAM_COMPONENTS.md](UPSTREAM_COMPONENTS.md) for the upstream repository inventory and license notes. A Git submodule entry records a pinned commit; it does not copy source files into the MyOutlet application.
+
+## Source validation
+
+Run `node scripts/validate-backend.js` (or `npm test`) to check that exported backend web methods have explicit permissions, private collections are documented, and the MyOutlet site binding and media event/uploader wiring remain consistent. The same check runs in GitHub Actions on relevant pushes and pull requests.

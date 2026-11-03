@@ -1,0 +1,39 @@
+name: Validate MyOutlet backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/backend/**"
+      - "src/public/**"
+      - "CMS_COLLECTIONS.md"
+      - "wix.config.json"
+      - "package.json"
+      - "scripts/**"
+      - ".github/workflows/validate-backend.yml"
+  pull_request:
+    paths:
+      - "src/backend/**"
+      - "src/public/**"
+      - "CMS_COLLECTIONS.md"
+      - "wix.config.json"
+      - "package.json"
+      - "scripts/**"
+      - ".github/workflows/validate-backend.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Validate backend contracts
+        run: node scripts/validate-backend.js
