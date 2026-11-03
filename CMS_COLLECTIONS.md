@@ -64,7 +64,7 @@ Permissions: site owner only. Playback progress is mediated by authenticated vie
 
 ## Implemented backend operations
 
-- Public catalogue browse, title/description search and per-channel catalogue reads, limited to published records.
+- Public creator directory, creator search and handle-based creator profiles, alongside published catalogue browse, title/description search and per-channel catalogue reads. Creator search/profile responses expose only public channel fields and published media.
 - Member-owned creator channel creation and update.
 - Member content submission into the moderation queue, plus private submission-status tracking.
 - Owner-only pending-review queue, publish/reject/remove decisions and song-request queue status controls.

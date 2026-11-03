@@ -43,6 +43,69 @@ function publicMedia(item) {
 const RATINGS = ['TV-Y', 'TV-Y7', 'TV-G', 'TV-PG', 'TV-14', 'TV-MA', 'Unrated'];
 const TYPES = ['video', 'livestream', 'audio'];
 
+
+function publicChannel(channel) {
+  return {
+    _id: channel._id,
+    name: channel.name,
+    handle: channel.handle,
+    description: channel.description || ''
+  };
+}
+
+export async function browseCreators(options = {}) {
+  const requestedLimit = Number(options.limit);
+  const requestedOffset = Number(options.offset);
+  const limit = Math.min(Math.max(Number.isFinite(requestedLimit) && requestedLimit ? requestedLimit : 24, 1), 50);
+  const offset = Math.min(Math.max(Number.isFinite(requestedOffset) ? requestedOffset : 0, 0), 10000);
+  const result = await wixData.query(CHANNELS)
+    .ascending('name')
+    .skip(offset)
+    .limit(limit)
+    .find({ suppressAuth: true });
+  return {
+    items: result.items.map(publicChannel),
+    total: result.totalCount,
+    offset,
+    limit
+  };
+}
+
+export async function searchCreators(options = {}) {
+  const term = cleanText(options.term, 'Search term', 100);
+  const requestedLimit = Number(options.limit);
+  const limit = Math.min(Math.max(Number.isFinite(requestedLimit) && requestedLimit ? requestedLimit : 24, 1), 50);
+  const nameQuery = wixData.query(CHANNELS).contains('name', term);
+  const handleQuery = wixData.query(CHANNELS).contains('handle', term.toLowerCase().replace(/^@/, ''));
+  const descriptionQuery = wixData.query(CHANNELS).contains('description', term);
+  const result = await nameQuery.or(handleQuery).or(descriptionQuery)
+    .ascending('name')
+    .limit(limit)
+    .find({ suppressAuth: true });
+  return { items: result.items.map(publicChannel), total: result.totalCount };
+}
+
+export async function getCreatorProfile(input = {}) {
+  const handle = cleanText(input.handle, 'Creator handle', 30).replace(/^@/, '').toLowerCase();
+  const result = await wixData.query(CHANNELS)
+    .eq('handle', handle)
+    .limit(1)
+    .find({ suppressAuth: true });
+  if (!result.items.length) return null;
+  const channel = result.items[0];
+  const media = await wixData.query(MEDIA)
+    .eq('creatorChannelId', channel._id)
+    .eq('status', 'published')
+    .descending('publishedAt')
+    .limit(24)
+    .find({ suppressAuth: true });
+  return {
+    channel: publicChannel(channel),
+    media: media.items.map(publicMedia),
+    totalMedia: media.totalCount
+  };
+}
+
 export async function browseCatalog(options = {}) {
   const limit = Math.min(Math.max(Number(options.limit) || 24, 1), 50);
   const offset = Math.min(Math.max(Number(options.offset) || 0, 0), 10000);
@@ -84,6 +147,10 @@ export async function saveMyChannel(input = {}) {
   if (!/^[a-z0-9_]+$/.test(handle)) throw new Error('Channel handle may contain only lowercase letters, numbers and underscores.');
   const description = typeof input.description === 'string' ? input.description.trim().slice(0, 500) : '';
   const found = await wixData.query(CHANNELS).eq('memberId', ownerId).limit(1).find({ suppressAuth: true });
+  const collision = await wixData.query(CHANNELS).eq('handle', handle).limit(1).find({ suppressAuth: true });
+  if (collision.items.length && (!found.items.length || collision.items[0]._id !== found.items[0]._id)) {
+    throw new Error('That channel handle is already in use.');
+  }
   const record = { name, handle, description, memberId: ownerId };
   if (found.items.length) {
     const updated = await wixData.update(CHANNELS, { ...found.items[0], ...record }, { suppressAuth: true });
