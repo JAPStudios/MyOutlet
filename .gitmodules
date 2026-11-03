@@ -76,3 +76,107 @@
 [submodule "upstream/obsproject/obs-oauth-cf"]
 	path = upstream/obsproject/obs-oauth-cf
 	url = https://github.com/obsproject/obs-oauth-cf.git
+
+[submodule "upstream/chatterino/chatterino2"]
+	path = upstream/chatterino/chatterino2
+	url = https://github.com/Chatterino/chatterino2.git
+
+[submodule "upstream/chatterino/api"]
+	path = upstream/chatterino/api
+	url = https://github.com/Chatterino/api.git
+
+[submodule "upstream/chatterino/chatterino-browser-ext"]
+	path = upstream/chatterino/chatterino-browser-ext
+	url = https://github.com/Chatterino/chatterino-browser-ext.git
+
+[submodule "upstream/chatterino/wiki"]
+	path = upstream/chatterino/wiki
+	url = https://github.com/Chatterino/wiki.git
+
+[submodule "upstream/chatterino/website"]
+	path = upstream/chatterino/website
+	url = https://github.com/Chatterino/website.git
+
+[submodule "upstream/chatterino/qtkeychain"]
+	path = upstream/chatterino/qtkeychain
+	url = https://github.com/Chatterino/qtkeychain.git
+
+[submodule "upstream/chatterino/libcommuni"]
+	path = upstream/chatterino/libcommuni
+	url = https://github.com/Chatterino/libcommuni.git
+
+[submodule "upstream/chatterino/login"]
+	path = upstream/chatterino/login
+	url = https://github.com/Chatterino/login.git
+
+[submodule "upstream/chatterino/crash-handler"]
+	path = upstream/chatterino/crash-handler
+	url = https://github.com/Chatterino/crash-handler.git
+
+[submodule "upstream/chatterino/appbase"]
+	path = upstream/chatterino/appbase
+	url = https://github.com/Chatterino/appbase.git
+
+[submodule "upstream/chatterino/command-list-api"]
+	path = upstream/chatterino/command-list-api
+	url = https://github.com/Chatterino/command-list-api.git
+
+[submodule "upstream/chatterino/msvc-dev-cmd"]
+	path = upstream/chatterino/msvc-dev-cmd
+	url = https://github.com/Chatterino/msvc-dev-cmd.git
+
+[submodule "upstream/chatterino/twitch-cli"]
+	path = upstream/chatterino/twitch-cli
+	url = https://github.com/Chatterino/twitch-cli.git
+
+[submodule "upstream/chatterino/actions-comment-pull-request"]
+	path = upstream/chatterino/actions-comment-pull-request
+	url = https://github.com/Chatterino/actions-comment-pull-request.git
+
+[submodule "upstream/chatterino/webhook-receiver"]
+	path = upstream/chatterino/webhook-receiver
+	url = https://github.com/Chatterino/webhook-receiver.git
+
+[submodule "upstream/chatterino/docker"]
+	path = upstream/chatterino/docker
+	url = https://github.com/Chatterino/docker.git
+
+[submodule "upstream/chatterino/chatterino-updater-win"]
+	path = upstream/chatterino/chatterino-updater-win
+	url = https://github.com/Chatterino/chatterino-updater-win.git
+
+[submodule "upstream/chatterino/certify"]
+	path = upstream/chatterino/certify
+	url = https://github.com/Chatterino/certify.git
+
+[submodule "upstream/chatterino/plugin-test"]
+	path = upstream/chatterino/plugin-test
+	url = https://github.com/Chatterino/plugin-test.git
+
+[submodule "upstream/chatterino/meta"]
+	path = upstream/chatterino/meta
+	url = https://github.com/Chatterino/meta.git
+
+[submodule "upstream/chatterino/httpbox"]
+	path = upstream/chatterino/httpbox
+	url = https://github.com/Chatterino/httpbox.git
+
+[submodule "upstream/chatterino/pkg"]
+	path = upstream/chatterino/pkg
+	url = https://github.com/Chatterino/pkg.git
+
+[submodule "upstream/chatterino/websocketpp"]
+	path = upstream/chatterino/websocketpp
+	url = https://github.com/Chatterino/websocketpp.git
+
+[submodule "upstream/chatterino/twitch-pubsub-server-test"]
+	path = upstream/chatterino/twitch-pubsub-server-test
+	url = https://github.com/Chatterino/twitch-pubsub-server-test.git
+
+[submodule "upstream/chatterino/clang-tidy-module"]
+	path = upstream/chatterino/clang-tidy-module
+	url = https://github.com/Chatterino/clang-tidy-module.git
+
+[submodule "upstream/chatterino/twitch-eventsub-ws"]
+	path = upstream/chatterino/twitch-eventsub-ws
+	url = https://github.com/Chatterino/twitch-eventsub-ws.git
