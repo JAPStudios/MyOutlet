@@ -2,7 +2,7 @@ import wixData from 'wix-data';
 import wixUsersBackend from 'wix-users-backend';
 import { isContentRatingAllowed } from 'backend/ratingPreferences';
 import { isMediaRightsCurrent } from 'backend/rightsCore';
-import { createNotification } from 'backend/notifications';
+import { createNotification } from 'backend/notificationCore';
 
 const MEDIA = 'MediaItems';
 const LIKES = 'MediaLikes';
