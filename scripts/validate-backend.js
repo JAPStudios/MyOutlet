@@ -85,6 +85,9 @@ const memberMethods = new Set([
   'backend/liveChat.jsw:sendLiveChatMessage',
   'backend/liveChat.jsw:reportLiveChatMessage',
   'backend/liveChat.jsw:getMyLiveChatReports',
+  'backend/liveChat.jsw:banLiveChatMember',
+  'backend/liveChat.jsw:unbanLiveChatMember',
+  'backend/liveChat.jsw:getMyLiveChatBans',
   'backend/liveChat.jsw:moderateMyChannelChatMessage',
   'backend/rights.jsw:submitRightsDeclaration',
   'backend/rights.jsw:getMyRightsRecords'
@@ -260,6 +263,11 @@ assert.match(liveChat, /reportLiveChatMessage/);
 assert.match(liveChat, /getMyLiveChatReports/);
 assert.match(liveChat, /listLiveChatReports/);
 assert.match(liveChat, /resolveLiveChatReport/);
+assert.match(liveChat, /banLiveChatMember/);
+assert.match(liveChat, /unbanLiveChatMember/);
+assert.match(liveChat, /getMyLiveChatBans/);
+assert.match(liveChat, /assertNotBannedFromChannel/);
+assert.match(liveChat, /43,200 minutes/);
 assert.match(liveChat, /ten reports per 24 hours/);
 assert.match(liveChat, /remove_message/);
 assert.match(liveChat, /five messages per ten seconds/);
@@ -334,7 +342,7 @@ const notificationWriter = read('src/backend/notifications.js');
 assert.match(notificationWriter, /createNotification/);
 
 const readme = read('README.md');
-assert.match(readme, /The nineteen CMS collections/);
+assert.match(readme, /The twenty CMS collections/);
 assert.match(readme, /OBS Browser Source chat overlays/);
 console.log('MyOutlet source validation passed: ' + methodCount +
   ' web methods, ' + collectionNames.size + ' documented collections.');

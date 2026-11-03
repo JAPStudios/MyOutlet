@@ -5,6 +5,7 @@ import { isMediaRightsCurrent } from 'backend/rightsCore';
 
 const CHAT = 'LiveChatMessages';
 const REPORTS = 'LiveChatReports';
+const BANS = 'LiveChatBans';
 const REPORT_REASONS = ['harassment', 'hate', 'sexual_content', 'violence', 'self_harm', 'spam', 'threats', 'other'];
 const LIVE = 'LiveStreams';
 const MEDIA = 'MediaItems';
@@ -84,6 +85,27 @@ export async function getLiveChatMessages(input = {}) {
   };
 }
 
+async function assertNotBannedFromChannel(channelId, bannedMemberId) {
+  const result = await wixData.query(BANS)
+    .eq('creatorChannelId', channelId)
+    .eq('bannedMemberId', bannedMemberId)
+    .eq('status', 'active')
+    .limit(10)
+    .find({ suppressAuth: true });
+  for (const ban of result.items) {
+    if (ban.expiresAt && new Date(ban.expiresAt).getTime() <= Date.now()) {
+      await wixData.update(BANS, {
+        ...ban,
+        status: 'expired'
+      }, { suppressAuth: true });
+      continue;
+    }
+    throw new Error(ban.expiresAt
+      ? 'This account is timed out from this creator channel live chat.'
+      : 'This account is banned from this creator channel live chat.');
+  }
+}
+
 export async function sendLiveChatMessage(input = {}) {
   const senderMemberId = memberId();
   const streamId = requiredText(input.streamId, 'Live-stream ID', 100);
@@ -92,6 +114,7 @@ export async function sendLiveChatMessage(input = {}) {
     throw new Error('Messages cannot contain control characters.');
   }
   const { stream, channel } = await getLiveContext(streamId);
+  await assertNotBannedFromChannel(channel._id, senderMemberId);
   let senderName = senderMemberId === stream.creatorMemberId ? channel.name : 'Viewer';
   if (senderMemberId !== stream.creatorMemberId) {
     try {
@@ -325,5 +348,122 @@ export async function resolveLiveChatReport(input = {}) {
     status: updated.status,
     resolution: updated.resolution,
     messageStatus
+  };
+}
+
+export async function banLiveChatMember(input = {}) {
+  const moderatorMemberId = memberId();
+  const creatorChannelId = requiredText(input.creatorChannelId, 'Creator channel ID', 100);
+  const bannedMemberId = requiredText(input.bannedMemberId, 'Member ID', 100);
+  if (bannedMemberId === moderatorMemberId) throw new Error('A channel owner cannot ban their own account.');
+  const channel = await wixData.get(CHANNELS, creatorChannelId, { suppressAuth: true });
+  if (!channel || channel.memberId !== moderatorMemberId) {
+    throw new Error('Only the creator-channel owner can manage its live-chat bans.');
+  }
+  if (bannedMemberId === channel.memberId) throw new Error('The creator-channel owner cannot be banned from their own channel.');
+
+  const durationMinutes = input.durationMinutes === undefined ? 0 : Number(input.durationMinutes);
+  if (!Number.isInteger(durationMinutes) || durationMinutes < 0 || durationMinutes > 43200) {
+    throw new Error('Timeout duration must be zero (permanent) or between 1 and 43,200 minutes.');
+  }
+  const reason = typeof input.reason === 'string' ? input.reason.trim().slice(0, 500) : '';
+  const createdAt = new Date();
+  const expiresAt = durationMinutes === 0 ? null : new Date(createdAt.getTime() + durationMinutes * 60000);
+
+  const existing = await wixData.query(BANS)
+    .eq('creatorChannelId', creatorChannelId)
+    .eq('bannedMemberId', bannedMemberId)
+    .eq('status', 'active')
+    .limit(1)
+    .find({ suppressAuth: true });
+
+  let ban;
+  if (existing.items.length) {
+    ban = await wixData.update(BANS, {
+      ...existing.items[0],
+      moderatorMemberId,
+      reason,
+      status: 'active',
+      createdAt,
+      expiresAt,
+      liftedAt: null,
+      liftedBy: '',
+      liftReason: ''
+    }, { suppressAuth: true });
+  } else {
+    ban = await wixData.insert(BANS, {
+      creatorChannelId,
+      bannedMemberId,
+      moderatorMemberId,
+      reason,
+      status: 'active',
+      createdAt,
+      expiresAt,
+      liftedAt: null,
+      liftedBy: '',
+      liftReason: ''
+    }, { suppressAuth: true });
+  }
+
+  return {
+    _id: ban._id,
+    creatorChannelId,
+    bannedMemberId,
+    status: ban.status,
+    expiresAt: ban.expiresAt,
+    permanent: !ban.expiresAt
+  };
+}
+
+export async function unbanLiveChatMember(input = {}) {
+  const moderatorMemberId = memberId();
+  const creatorChannelId = requiredText(input.creatorChannelId, 'Creator channel ID', 100);
+  const banId = requiredText(input.banId, 'Live-chat ban ID', 100);
+  const channel = await wixData.get(CHANNELS, creatorChannelId, { suppressAuth: true });
+  if (!channel || channel.memberId !== moderatorMemberId) {
+    throw new Error('Only the creator-channel owner can manage its live-chat bans.');
+  }
+  const ban = await wixData.get(BANS, banId, { suppressAuth: true });
+  if (!ban || ban.creatorChannelId !== creatorChannelId || ban.status !== 'active') {
+    throw new Error('An active ban for this creator channel was not found.');
+  }
+  const updated = await wixData.update(BANS, {
+    ...ban,
+    status: 'lifted',
+    liftedAt: new Date(),
+    liftedBy: moderatorMemberId,
+    liftReason: typeof input.reason === 'string' ? input.reason.trim().slice(0, 500) : ''
+  }, { suppressAuth: true });
+  return { _id: updated._id, status: updated.status, liftedAt: updated.liftedAt };
+}
+
+export async function getMyLiveChatBans(input = {}) {
+  const moderatorMemberId = memberId();
+  const creatorChannelId = requiredText(input.creatorChannelId, 'Creator channel ID', 100);
+  const channel = await wixData.get(CHANNELS, creatorChannelId, { suppressAuth: true });
+  if (!channel || channel.memberId !== moderatorMemberId) {
+    throw new Error('Only the creator-channel owner can view its live-chat bans.');
+  }
+  const status = input.status === undefined ? 'active' : requiredText(input.status, 'Ban status', 20);
+  if (!['active', 'lifted', 'expired', 'all'].includes(status)) {
+    throw new Error('Unsupported live-chat ban status.');
+  }
+  const query = wixData.query(BANS).eq('creatorChannelId', creatorChannelId);
+  const filtered = status === 'all' ? query : query.eq('status', status);
+  const result = await filtered.descending('createdAt').limit(100).find({ suppressAuth: true });
+  return {
+    items: result.items.map(item => ({
+      _id: item._id,
+      bannedMemberId: item.bannedMemberId,
+      moderatorMemberId: item.moderatorMemberId,
+      reason: item.reason || '',
+      status: item.status,
+      createdAt: item.createdAt,
+      expiresAt: item.expiresAt,
+      liftedAt: item.liftedAt,
+      liftedBy: item.liftedBy || '',
+      liftReason: item.liftReason || '',
+      permanent: !item.expiresAt
+    }))
   };
 }

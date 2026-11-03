@@ -1,6 +1,6 @@
 # MyOutlet CMS data collections
 
-The nineteen custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
+The twenty custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
 
 ## MediaItems
 
@@ -151,6 +151,26 @@ Permissions: `ADMIN` for direct read, insert, update and remove. Members submit 
 Indexes:
 - `live-chat-reports-status-created`
 - `live-chat-reports-message-reporter`
+
+## LiveChatBans
+
+Fields:
+- `creatorChannelId` — Text, required
+- `bannedMemberId` — Text, required
+- `moderatorMemberId` — Text, required
+- `reason` — Text; optional, maximum 500 characters
+- `status` — Text: `active`, `lifted` or `expired`
+- `createdAt` — Date and time, required
+- `expiresAt` — Date and time; empty means a permanent ban
+- `liftedAt` — Date and time
+- `liftedBy` — Text
+- `liftReason` — Text
+
+Permissions: `ADMIN` for direct read, insert, update and remove. Only the creator-channel owner can create, extend, lift or list bans through `src/backend/liveChat.jsw`. Timeouts accept 1–43,200 minutes; zero creates a permanent ban. Expired timeouts are marked `expired` when the member next attempts to post.
+
+Indexes:
+- `live-chat-bans-channel-member-status`
+- `live-chat-bans-channel-status-created`
 
 ## CreatorChannels
 
