@@ -22,6 +22,18 @@ function safeHttpsUrl(value, field) {
   return parsed.toString();
 }
 
+function safeImageUrl(value, field) {
+  const raw = cleanText(value, field, 2048);
+  if (raw.startsWith('wix:image://')) return raw;
+  return safeHttpsUrl(raw, field);
+}
+
+function normalizeSocialLinks(value) {
+  if (value === undefined || value === null) return [];
+  if (!Array.isArray(value)) throw new Error('Social links must be an array of HTTPS URLs.');
+  return [...new Set(value.map(link => safeHttpsUrl(link, 'Social link')))].slice(0, 10);
+}
+
 function optionalText(value, field, max) {
   if (value === undefined || value === null || value === '') return '';
   return cleanText(value, field, max);
@@ -103,7 +115,13 @@ function publicChannel(channel) {
     _id: channel._id,
     name: channel.name,
     handle: channel.handle,
-    description: channel.description || ''
+    description: channel.description || '',
+    avatarUrl: channel.avatarUrl || '',
+    bannerUrl: channel.bannerUrl || '',
+    websiteUrl: channel.websiteUrl || '',
+    socialLinks: Array.isArray(channel.socialLinks) ? channel.socialLinks : [],
+    createdAt: channel.createdAt,
+    updatedAt: channel.updatedAt
   };
 }
 
@@ -200,8 +218,7 @@ export async function getMyChannel() {
   const ownerId = memberId();
   const result = await wixData.query(CHANNELS).eq('memberId', ownerId).limit(1).find({ suppressAuth: true });
   if (!result.items.length) return null;
-  const channel = result.items[0];
-  return { _id: channel._id, name: channel.name, handle: channel.handle, description: channel.description || '' };
+  return publicChannel(result.items[0]);
 }
 
 export async function saveMyChannel(input = {}) {
@@ -211,17 +228,36 @@ export async function saveMyChannel(input = {}) {
   if (!/^[a-z0-9_]+$/.test(handle)) throw new Error('Channel handle may contain only lowercase letters, numbers and underscores.');
   const description = typeof input.description === 'string' ? input.description.trim().slice(0, 500) : '';
   const found = await wixData.query(CHANNELS).eq('memberId', ownerId).limit(1).find({ suppressAuth: true });
+  const existing = found.items[0] || null;
   const collision = await wixData.query(CHANNELS).eq('handle', handle).limit(1).find({ suppressAuth: true });
-  if (collision.items.length && (!found.items.length || collision.items[0]._id !== found.items[0]._id)) {
+  if (collision.items.length && (!existing || collision.items[0]._id !== existing._id)) {
     throw new Error('That channel handle is already in use.');
   }
-  const record = { name, handle, description, memberId: ownerId };
-  if (found.items.length) {
-    const updated = await wixData.update(CHANNELS, { ...found.items[0], ...record }, { suppressAuth: true });
-    return { _id: updated._id, name: updated.name, handle: updated.handle, description: updated.description };
+  const avatarUrl = input.avatarUrl === undefined
+    ? (existing ? existing.avatarUrl || '' : '')
+    : (input.avatarUrl ? safeImageUrl(input.avatarUrl, 'Avatar URL') : '');
+  const bannerUrl = input.bannerUrl === undefined
+    ? (existing ? existing.bannerUrl || '' : '')
+    : (input.bannerUrl ? safeImageUrl(input.bannerUrl, 'Banner URL') : '');
+  const websiteUrl = input.websiteUrl === undefined
+    ? (existing ? existing.websiteUrl || '' : '')
+    : (input.websiteUrl ? safeHttpsUrl(input.websiteUrl, 'Website URL') : '');
+  const socialLinks = input.socialLinks === undefined
+    ? (existing && Array.isArray(existing.socialLinks) ? existing.socialLinks : [])
+    : normalizeSocialLinks(input.socialLinks);
+  const now = new Date();
+  const record = {
+    name, handle, description, avatarUrl, bannerUrl, websiteUrl, socialLinks,
+    memberId: ownerId,
+    createdAt: existing ? existing.createdAt || now : now,
+    updatedAt: now
+  };
+  if (existing) {
+    const updated = await wixData.update(CHANNELS, { ...existing, ...record }, { suppressAuth: true });
+    return publicChannel(updated);
   }
   const created = await wixData.insert(CHANNELS, record, { suppressAuth: true });
-  return { _id: created._id, name: created.name, handle: created.handle, description: created.description };
+  return publicChannel(created);
 }
 
 export async function submitContent(input = {}) {

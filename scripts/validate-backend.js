@@ -132,6 +132,8 @@ for (const field of ['category', 'tags', 'language', 'durationSeconds']) {
   assert.ok(catalog.includes(field), 'Catalogue must support ' + field);
   assert.ok(cms.includes('`' + field + '`'), 'CMS schema must document ' + field);
 }
+assert.match(catalog, /socialLinks/);
+assert.match(catalog, /bannerUrl/);
 assert.match(catalog, /session\.status\s*!==\s*'ready'/,
   'Content submission must wait for successful transcoding');
 

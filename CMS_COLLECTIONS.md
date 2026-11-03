@@ -75,7 +75,13 @@ Fields:
 - `name` — Text, required
 - `handle` — Text, required
 - `description` — Text
-- `memberId` — Text
+- `memberId` — Text, required
+- `avatarUrl` — Text; HTTPS or Wix image URL
+- `bannerUrl` — Text; HTTPS or Wix image URL
+- `websiteUrl` — Text; HTTPS URL
+- `socialLinks` — Array of HTTPS URLs
+- `createdAt` — Date and time
+- `updatedAt` — Date and time
 
 Permissions: `ADMIN` (site administrators) for direct collection access. Application access is mediated by the backend web methods. Channel creation and updates are mediated by the member-authenticated backend methods.
 
