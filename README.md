@@ -28,4 +28,4 @@ See [UPSTREAM_COMPONENTS.md](UPSTREAM_COMPONENTS.md) for the upstream repository
 
 ## Source validation
 
-Run `node scripts/validate-backend.js` (or `npm test`) to check that all exported backend web methods have explicit permissions, private collections are documented, and the MyOutlet site binding, media event/uploader wiring and feature modules remain consistent. The same check runs in GitHub Actions on relevant pushes and pull requests.
+Run `node scripts/validate-backend.js` (or `npm test`) to check that all exported backend web methods have explicit permissions, private collections are documented, and the MyOutlet site binding, media event/uploader wiring and feature modules remain consistent. GitHub Actions syntax-checks every Velo JavaScript source file and validates all 54 exported web methods across the 15 documented collections on relevant pushes and pull requests.

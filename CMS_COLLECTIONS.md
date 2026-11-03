@@ -244,4 +244,4 @@ Indexes for the first nine collections were confirmed `ACTIVE` on the MyOutlet s
 - `MediaComments`: `media-comments-status-created`, `media-comments-member-created`
 - `MediaPlaylists`: `playlists-owner-updated`, `playlists-visibility-updated`
 - `PlaylistItems`: unique `playlist-item-key-unique`, plus `playlist-items-position` and `playlist-items-media`
-- `Notifications`: unique `notifications-key-unique`, plus `notifications-recipient-created` and `notifications-recipient-read` (building)
+- `Notifications`: unique `notifications-key-unique`, plus `notifications-recipient-created` and `notifications-recipient-read`
