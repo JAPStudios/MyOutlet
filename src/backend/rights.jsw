@@ -227,8 +227,9 @@ export async function reviewRightsDeclaration(input = {}) {
       if (expiry < now) throw new Error('Expired rights cannot be verified.');
     }
     const media = await wixData.get(MEDIA, record.mediaItemId, { suppressAuth: true });
-    if (!media || media.creatorMemberId !== record.creatorMemberId) {
-      throw new Error('The media item and rights declaration do not match.');
+    if (!media || media.creatorMemberId !== record.creatorMemberId ||
+        !['pending_review', 'published'].includes(media.status)) {
+      throw new Error('The media item and rights declaration do not match or the media is no longer reviewable.');
     }
   }
 

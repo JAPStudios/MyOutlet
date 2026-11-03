@@ -204,6 +204,11 @@ assert.match(rightsCore, /applyVerifiedRightsFilter/);
 assert.match(rights, /rightsVerified: true/);
 assert.match(rights, /rightsVerified: false/);
 assert.match(catalog, /getVerifiedRightsForMedia/);
+assert.match(catalog, /applyVerifiedRightsFilter/);
+assert.match(viewer, /applyVerifiedRightsFilter/);
+assert.match(viewer, /isMediaRightsCurrent/);
+assert.match(engagement, /isMediaRightsCurrent/);
+assert.match(playlists, /isMediaRightsCurrent/);
 
 const notifications = read('src/backend/notifications.jsw');
 assert.match(notifications, /getMyNotifications/);
