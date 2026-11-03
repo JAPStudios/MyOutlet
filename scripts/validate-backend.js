@@ -310,3 +310,15 @@ assert.match(notificationWriter, /createNotification/);
 
 console.log('MyOutlet source validation passed: ' + methodCount +
   ' web methods, ' + collectionNames.size + ' documented collections.');
+
+const gitmodules = read('.gitmodules');
+const upstreamComponents = read('UPSTREAM_COMPONENTS.md');
+const chatterinoSubmodules = [...gitmodules.matchAll(/\\[submodule "upstream\\/chatterino\\/([^"]+)"\\]/g)];
+const chatterinoTableRows = [...upstreamComponents.matchAll(/^\\| `upstream\\/chatterino\\//gm)];
+assert.equal(chatterinoSubmodules.length, 26,
+  'Every public Chatterino organization repository must be pinned as a submodule');
+assert.equal(chatterinoTableRows.length, 26,
+  'Every pinned Chatterino repository must have an upstream integration record');
+assert.match(gitmodules, /path = upstream\\/chatterino\\/chatterino2/);
+assert.match(gitmodules, /url = https:\\/\\/github\\.com\\/Chatterino\\/chatterino2\\.git/);
+assert.match(upstreamComponents, /Chatterino organization repositories/);
