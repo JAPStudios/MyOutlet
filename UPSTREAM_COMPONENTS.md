@@ -44,6 +44,39 @@ The following public OBS Project repositories were pinned at their default-branc
 | [obsproject/obs-deps-buildstream](https://github.com/obsproject/obs-deps-buildstream) | `master` | `602653e345270cb2c388dbc8cc5bb50935e1b1b1` | BuildStream dependency/build definitions. |
 | [obsproject/obs-oauth-cf](https://github.com/obsproject/obs-oauth-cf) | `master` | `039c64c4e9a097a7e536a714b2e92477e98723be` | OAuth-related Cloudflare worker/service reference. |
 
+## Chatterino organization repositories
+
+All 26 public repositories returned by the Chatterino organization repository search are pinned as Git submodules under `upstream/chatterino/`. Each entry records the exact default-branch commit selected on November 3, 2026. These are source checkouts, not merged into MyOutlet's Wix Velo runtime. The desktop Chatterino client is a native Qt application; its code is not directly executable as a browser chat panel. The primary relevant references are `chatterino2`, `api`, `libcommuni`, `twitch-eventsub-ws`, and `websocketpp`.
+
+| Local path | Upstream | Branch | Pinned commit | Relevance |
+|---|---|---|---|---|
+| `upstream/chatterino/chatterino2` | [Chatterino/chatterino2](https://github.com/Chatterino/chatterino2) | `master` | `463ca077f4dc4b24d19ab501a9301cd124247cb3` | Primary native Twitch chat client reference; MIT licence. MyOutlet's live-chat backend remains a separate web implementation. |
+| `upstream/chatterino/api` | [Chatterino/api](https://github.com/Chatterino/api) | `master` | `b2549741d1c9cec0e95ea3126980fac8269bf1d5` | Go URL-preview and API-cache service reference; separate deployment would be required. |
+| `upstream/chatterino/chatterino-browser-ext` | [Chatterino/chatterino-browser-ext](https://github.com/Chatterino/chatterino-browser-ext) | `master` | `cc908f54feacd6afac9cefbac5d77a0679621dbc` | Browser-extension reference; not a MyOutlet browser extension. |
+| `upstream/chatterino/wiki` | [Chatterino/wiki](https://github.com/Chatterino/wiki) | `master` | `1a570ec111339a4469fcea53f73acc747f702a88` | Chatterino product and developer documentation reference. |
+| `upstream/chatterino/website` | [Chatterino/website](https://github.com/Chatterino/website) | `main` | `c05e86ffc78b824f27cb2d972c0e07295b1bf23e` | Rust/Minijinja website implementation reference. |
+| `upstream/chatterino/qtkeychain` | [Chatterino/qtkeychain](https://github.com/Chatterino/qtkeychain) | `master` | `73c3772d6432280df83e1ab3299c2a8f1e4ea47f` | Qt keychain integration dependency reference. |
+| `upstream/chatterino/libcommuni` | [Chatterino/libcommuni](https://github.com/Chatterino/libcommuni) | `chatterino-cmake` | `9dc0de7c91d362abc431f680dd94e81eadf41622` | IRC protocol library reference. |
+| `upstream/chatterino/login` | [Chatterino/login](https://github.com/Chatterino/login) | `master` | `4883d98357f46e38ad88ff0c85edb6d37652df8b` | Archived login service reference. |
+| `upstream/chatterino/crash-handler` | [Chatterino/crash-handler](https://github.com/Chatterino/crash-handler) | `main` | `d3270fa03668b5c6c208400196368f66f6883352` | Crash-reporting service reference. |
+| `upstream/chatterino/appbase` | [Chatterino/appbase](https://github.com/Chatterino/appbase) | `master` | `d054925734cf26576346a1da856f7ab0d4b6c0a5` | Archived shared application framework reference. |
+| `upstream/chatterino/command-list-api` | [Chatterino/command-list-api](https://github.com/Chatterino/command-list-api) | `main` | `73c784f12d36329405f2d87da45b83c9a0423226` | Command-list API reference. |
+| `upstream/chatterino/msvc-dev-cmd` | [Chatterino/msvc-dev-cmd](https://github.com/Chatterino/msvc-dev-cmd) | `master` | `0a3f3854dc342f760a57bfa5b3936ed1bb7c2194` | Windows build-environment helper reference. |
+| `upstream/chatterino/twitch-cli` | [Chatterino/twitch-cli](https://github.com/Chatterino/twitch-cli) | `main` | `a367becc25b3b3712509bde15021cd222d827923` | Twitch CLI tooling reference. |
+| `upstream/chatterino/actions-comment-pull-request` | [Chatterino/actions-comment-pull-request](https://github.com/Chatterino/actions-comment-pull-request) | `main` | `e4a76dd2b0a3c2027c3fd84147a67c22ee4c90fa` | GitHub Actions pull-request automation reference. |
+| `upstream/chatterino/webhook-receiver` | [Chatterino/webhook-receiver](https://github.com/Chatterino/webhook-receiver) | `main` | `9e52bb01736f25fa05e4432210a87e40165780cc` | Webhook receiver reference. |
+| `upstream/chatterino/docker` | [Chatterino/docker](https://github.com/Chatterino/docker) | `master` | `4d8abb0fa67eb98f4b341d8f861c8b89692b750e` | Container build and deployment reference. |
+| `upstream/chatterino/chatterino-updater-win` | [Chatterino/chatterino-updater-win](https://github.com/Chatterino/chatterino-updater-win) | `master` | `dabdad80656108c6bdaf214f1ce0599e91852637` | Windows updater reference. |
+| `upstream/chatterino/certify` | [Chatterino/certify](https://github.com/Chatterino/certify) | `master` | `a448a3915ddac716ce76e4b8cbf0e7f4153ed1e2` | Certificate automation reference. |
+| `upstream/chatterino/plugin-test` | [Chatterino/plugin-test](https://github.com/Chatterino/plugin-test) | `main` | `fd71b3d7b90532d4181f74f527113d170a7f2e5b` | Plugin test fixtures and examples. |
+| `upstream/chatterino/meta` | [Chatterino/meta](https://github.com/Chatterino/meta) | `main` | `04656e25e23a900f7a6f676eba4ae1adec167e26` | Organization metadata and community reference. |
+| `upstream/chatterino/httpbox` | [Chatterino/httpbox](https://github.com/Chatterino/httpbox) | `master` | `6f33826510fea2a18001a7268016ff1f613d1346` | HTTP test utility reference. |
+| `upstream/chatterino/pkg` | [Chatterino/pkg](https://github.com/Chatterino/pkg) | `main` | `4c9c416ba5dfac4befc14ee7beee422460cd2237` | Packaging metadata and tooling reference. |
+| `upstream/chatterino/websocketpp` | [Chatterino/websocketpp](https://github.com/Chatterino/websocketpp) | `chatterino` | `f1736a8e72b910810ff6869fe20f647a62f3bc35` | WebSocket++ dependency fork reference. |
+| `upstream/chatterino/twitch-pubsub-server-test` | [Chatterino/twitch-pubsub-server-test](https://github.com/Chatterino/twitch-pubsub-server-test) | `master` | `58e80004fb5e88fec06b8278af9f06ae249bacd5` | Twitch PubSub test service reference. |
+| `upstream/chatterino/clang-tidy-module` | [Chatterino/clang-tidy-module](https://github.com/Chatterino/clang-tidy-module) | `main` | `0759bf70373b8c083f9109997d568fc2177e7797` | C++ static-analysis tooling reference. |
+| `upstream/chatterino/twitch-eventsub-ws` | [Chatterino/twitch-eventsub-ws](https://github.com/Chatterino/twitch-eventsub-ws) | `master` | `dc1007dd22e51c9ab8e59ad2119abd72d189a249` | Twitch EventSub WebSocket reference. |
+
 ## Integration and licensing boundary
 
 - Submodule entries only pin upstream commit objects. They do not mean all upstream source files have been copied into MyOutlet or that the code is running.
