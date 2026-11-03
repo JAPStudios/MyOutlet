@@ -126,6 +126,7 @@ export async function submitRightsDeclaration(input = {}) {
     await wixData.update(MEDIA, {
       ...media,
       rightsVerified: false,
+      rightsTerritories: [],
       rightsValidUntil: validUntil,
       rightsRecordId: previous._id
     }, { suppressAuth: true });
@@ -187,6 +188,7 @@ export async function submitRightsDeclaration(input = {}) {
   await wixData.update(MEDIA, {
     ...media,
     rightsVerified: false,
+    rightsTerritories: [],
     rightsValidUntil: validUntil,
     rightsRecordId: created._id
   }, { suppressAuth: true });
