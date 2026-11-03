@@ -312,6 +312,17 @@
         "anonymous": {
           "invoke": false
         }
+      },
+      "getMyCreatorAnalytics": {
+        "siteOwner": {
+          "invoke": true
+        },
+        "siteMember": {
+          "invoke": true
+        },
+        "anonymous": {
+          "invoke": false
+        }
       }
     },
     "backend/media.jsw": {

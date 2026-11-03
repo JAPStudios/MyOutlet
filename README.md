@@ -8,17 +8,17 @@ The Wix Velo site source is under `src/`. The browser extension files at the rep
 
 ## Backend catalogue and creator workflows
 
-The backend service layer includes `src/backend/catalog.jsw` for creator discovery, published catalogue browsing/search with category, tag, rating, type and language filters, channel management, submissions, moderation and channel-scoped song requests; `src/backend/viewer.jsw` for watchlists, playback progress, creator follows and a followed-creator feed; and `src/backend/media.jsw` for private MP4 uploads and published-video playback URLs; `src/backend/reports.jsw` handles member reports and owner-only moderation, while `src/backend/ratingPreferences.js` applies member-selected rating filters. `src/backend/events.js` records upload completion and video-transcoding readiness. The reusable front-end uploader in `src/public/mediaUpload.js` sends MP4 files to the signed upload URL and reports byte-level progress; the returned upload-session ID can then be passed to `submitContent` after the session reaches `ready`. See [CMS_COLLECTIONS.md](CMS_COLLECTIONS.md) for the required Wix CMS collection fields and access controls.
+The backend service layer includes `src/backend/catalog.jsw` for creator discovery, published catalogue browsing/search with category, tag, rating, type and language filters, channel management, submissions, moderation and channel-scoped song requests; `src/backend/viewer.jsw` for watchlists, playback progress, creator follows, a followed-creator feed, member-selected content-rating preferences and creator playback analytics; and `src/backend/media.jsw` for private MP4 uploads and published-video playback URLs; `src/backend/reports.jsw` handles member reports and owner-only moderation, while `src/backend/ratingPreferences.js` applies member-selected rating filters. `src/backend/events.js` records upload completion and video-transcoding readiness. The reusable front-end uploader in `src/public/mediaUpload.js` sends MP4 files to the signed upload URL and reports byte-level progress; the returned upload-session ID can then be passed to `submitContent` after the session reaches `ready`. See [CMS_COLLECTIONS.md](CMS_COLLECTIONS.md) for the required Wix CMS collection fields and access controls.
 
 Current MyOutlet site state:
-1. The nine CMS collections in `CMS_COLLECTIONS.md` have been created on the MyOutlet site.
+1. The ten CMS collections in `CMS_COLLECTIONS.md` have been created on the MyOutlet site.
 2. Their direct collection permissions are set to `ADMIN`; application-level public, member and site-owner access is controlled by `src/backend/permissions.json`.
 3. The repository's Wix site binding now targets MyOutlet.
 4. The automated source-contract check is available as `npm test`; live Velo runtime behavior still requires execution against the site.
 
 ## Functional boundaries
 
-The current media workflow accepts private MP4 uploads into the Wix Media Manager, waits for Wix's video-transcoding event, and returns HLS or DASH playback URLs only for published uploaded videos. It does not yet provide live ingest, a custom CDN, external transcoding, content-rights records, age/rating enforcement, creator analytics, payment processing or operational monitoring.
+The current media workflow accepts private MP4 uploads into the Wix Media Manager, waits for Wix's video-transcoding event, and returns HLS or DASH playback URLs only for published uploaded videos. It does not yet provide live ingest, a custom CDN, external transcoding, content-rights records, verified age checks, payment processing or operational monitoring. Content-rating preferences are viewer-selected filters, not age verification. Creator analytics report playback starts, bounded client-reported watch time and completions; they are not audited audience measurements.
 
 No payment is collected by the current backend. Song requests are queued as metadata only; they do not charge viewers. No third-party media is licensed by the presence of a URL or catalogue record.
 

@@ -1,6 +1,6 @@
 # MyOutlet CMS data collections
 
-The nine custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
+The ten custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
 
 ## MediaItems
 
@@ -99,6 +99,18 @@ Fields:
 
 Permissions: `ADMIN` (site administrators) for direct collection access. Application access is mediated by the backend web methods. Watchlist operations are mediated by authenticated viewer methods.
 
+## MediaMetrics
+
+Fields:
+- `mediaItemId` — Text, required; one aggregate record per media item
+- `creatorChannelId` — Text, required
+- `playbackStarts` — Number
+- `watchTimeSeconds` — Number
+- `completions` — Number
+- `updatedAt` — Date and time
+
+Permissions: `ADMIN` (site administrators) for direct collection access. Creator analytics are returned only through the authenticated creator analytics method. Playback starts and watch time are derived from client-reported progress and are approximate, not audited viewing measurements.
+
 ## CreatorFollows
 
 Fields:
@@ -117,6 +129,8 @@ Fields:
 - `durationSeconds` — Number, required
 - `completed` — Boolean, required
 - `lastPlayedAt` — Date and time, required
+- `startedAt` — Date and time
+- `watchTimeSeconds` — Number
 
 Permissions: `ADMIN` (site administrators) for direct collection access. Application access is mediated by the backend web methods. Playback progress is mediated by authenticated viewer methods. The client must send progress only while the member is actually watching; progress values are user-reported and are not proof of viewing.
 
@@ -131,6 +145,7 @@ Permissions: `ADMIN` (site administrators) for direct collection access. Applica
 - Member watchlists, with published-media checks and private per-member records.
 - Continue-watching history for on-demand video/audio, with bounded playback positions and completed-item exclusion.
 - Creator follows, followed-channel lists and a published-media feed across followed channels.
+- Creator analytics for playback starts, estimated watch time and completions.
 - Member-selected content-rating preferences applied to catalogue, creator, watchlist, continue-watching, following-feed and playback reads.
 - Member content reports, a private moderation queue, and owner-only report resolution with removal or rating correction.
 
@@ -139,7 +154,7 @@ This layer uploads private MP4 files to the Wix Media Manager, records upload/tr
 
 ## Wix data indexes
 
-All listed collection indexes were confirmed `ACTIVE` on the MyOutlet site.
+Indexes for the first nine collections were confirmed `ACTIVE` on the MyOutlet site. The two new MediaMetrics indexes were still `BUILDING` at the last status check.
 
 - `MediaItems`: `media-status-published`, `media-channel-status-published`, `media-creator-submitted`
 - `CreatorChannels`: case-insensitive unique `creator-handle-unique`, plus `creator-member`
@@ -149,5 +164,6 @@ All listed collection indexes were confirmed `ACTIVE` on the MyOutlet site.
 - `CreatorFollows`: `follows-member-date`
 - `MediaUploadSessions`: `uploads-owner-created`
 
-- `ViewerPreferences`: unique `viewer-preferences-member-unique` (building)
-- `ContentReports`: `reports-status-created`, `reports-member-created`, `reports-media-status` (building)
+- `ViewerPreferences`: unique `viewer-preferences-member-unique`
+- `ContentReports`: `reports-status-created`, `reports-member-created`, `reports-media-status`
+- `MediaMetrics`: unique `media-metrics-media-unique`, plus `media-metrics-channel` (building)

@@ -47,6 +47,7 @@ const memberMethods = new Set([
   'backend/viewer.jsw:followCreator',
   'backend/viewer.jsw:unfollowCreator',
   'backend/viewer.jsw:getMyFollowing',
+  'backend/viewer.jsw:getMyCreatorAnalytics',
   'backend/viewer.jsw:getFollowingFeed',
   'backend/media.jsw:createVideoUpload',
   'backend/media.jsw:getMyVideoUploads'
