@@ -358,6 +358,17 @@
         "anonymous": {
           "invoke": true
         }
+      },
+      "getPublishedMediaPlayback": {
+        "siteOwner": {
+          "invoke": true
+        },
+        "siteMember": {
+          "invoke": true
+        },
+        "anonymous": {
+          "invoke": true
+        }
       }
     },
     "backend/reports.jsw": {
@@ -598,4 +609,4 @@
       }
     }
   }
-}
+}\n

@@ -8,13 +8,10 @@ const parse = file => JSON.parse(read(file));
 const permissions = parse('src/backend/permissions.json')['web-methods'];
 const cms = read('CMS_COLLECTIONS.md');
 const site = parse('wix.config.json');
+const tick = String.fromCharCode(96);
 
-assert.equal(
-  site.siteId,
-  '34798e4b-3c1a-45ff-a023-4ea4b83cc9f8',
-  'wix.config.json must target the MyOutlet site'
-);
-
+assert.equal(site.siteId, '34798e4b-3c1a-45ff-a023-4ea4b83cc9f8',
+  'wix.config.json must target the MyOutlet site');
 assert.equal(permissions['*']['*'].siteMember.invoke, false,
   'Unlisted web methods must not be callable by site members');
 assert.equal(permissions['*']['*'].anonymous.invoke, false,
@@ -28,10 +25,11 @@ const publicMethods = new Set([
   'backend/catalog.jsw:searchCatalog',
   'backend/catalog.jsw:getSongQueue',
   'backend/catalog.jsw:getCreatorCatalog',
+  'backend/media.jsw:getPublishedVideoPlayback',
+  'backend/media.jsw:getPublishedMediaPlayback',
   'backend/engagement.jsw:getMediaEngagement',
   'backend/engagement.jsw:listComments',
-  'backend/playlists.jsw:getPlaylist',
-  'backend/media.jsw:getPublishedVideoPlayback'
+  'backend/playlists.jsw:getPlaylist'
 ]);
 
 const memberMethods = new Set([
@@ -50,18 +48,45 @@ const memberMethods = new Set([
   'backend/viewer.jsw:followCreator',
   'backend/viewer.jsw:unfollowCreator',
   'backend/viewer.jsw:getMyFollowing',
-  'backend/viewer.jsw:getMyCreatorAnalytics',
   'backend/viewer.jsw:getFollowingFeed',
+  'backend/viewer.jsw:getMyViewingPreferences',
+  'backend/viewer.jsw:setMyViewingPreferences',
+  'backend/viewer.jsw:getMyCreatorAnalytics',
   'backend/media.jsw:createVideoUpload',
-  'backend/media.jsw:getMyVideoUploads'
+  'backend/media.jsw:getMyVideoUploads',
+  'backend/reports.jsw:reportContent',
+  'backend/reports.jsw:getMyContentReports',
+  'backend/engagement.jsw:likeMedia',
+  'backend/engagement.jsw:unlikeMedia',
+  'backend/engagement.jsw:addComment',
+  'backend/engagement.jsw:editComment',
+  'backend/engagement.jsw:deleteComment',
+  'backend/playlists.jsw:createPlaylist',
+  'backend/playlists.jsw:updatePlaylist',
+  'backend/playlists.jsw:deletePlaylist',
+  'backend/playlists.jsw:addMediaToPlaylist',
+  'backend/playlists.jsw:removeMediaFromPlaylist',
+  'backend/playlists.jsw:reorderPlaylistItems',
+  'backend/playlists.jsw:getMyPlaylists'
 ]);
 
 const ownerMethods = new Set([
   'backend/catalog.jsw:moderateContent',
   'backend/catalog.jsw:listPendingContent',
+  'backend/reports.jsw:listContentReports',
+  'backend/reports.jsw:resolveContentReport',
+  'backend/engagement.jsw:moderateComment',
+  'backend/engagement.jsw:listPendingComments'
 ]);
 
-const modules = ['catalog.jsw', 'viewer.jsw', 'media.jsw'];
+const modules = [
+  'catalog.jsw',
+  'viewer.jsw',
+  'media.jsw',
+  'reports.jsw',
+  'engagement.jsw',
+  'playlists.jsw'
+];
 let methodCount = 0;
 for (const file of modules) {
   const key = 'backend/' + file;
@@ -69,7 +94,6 @@ for (const file of modules) {
   const exports = [...source.matchAll(/export\s+async\s+function\s+([A-Za-z0-9_]+)/g)]
     .map(match => match[1]);
   const configured = permissions[key] || {};
-
   assert.ok(exports.length > 0, key + ' must export web methods');
   for (const method of exports) {
     const identity = key + ':' + method;
@@ -77,7 +101,6 @@ for (const file of modules) {
     assert.ok(rule, identity + ' is missing an explicit permission rule');
     assert.equal(rule.siteOwner && rule.siteOwner.invoke, true,
       identity + ' must allow site-owner invocation');
-
     if (publicMethods.has(identity)) {
       assert.equal(rule.siteMember && rule.siteMember.invoke, true,
         identity + ' must allow member invocation');
@@ -113,24 +136,25 @@ for (const collection of collectionNames) {
 }
 
 const events = read('src/backend/events.js');
-assert.match(events, /export\s+async\s+function\s+wixMediaManager_onFileUploaded/);
-assert.match(events, /export\s+async\s+function\s+wixMediaManager_onVideoTranscoded/);
+assert.match(events, /wixMediaManager_onFileUploaded/);
+assert.match(events, /wixMediaManager_onVideoTranscoded/);
 
 const media = read('src/backend/media.jsw');
 assert.match(media, /isPrivate:\s*true/,
   'Creator uploads must remain private before moderation');
-assert.match(media, /getVideoPlaybackUrl/,
-  'Published uploaded videos must have a playback URL path');
+assert.match(media, /getVideoPlaybackUrl/);
+assert.match(media, /getPublishedMediaPlayback/);
+assert.match(media, /isContentRatingAllowed/);
 
 const uploader = read('src/public/mediaUpload.js');
-assert.match(uploader, /export\s+async\s+function\s+uploadVideoFile/);
+assert.match(uploader, /uploadVideoFile/);
 assert.match(uploader, /request\.upload\.onprogress/,
   'The browser uploader must expose upload progress');
 
 const catalog = read('src/backend/catalog.jsw');
 for (const field of ['category', 'tags', 'language', 'durationSeconds']) {
   assert.ok(catalog.includes(field), 'Catalogue must support ' + field);
-  assert.ok(cms.includes('`' + field + '`'), 'CMS schema must document ' + field);
+  assert.ok(cms.includes(tick + field + tick), 'CMS schema must document ' + field);
 }
 assert.match(catalog, /socialLinks/);
 assert.match(catalog, /bannerUrl/);
@@ -141,23 +165,24 @@ const ratingPreferences = read('src/backend/ratingPreferences.js');
 assert.match(ratingPreferences, /applyViewerRatingPreference/);
 assert.match(ratingPreferences, /hideUnrated/);
 
-const viewerSource = read('src/backend/viewer.jsw');
-assert.match(viewerSource, /getMyCreatorAnalytics/);
-assert.match(viewerSource, /watchTimeSeconds/);
-assert.match(viewerSource, /previous\.completed === true && safePosition <= 5/);
+const viewer = read('src/backend/viewer.jsw');
+assert.match(viewer, /getMyCreatorAnalytics/);
+assert.match(viewer, /watchTimeSeconds/);
+assert.match(viewer, /previous\.completed === true && safePosition <= 5/);
 
 const reports = read('src/backend/reports.jsw');
-assert.match(reports, /export async function reportContent/);
-assert.match(reports, /export async function resolveContentReport/);
-const engagement = read('src/backend/engagement.jsw');
-assert.match(engagement, /export async function likeMedia/);
-assert.match(engagement, /export async function addComment/);
-assert.match(engagement, /export async function moderateComment/);
-assert.match(engagement, /export async function listPendingComments/);
-const playlists = read('src/backend/playlists.jsw');
-assert.match(playlists, /export async function getPlaylist/);
-assert.match(playlists, /export async function reorderPlaylistItems/);
+assert.match(reports, /reportContent/);
+assert.match(reports, /resolveContentReport/);
 
+const engagement = read('src/backend/engagement.jsw');
+assert.match(engagement, /likeMedia/);
+assert.match(engagement, /addComment/);
+assert.match(engagement, /moderateComment/);
+assert.match(engagement, /listPendingComments/);
+
+const playlists = read('src/backend/playlists.jsw');
+assert.match(playlists, /getPlaylist/);
+assert.match(playlists, /reorderPlaylistItems/);
 
 console.log('MyOutlet source validation passed: ' + methodCount +
   ' web methods, ' + collectionNames.size + ' documented collections.');

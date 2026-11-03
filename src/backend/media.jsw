@@ -1,6 +1,7 @@
 import wixData from 'wix-data';
 import wixUsersBackend from 'wix-users-backend';
 import { mediaManager } from 'wix-media-backend';
+import { isContentRatingAllowed } from 'backend/ratingPreferences';
 
 const UPLOADS = 'MediaUploadSessions';
 const MEDIA = 'MediaItems';
@@ -99,23 +100,50 @@ export async function getMyVideoUploads(options = {}) {
   };
 }
 
-export async function getPublishedVideoPlayback(input = {}) {
+async function createPlaybackResponse(input, allowedTypes) {
   const mediaItemId = typeof input.mediaItemId === 'string' ? input.mediaItemId.trim() : '';
   if (!mediaItemId || mediaItemId.length > 100) throw new Error('Media item ID is invalid.');
 
   const media = await wixData.get(MEDIA, mediaItemId, { suppressAuth: true });
-  if (!media || media.status !== 'published' || media.contentType !== 'video') {
-    throw new Error('This published video is not available.');
+  if (!media || media.status !== 'published' || !allowedTypes.includes(media.contentType)) {
+    throw new Error('This published media item is not available.');
   }
-  if (typeof media.mediaUrl !== 'string' || !media.mediaUrl.startsWith('wix:video://')) {
-    throw new Error('This item is not stored as a MyOutlet Media Manager video.');
+  const viewerId = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  if (!await isContentRatingAllowed(media.contentRating, viewerId)) {
+    throw new Error('This media item exceeds the selected content-rating preference.');
+  }
+  if (typeof media.mediaUrl !== 'string' || !media.mediaUrl) {
+    throw new Error('This media item does not have a playback source.');
   }
 
-  const requestedFormat = typeof input.format === 'string' ? input.format.toLowerCase() : 'hls';
-  if (!['hls', 'dash'].includes(requestedFormat)) {
-    throw new Error('Playback format must be HLS or DASH.');
+  let url;
+  let format = 'external';
+  if (media.contentType === 'video' && media.mediaUrl.startsWith('wix:video://')) {
+    const requestedFormat = typeof input.format === 'string' ? input.format.toLowerCase() : 'hls';
+    if (!['hls', 'dash'].includes(requestedFormat)) {
+      throw new Error('Playback format must be HLS or DASH.');
+    }
+    url = await mediaManager.getVideoPlaybackUrl(media.mediaUrl, requestedFormat);
+    format = requestedFormat;
+  } else if (/^https:\/\//i.test(media.mediaUrl)) {
+    url = media.mediaUrl;
+  } else {
+    throw new Error('This media source is not a supported HTTPS or Wix video URL.');
   }
 
-  const url = await mediaManager.getVideoPlaybackUrl(media.mediaUrl, requestedFormat);
-  return { mediaItemId, format: requestedFormat, url };
+  return {
+    mediaItemId,
+    contentType: media.contentType,
+    contentRating: media.contentRating,
+    format,
+    url
+  };
+}
+
+export async function getPublishedMediaPlayback(input = {}) {
+  return createPlaybackResponse(input, ['video', 'audio', 'livestream']);
+}
+
+export async function getPublishedVideoPlayback(input = {}) {
+  return createPlaybackResponse(input, ['video']);
 }
