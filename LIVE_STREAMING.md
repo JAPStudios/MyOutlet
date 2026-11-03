@@ -8,7 +8,8 @@ MyOutlet live sessions use OBS Studio for contribution, MediaMTX for RTMPS inges
 2. The creator submits a rights declaration for the returned `mediaItemId`. A site owner reviews the declaration and publishes the media item only after rights verification.
 3. Publishing the media item changes the associated live session to `ready`. MediaMTX accepts an OBS publisher only when the stream path, channel ID, stream-key hash, published media item and current rights state all match.
 4. MediaMTX serves the active stream over HTTPS HLS. Its HTTP authentication callback checks that the session remains live and that the associated media item remains published with current verified rights.
-5. The creator ends the session with `endLiveStream`. The session becomes `ended` and its live media item is removed from the public catalogue.
+5. Visitors discover active sessions through `browseLiveStreams` or retrieve one by ID through `getLiveStream`. Both methods expose only live sessions whose media remains published, rights-verified and within the viewer's rating preference.
+6. The creator ends the session with `endLiveStream`. The session becomes `ended` and its live media item is removed from the public catalogue.
 
 ## Wix Secrets Manager
 
