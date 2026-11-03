@@ -451,19 +451,28 @@ export async function getMyLiveChatBans(input = {}) {
   const query = wixData.query(BANS).eq('creatorChannelId', creatorChannelId);
   const filtered = status === 'all' ? query : query.eq('status', status);
   const result = await filtered.descending('createdAt').limit(100).find({ suppressAuth: true });
-  return {
-    items: result.items.map(item => ({
-      _id: item._id,
-      bannedMemberId: item.bannedMemberId,
-      moderatorMemberId: item.moderatorMemberId,
-      reason: item.reason || '',
-      status: item.status,
-      createdAt: item.createdAt,
-      expiresAt: item.expiresAt,
-      liftedAt: item.liftedAt,
-      liftedBy: item.liftedBy || '',
-      liftReason: item.liftReason || '',
-      permanent: !item.expiresAt
-    }))
-  };
+  const items = await Promise.all(result.items.map(async item => {
+    let current = item;
+    if (current.status === 'active' && current.expiresAt &&
+        new Date(current.expiresAt).getTime() <= Date.now()) {
+      current = await wixData.update(BANS, {
+        ...current,
+        status: 'expired'
+      }, { suppressAuth: true });
+    }
+    return {
+      _id: current._id,
+      bannedMemberId: current.bannedMemberId,
+      moderatorMemberId: current.moderatorMemberId,
+      reason: current.reason || '',
+      status: current.status,
+      createdAt: current.createdAt,
+      expiresAt: current.expiresAt,
+      liftedAt: current.liftedAt,
+      liftedBy: current.liftedBy || '',
+      liftReason: current.liftReason || '',
+      permanent: !current.expiresAt
+    };
+  }));
+  return { items };
 }
