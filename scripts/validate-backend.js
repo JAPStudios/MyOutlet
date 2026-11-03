@@ -156,7 +156,7 @@ for (const file of modules) {
 }
 
 const collectionNames = new Set();
-for (const file of [...modules, 'ratingPreferences.js', 'notifications.js']) {
+for (const file of [...modules, 'ratingPreferences.js', 'notificationCore.js']) {
   const source = read('src/backend/' + file);
   for (const match of source.matchAll(/const\s+[A-Z_]+\s*=\s*['"]([A-Za-z0-9_-]+)['"]/g)) {
     collectionNames.add(match[1]);
