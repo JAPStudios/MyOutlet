@@ -99,7 +99,6 @@ Permissions: `ADMIN` for direct read, insert, update and remove. Creators submit
 Fields:
 - `streamPath` — Text, unique; unguessable MediaMTX path
 - `streamKeyHash` — Text; SHA-256 hash of the per-session publisher key, never the plaintext key
-- `chatOverlayTokenHash` — Text; SHA-256 hash of the creator's rotatable OBS Browser Source overlay token, never the plaintext token
 - `creatorChannelId` — Text, required
 - `creatorMemberId` — Text, required
 - `mediaItemId` — Text, required; associated MediaItems record
