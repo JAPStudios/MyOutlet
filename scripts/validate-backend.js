@@ -28,6 +28,8 @@ const publicMethods = new Set([
   'backend/catalog.jsw:searchCatalog',
   'backend/catalog.jsw:getSongQueue',
   'backend/catalog.jsw:getCreatorCatalog',
+  'backend/engagement.jsw:getMediaEngagement',
+  'backend/engagement.jsw:listComments',
   'backend/media.jsw:getPublishedVideoPlayback'
 ]);
 
@@ -144,6 +146,10 @@ assert.match(viewerSource, /previous\.completed === true && safePosition <= 5/);
 const reports = read('src/backend/reports.jsw');
 assert.match(reports, /export async function reportContent/);
 assert.match(reports, /export async function resolveContentReport/);
+const engagement = read('src/backend/engagement.jsw');
+assert.match(engagement, /export async function likeMedia/);
+assert.match(engagement, /export async function addComment/);
+assert.match(engagement, /export async function moderateComment/);
 
 
 console.log('MyOutlet source validation passed: ' + methodCount +

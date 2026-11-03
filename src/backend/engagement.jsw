@@ -1,0 +1,194 @@
+import wixData from 'wix-data';
+import wixUsersBackend from 'wix-users-backend';
+import { isContentRatingAllowed } from 'backend/ratingPreferences';
+
+const MEDIA = 'MediaItems';
+const LIKES = 'MediaLikes';
+const COMMENTS = 'MediaComments';
+
+function memberId() {
+  const id = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  if (!id) throw new Error('A signed-in site member is required.');
+  return id;
+}
+
+function requiredText(value, field, max) {
+  if (typeof value !== 'string') throw new Error(field + ' must be text.');
+  const result = value.trim();
+  if (!result || result.length > max) {
+    throw new Error(field + ' is required and must be at most ' + max + ' characters.');
+  }
+  return result;
+}
+
+async function publishedMedia(mediaItemId) {
+  const media = await wixData.get(MEDIA, mediaItemId, { suppressAuth: true });
+  if (!media || media.status !== 'published') {
+    throw new Error('Published media was not found.');
+  }
+  const viewerId = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  if (!await isContentRatingAllowed(media.contentRating, viewerId)) {
+    throw new Error('This media exceeds the selected content-rating preference.');
+  }
+  return media;
+}
+
+export async function likeMedia(input = {}) {
+  const viewerId = memberId();
+  const mediaItemId = requiredText(input.mediaItemId, 'Media item ID', 100);
+  await publishedMedia(mediaItemId);
+  const likeKey = mediaItemId + ':' + viewerId;
+  const existing = await wixData.query(LIKES)
+    .eq('likeKey', likeKey)
+    .limit(1)
+    .find({ suppressAuth: true });
+  if (existing.items.length) {
+    return { liked: true, alreadyLiked: true };
+  }
+
+  try {
+    await wixData.insert(LIKES, {
+      likeKey,
+      mediaItemId,
+      memberId: viewerId,
+      createdAt: new Date()
+    }, { suppressAuth: true });
+  } catch (error) {
+    const duplicate = await wixData.query(LIKES)
+      .eq('likeKey', likeKey)
+      .limit(1)
+      .find({ suppressAuth: true });
+    if (!duplicate.items.length) throw error;
+  }
+  return { liked: true, alreadyLiked: false };
+}
+
+export async function unlikeMedia(input = {}) {
+  const viewerId = memberId();
+  const mediaItemId = requiredText(input.mediaItemId, 'Media item ID', 100);
+  const likeKey = mediaItemId + ':' + viewerId;
+  const existing = await wixData.query(LIKES)
+    .eq('likeKey', likeKey)
+    .limit(1)
+    .find({ suppressAuth: true });
+  if (existing.items.length) {
+    await wixData.remove(LIKES, existing.items[0]._id, { suppressAuth: true });
+  }
+  return { liked: false };
+}
+
+export async function getMediaEngagement(input = {}) {
+  const mediaItemId = requiredText(input.mediaItemId, 'Media item ID', 100);
+  await publishedMedia(mediaItemId);
+  const viewerId = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
+  const likeQuery = wixData.query(LIKES).eq('mediaItemId', mediaItemId);
+  const commentQuery = wixData.query(COMMENTS)
+    .eq('mediaItemId', mediaItemId)
+    .eq('status', 'published');
+  const [likeCount, commentCount, viewerLike] = await Promise.all([
+    likeQuery.count({ suppressAuth: true }),
+    commentQuery.count({ suppressAuth: true }),
+    viewerId
+      ? wixData.query(LIKES).eq('likeKey', mediaItemId + ':' + viewerId)
+          .limit(1).find({ suppressAuth: true })
+      : Promise.resolve({ items: [] })
+  ]);
+  return {
+    mediaItemId,
+    likes: likeCount,
+    comments: commentCount,
+    likedByCurrentMember: viewerLike.items.length > 0
+  };
+}
+
+export async function addComment(input = {}) {
+  const viewerId = memberId();
+  const mediaItemId = requiredText(input.mediaItemId, 'Media item ID', 100);
+  await publishedMedia(mediaItemId);
+  const body = requiredText(input.body, 'Comment', 2000);
+  const now = new Date();
+  const created = await wixData.insert(COMMENTS, {
+    mediaItemId,
+    memberId: viewerId,
+    body,
+    status: 'published',
+    createdAt: now,
+    updatedAt: now
+  }, { suppressAuth: true });
+  return { _id: created._id, mediaItemId, body: created.body, status: created.status, createdAt: created.createdAt };
+}
+
+export async function editComment(input = {}) {
+  const viewerId = memberId();
+  const commentId = requiredText(input.commentId, 'Comment ID', 100);
+  const body = requiredText(input.body, 'Comment', 2000);
+  const comment = await wixData.get(COMMENTS, commentId, { suppressAuth: true });
+  if (!comment || comment.memberId !== viewerId) {
+    throw new Error('Only the comment author can edit this comment.');
+  }
+  const media = await publishedMedia(comment.mediaItemId);
+  const updated = await wixData.update(COMMENTS, {
+    ...comment,
+    body,
+    status: 'pending_review',
+    updatedAt: new Date()
+  }, { suppressAuth: true });
+  return { _id: updated._id, status: updated.status, body: updated.body };
+}
+
+export async function deleteComment(input = {}) {
+  const viewerId = memberId();
+  const commentId = requiredText(input.commentId, 'Comment ID', 100);
+  const comment = await wixData.get(COMMENTS, commentId, { suppressAuth: true });
+  if (!comment || comment.memberId !== viewerId) {
+    throw new Error('Only the comment author can delete this comment.');
+  }
+  await wixData.remove(COMMENTS, commentId, { suppressAuth: true });
+  return { deleted: true, commentId };
+}
+
+export async function listComments(input = {}) {
+  const mediaItemId = requiredText(input.mediaItemId, 'Media item ID', 100);
+  await publishedMedia(mediaItemId);
+  const requested = Number(input.limit);
+  const requestedOffset = Number(input.offset);
+  const limit = Math.min(Math.max(Number.isFinite(requested) && requested ? requested : 30, 1), 100);
+  const offset = Math.min(Math.max(Number.isFinite(requestedOffset) ? requestedOffset : 0, 0), 10000);
+  const result = await wixData.query(COMMENTS)
+    .eq('mediaItemId', mediaItemId)
+    .eq('status', 'published')
+    .ascending('createdAt')
+    .skip(offset)
+    .limit(limit)
+    .find({ suppressAuth: true });
+  return {
+    items: result.items.map(comment => ({
+      _id: comment._id,
+      memberId: comment.memberId,
+      body: comment.body,
+      createdAt: comment.createdAt,
+      updatedAt: comment.updatedAt
+    })),
+    total: result.totalCount,
+    offset,
+    limit
+  };
+}
+
+export async function moderateComment(input = {}) {
+  const commentId = requiredText(input.commentId, 'Comment ID', 100);
+  const status = requiredText(input.status, 'Comment status', 20);
+  const note = typeof input.note === 'string' ? input.note.trim().slice(0, 1000) : '';
+  if (!['published', 'removed'].includes(status)) {
+    throw new Error('Comment status must be published or removed.');
+  }
+  const comment = await wixData.get(COMMENTS, commentId, { suppressAuth: true });
+  if (!comment) throw new Error('Comment was not found.');
+  const updated = await wixData.update(COMMENTS, {
+    ...comment,
+    status,
+    moderationNote: note,
+    updatedAt: new Date()
+  }, { suppressAuth: true });
+  return { _id: updated._id, status: updated.status };
+}

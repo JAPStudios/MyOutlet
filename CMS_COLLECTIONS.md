@@ -1,6 +1,6 @@
 # MyOutlet CMS data collections
 
-The ten custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
+The twelve custom Wix CMS collections documented here have been created on the MyOutlet site. Collection names are case-sensitive. Direct collection permissions are set to `ADMIN` for read, insert, update and remove. Backend web-method permissions provide the narrower public, member and site-owner access rules. To reproduce the backend on another Wix site, create these collections with the schemas below.
 
 ## MediaItems
 
@@ -99,6 +99,29 @@ Fields:
 
 Permissions: `ADMIN` (site administrators) for direct collection access. Application access is mediated by the backend web methods. Watchlist operations are mediated by authenticated viewer methods.
 
+## MediaLikes
+
+Fields:
+- `likeKey` — Text, required; deterministic `mediaItemId:memberId` key
+- `mediaItemId` — Text, required
+- `memberId` — Text, required
+- `createdAt` — Date and time
+
+Permissions: `ADMIN` (site administrators) for direct collection access. Likes are created and removed through authenticated member methods.
+
+## MediaComments
+
+Fields:
+- `mediaItemId` — Text, required
+- `memberId` — Text, required
+- `body` — Text, required
+- `status` — Text: `published`, `pending_review` or `removed`
+- `createdAt` — Date and time
+- `updatedAt` — Date and time
+- `moderationNote` — Text
+
+Permissions: `ADMIN` (site administrators) for direct collection access. Members can create, edit and delete their own comments. Edits return to `pending_review`; site owners can publish or remove comments.
+
 ## MediaMetrics
 
 Fields:
@@ -148,6 +171,7 @@ Permissions: `ADMIN` (site administrators) for direct collection access. Applica
 - Creator analytics for playback starts, estimated watch time and completions.
 - Member-selected content-rating preferences applied to catalogue, creator, watchlist, continue-watching, following-feed and playback reads.
 - Member content reports, a private moderation queue, and owner-only report resolution with removal or rating correction.
+- Member likes, comments, comment editing/deletion, and owner moderation of edited or reported comments.
 
 This layer uploads private MP4 files to the Wix Media Manager, records upload/transcoding events, and can request HLS or DASH playback URLs for published MyOutlet-uploaded videos. It does not provide live ingest, a custom CDN, external media transcoding, creator analytics, payment processing or rights verification. Do not publish an item until the media is ready, distribution rights and content rating have been checked, and moderation is complete. Wix backend media events do not run in site Preview.
 
@@ -167,3 +191,5 @@ Indexes for the first nine collections were confirmed `ACTIVE` on the MyOutlet s
 - `ViewerPreferences`: unique `viewer-preferences-member-unique`
 - `ContentReports`: `reports-status-created`, `reports-member-created`, `reports-media-status`
 - `MediaMetrics`: unique `media-metrics-media-unique`, plus `media-metrics-channel`
+- `MediaLikes`: unique `media-likes-key-unique`, plus `media-likes-media` (building)
+- `MediaComments`: `media-comments-status-created`, `media-comments-member-created` (building)
