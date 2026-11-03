@@ -74,7 +74,7 @@ export async function getMyCreatorAnalytics(options = {}) {
   const channelsResult = await wixData.query(CHANNELS)
     .eq('memberId', ownerId)
     .limit(50)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
   const channelIds = channelsResult.items.map(channel => channel._id);
   if (!channelIds.length) {
     return {
@@ -96,7 +96,7 @@ export async function getMyCreatorAnalytics(options = {}) {
     .descending('updatedAt')
     .skip(offset)
     .limit(limit)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
 
   const items = await Promise.all(metricsResult.items.map(async metric => {
     let media = null;
@@ -142,7 +142,7 @@ export async function getMyFollowing(options = {}) {
     .eq('memberId', viewerId)
     .descending('followedAt')
     .limit(limit)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
 
   const creators = await Promise.all(result.items.map(async follow => {
     try {
@@ -169,7 +169,7 @@ export async function getFollowingFeed(options = {}) {
   const follows = await wixData.query(FOLLOWS)
     .eq('memberId', viewerId)
     .limit(100)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
   const channelIds = follows.items.map(item => item.creatorChannelId).filter(Boolean);
   if (!channelIds.length) return { items: [], total: 0 };
 
@@ -180,7 +180,7 @@ export async function getFollowingFeed(options = {}) {
   const result = await filteredQuery
     .descending('publishedAt')
     .limit(limit)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
 
   return {
     items: result.items.map(item => ({
@@ -297,7 +297,7 @@ export async function getMyWatchlist(options = {}) {
     .eq('memberId', viewerId)
     .descending('savedAt')
     .limit(limit)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
 
   const items = await Promise.all(result.items.map(async entry => {
     try {

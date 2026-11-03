@@ -248,7 +248,7 @@ export async function listComments(input = {}) {
     .ascending('createdAt')
     .skip(offset)
     .limit(limit)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
   return {
     items: result.items.map(comment => ({
       _id: comment._id,
@@ -270,7 +270,7 @@ export async function listPendingComments(options = {}) {
     .eq('status', 'pending_review')
     .ascending('updatedAt')
     .limit(limit)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
   const items = await Promise.all(result.items.map(async comment => {
     let media = null;
     try {

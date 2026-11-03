@@ -21,7 +21,7 @@ export async function getMyNotifications(options = {}) {
       .descending('createdAt')
       .skip(offset)
       .limit(limit)
-      .find({ suppressAuth: true }),
+      .find({ suppressAuth: true, returnTotalCount: true }),
     wixData.query(COLLECTION)
       .eq('recipientMemberId', viewerId)
       .isEmpty('readAt')

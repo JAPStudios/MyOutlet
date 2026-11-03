@@ -199,7 +199,7 @@ export async function getMyRightsRecords(options = {}) {
     .eq('creatorMemberId', creatorMemberId)
     .descending('declaredAt')
     .limit(limit)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
   return { items: result.items.map(rightsSummary), total: result.totalCount };
 }
 
@@ -210,7 +210,7 @@ export async function listPendingRights(options = {}) {
     .eq('status', 'pending_review')
     .ascending('declaredAt')
     .limit(limit)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
   const items = await Promise.all(result.items.map(async item => {
     const media = await wixData.get(MEDIA, item.mediaItemId, { suppressAuth: true });
     return {

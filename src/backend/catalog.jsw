@@ -137,7 +137,7 @@ export async function browseCreators(options = {}) {
     .ascending('name')
     .skip(offset)
     .limit(limit)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
   return {
     items: result.items.map(publicChannel),
     total: result.totalCount,
@@ -156,7 +156,7 @@ export async function searchCreators(options = {}) {
   const result = await nameQuery.or(handleQuery).or(descriptionQuery)
     .ascending('name')
     .limit(limit)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
   return { items: result.items.map(publicChannel), total: result.totalCount };
 }
 
@@ -165,7 +165,7 @@ export async function getCreatorProfile(input = {}) {
   const result = await wixData.query(CHANNELS)
     .eq('handle', handle)
     .limit(1)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
   if (!result.items.length) return null;
   const channel = result.items[0];
   const member = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
@@ -176,7 +176,7 @@ export async function getCreatorProfile(input = {}) {
   const media = await mediaQuery
     .descending('publishedAt')
     .limit(24)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
   return {
     channel: publicChannel(channel),
     media: media.items.map(publicMedia),
@@ -196,7 +196,7 @@ export async function browseCatalog(options = {}) {
     .descending('publishedAt')
     .skip(offset)
     .limit(limit)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
   return { items: result.items.map(publicMedia), total: result.totalCount, offset, limit };
 }
 
@@ -217,7 +217,7 @@ export async function searchCatalog(options = {}) {
     .descending('publishedAt')
     .skip(offset)
     .limit(limit)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
   return { items: result.items.map(publicMedia), total: result.totalCount, offset, limit };
 }
 
@@ -370,7 +370,7 @@ export async function enqueueSong(input = {}) {
     .eq('creatorChannelId', channelId)
     .eq('status', 'live')
     .limit(1)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
   const activeStream = activeStreamResult.items[0];
   if (!activeStream) throw new Error('Song requests are available only while this creator is live.');
   const liveMedia = await wixData.get(MEDIA, activeStream.mediaItemId, { suppressAuth: true });
@@ -382,7 +382,7 @@ export async function enqueueSong(input = {}) {
     .eq('liveStreamId', activeStream._id)
     .eq('status', 'queued')
     .limit(1)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
   if (queue.totalCount >= 50) throw new Error('This live stream song queue is full.');
 
   const requesterQueue = await wixData.query(SONGS)
@@ -390,7 +390,7 @@ export async function enqueueSong(input = {}) {
     .eq('requesterMemberId', requesterId)
     .eq('status', 'queued')
     .limit(1)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
   if (requesterQueue.totalCount >= 5) {
     throw new Error('A maximum of five queued song requests per viewer is allowed per live stream.');
   }
@@ -477,7 +477,7 @@ export async function getCreatorCatalog(input = {}) {
   const result = await filteredQuery
     .descending('publishedAt')
     .limit(limit)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
   return { items: result.items.map(publicMedia), total: result.totalCount };
 }
 

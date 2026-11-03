@@ -199,7 +199,7 @@ export async function getMyLiveStreams(options = {}) {
     .eq('creatorMemberId', creatorMemberId)
     .descending('createdAt')
     .limit(limit)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
   const items = await Promise.all(result.items.map(async stream => {
     const media = await wixData.get(MEDIA, stream.mediaItemId, { suppressAuth: true });
     return publicSession(stream, media);
@@ -284,7 +284,7 @@ export async function browseLiveStreams(options = {}) {
     .descending('startedAt')
     .skip(offset)
     .limit(limit)
-    .find({ suppressAuth: true });
+    .find({ suppressAuth: true, returnTotalCount: true });
   const items = await Promise.all(result.items.map(getPublicLiveSession));
   const visible = items.filter(Boolean);
   return {
