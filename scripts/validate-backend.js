@@ -194,6 +194,10 @@ for (const collection of collectionNames) {
 const events = read('src/backend/events.js');
 assert.match(events, /wixMediaManager_onFileUploaded/);
 assert.match(events, /wixMediaManager_onVideoTranscoded/);
+assert.match(events, /FINAL_UPLOAD_STATES/,
+  'Delayed Wix media events must not regress terminal upload states');
+assert.match(events, /session\.ownerMemberId !== context\.ownerMemberId/,
+  'Media events must match the upload session owner');
 
 const media = read('src/backend/media.jsw');
 assert.match(media, /isPrivate:\s*true/,
