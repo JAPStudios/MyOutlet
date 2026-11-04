@@ -1,6 +1,7 @@
 import wixData from 'wix-data';
 
 const UPLOADS = 'MediaUploadSessions';
+const FINAL_UPLOAD_STATES = new Set(['ready', 'submitted', 'failed']);
 
 async function updateUploadFromEvent(event, status) {
   const context = event && event.context ? event.context : {};
@@ -10,6 +11,9 @@ async function updateUploadFromEvent(event, status) {
 
   const session = await wixData.get(UPLOADS, context.uploadSessionId, { suppressAuth: true });
   if (!session || session.ownerMemberId !== context.ownerMemberId) return;
+
+  // Wix events may arrive out of order. Never regress a terminal upload state.
+  if (FINAL_UPLOAD_STATES.has(session.status)) return;
 
   const info = event.fileInfo || {};
   const update = {
