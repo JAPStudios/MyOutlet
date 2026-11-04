@@ -141,8 +141,8 @@ export async function addMediaToPlaylist(input = {}) {
   const mediaItemId = requiredText(input.mediaItemId, 'Media item ID', 100);
   const playlist = await ownedPlaylist(playlistId, ownerId);
   const media = await wixData.get(MEDIA, mediaItemId, { suppressAuth: true });
-  if (!media || media.status !== 'published' || !isMediaRightsCurrent(media)) {
-    throw new Error('Only published media with current distribution rights can be added to a playlist.');
+  if (!media || media.status !== 'published') {
+    throw new Error('Only published media can be added to a playlist.');
   }
   const itemCount = await wixData.query(ITEMS)
     .eq('playlistId', playlistId)

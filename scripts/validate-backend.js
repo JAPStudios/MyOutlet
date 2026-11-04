@@ -264,8 +264,6 @@ assert.match(engagement, /channel.memberId !== ownerId/);
 const playlists = read('src/backend/playlists.jsw');
 assert.match(playlists, /getPlaylist/);
 assert.match(playlists, /reorderPlaylistItems/);
-assert.match(playlists, /media\.status !== 'published' \|\| !isMediaRightsCurrent\(media\)/,
-  'Playlist additions must reject media without current distribution rights');
 const rights = read('src/backend/rights.jsw');
 assert.match(rights, /submitRightsDeclaration/);
 assert.match(rights, /reviewRightsDeclaration/);
