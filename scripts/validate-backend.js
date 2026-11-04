@@ -127,6 +127,12 @@ function collectBackendFiles(directory) {
 }
 const backendFiles = collectBackendFiles(backendRoot)
   .filter(file => /\.jsw?$/.test(file));
+const discoveredWebModules = backendFiles
+  .filter(file => file.endsWith('.jsw'))
+  .map(file => path.relative(backendRoot, file).replace(/\\/g, '/'))
+  .sort();
+assert.deepEqual([...modules].sort(), discoveredWebModules,
+  'Every backend web module must be included in permission validation');
 const backendModules = new Map();
 for (const file of backendFiles) {
   const relative = path.relative(backendRoot, file).replace(/\.jsw?$/, '');
