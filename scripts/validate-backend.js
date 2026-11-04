@@ -193,6 +193,8 @@ for (const collection of collectionNames) {
 
 const events = read('src/backend/events.js');
 assert.match(events, /wixMediaManager_onFileUploaded/);
+assert.equal(Object.hasOwn(permissions['backend/liveStreams.jsw'] || {}, 'getMyLiveChatOverlay'), false,
+  'Removed live-chat overlay methods must not retain stale permission entries');
 assert.match(events, /wixMediaManager_onVideoTranscoded/);
 assert.match(events, /FINAL_UPLOAD_STATES/,
   'Delayed Wix media events must not regress terminal upload states');
