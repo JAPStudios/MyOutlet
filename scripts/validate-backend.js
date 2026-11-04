@@ -151,6 +151,10 @@ for (const file of modules) {
     .map(match => match[1]);
   const configured = permissions[key] || {};
   assert.ok(exports.length > 0, key + ' must export web methods');
+  for (const configuredMethod of Object.keys(configured)) {
+    assert.ok(exports.includes(configuredMethod),
+      key + ':' + configuredMethod + ' has a permission rule but no exported web method');
+  }
   for (const method of exports) {
     const identity = key + ':' + method;
     const rule = configured[method];
