@@ -11,8 +11,8 @@ const cms = read('CMS_COLLECTIONS.md');
 const site = parse('wix.config.json');
 const tick = String.fromCharCode(96);
 
-assert.equal(site.siteId, '34798e4b-3c1a-45ff-a023-4ea4b83cc9f8',
-  'wix.config.json must target the MyOutlet site');
+assert.equal(site.siteId, '60a568ee-e9cb-4a45-8f02-e6343427552c',
+  'wix.config.json must target the live MyOutlet Wix site');
 assert.equal(permissions['*']['*'].siteMember.invoke, false,
   'Unlisted web methods must not be callable by site members');
 assert.equal(permissions['*']['*'].anonymous.invoke, false,
