@@ -813,7 +813,32 @@
       report.type = "button";
       report.textContent = "Report";
       report.dataset.messageId = message._id;
+      report.dataset.chatAction = "report";
       line.appendChild(report);
+      const ownsActiveChannel = creatorChannel && activeMediaItem &&
+        creatorChannel._id === activeMediaItem.creatorChannelId;
+      if (ownsActiveChannel && message.senderMemberId) {
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "Remove";
+        remove.dataset.messageId = message._id;
+        remove.dataset.chatAction = "remove";
+        line.appendChild(remove);
+        const timeout = document.createElement("button");
+        timeout.type = "button";
+        timeout.textContent = "Timeout 1 hour";
+        timeout.dataset.messageId = message._id;
+        timeout.dataset.memberId = message.senderMemberId;
+        timeout.dataset.chatAction = "timeout";
+        line.appendChild(timeout);
+        const ban = document.createElement("button");
+        ban.type = "button";
+        ban.textContent = "Ban";
+        ban.dataset.messageId = message._id;
+        ban.dataset.memberId = message.senderMemberId;
+        ban.dataset.chatAction = "ban";
+        line.appendChild(ban);
+      }
     }
     chatMessagesNode.appendChild(line);
     chatMessagesNode.scrollTop = chatMessagesNode.scrollHeight;
@@ -862,18 +887,44 @@
   });
 
   chatMessagesNode.addEventListener("click", async event => {
-    const button = event.target.closest("button[data-message-id]");
+    const button = event.target.closest("button[data-message-id][data-chat-action]");
     if (!button) return;
     button.disabled = true;
+    const action = button.dataset.chatAction;
     try {
-      await getJson(siteBase + "/_functions/reportLiveChatMessage", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messageId: button.dataset.messageId, reason: "other" })
-      });
-      chatStatus.textContent = "Message reported for review.";
+      if (action === "report") {
+        await getJson(siteBase + "/_functions/reportLiveChatMessage", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messageId: button.dataset.messageId, reason: "other" })
+        });
+        chatStatus.textContent = "Message reported for review.";
+      } else if (action === "remove") {
+        await getJson(siteBase + "/_functions/moderateMyChannelChatMessage", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messageId: button.dataset.messageId, note: "Removed by creator-channel owner." })
+        });
+        chatStatus.textContent = "Message removed from this channel's live chat.";
+      } else if (action === "timeout" || action === "ban") {
+        await getJson(siteBase + "/_functions/banLiveChatMember", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            creatorChannelId: activeMediaItem.creatorChannelId,
+            bannedMemberId: button.dataset.memberId,
+            durationMinutes: action === "timeout" ? 60 : 0,
+            reason: action === "timeout" ? "Live-chat timeout" : "Live-chat channel ban"
+          })
+        });
+        chatStatus.textContent = action === "timeout"
+          ? "Member timed out from this channel for one hour."
+          : "Member banned from this channel's live chat.";
+        await loadMyLiveChatBans();
+      }
+      await loadLiveChat(true);
     } catch (error) {
-      chatStatus.textContent = error.message || "The message could not be reported.";
+      chatStatus.textContent = error.message || "The live-chat action could not be completed.";
       button.disabled = false;
     }
   });
