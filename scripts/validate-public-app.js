@@ -53,7 +53,7 @@ assert.ok(homePage.includes('from "backend/media.jsw"'),
   'The homepage Velo page code must import the media playback web module.');
 assert.ok(homePage.includes('from "backend/liveChat.jsw"'),
   'The homepage Velo page code must import the live-chat web module.');
-for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'publicPlayback', 'liveChatMessages', 'sendLiveChatMessage', 'reportLiveChatMessage', 'myChannel', 'saveMyChannel', 'submitContent', 'mySubmissions', 'createVideoUpload', 'myVideoUploads', 'myCreatorAnalytics', 'createLiveStream', 'myLiveStreams', 'endLiveStream', 'songQueue', 'setSongRequestStatus', 'followCreator', 'unfollowCreator', 'addToWatchlist', 'removeFromWatchlist', 'myWatchlist', 'continueWatching', 'myFollowing', 'followingFeed', 'recordPlaybackProgress', 'myViewingPreferences', 'setMyViewingPreferences', 'promptLogin', 'listPendingContent', 'moderateContent', 'listPendingRights', 'reviewRightsDeclaration', 'listLiveChatReports', 'resolveLiveChatReport']) {
+for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'publicPlayback', 'liveChatMessages', 'sendLiveChatMessage', 'reportLiveChatMessage', 'myChannel', 'saveMyChannel', 'submitContent', 'mySubmissions', 'createVideoUpload', 'myVideoUploads', 'myCreatorAnalytics', 'createLiveStream', 'myLiveStreams', 'endLiveStream', 'songQueue', 'setSongRequestStatus', 'followCreator', 'unfollowCreator', 'addToWatchlist', 'removeFromWatchlist', 'myWatchlist', 'continueWatching', 'myFollowing', 'followingFeed', 'recordPlaybackProgress', 'myViewingPreferences', 'setMyViewingPreferences', 'promptLogin', 'listPendingContent', 'moderateContent', 'listPendingRights', 'reviewRightsDeclaration', 'listLiveChatReports', 'resolveLiveChatReport', 'mediaEngagement', 'mediaComments', 'likeMedia', 'unlikeMedia', 'addComment', 'reportContent']) {
   assert.ok(homePage.includes(route), 'The Velo bridge must handle ' + route + '.');
 }
 assert.match(homePage, /window\.addEventListener\(REQUEST_EVENT/,
@@ -100,6 +100,10 @@ assert.ok(app.includes('id=\"mo-moderation\"'), 'The homepage must include a sit
 assert.ok(app.includes('reviewRightsDeclaration'), 'Site owners must be able to review distribution-rights declarations.');
 assert.ok(app.includes('moderateContent'), 'Site owners must be able to approve or reject media submissions.');
 assert.ok(app.includes('resolveLiveChatReport'), 'Site owners must be able to resolve live-chat reports.');
+assert.ok(app.includes('mo-engagement'), 'The media player must expose engagement controls.');
+assert.ok(app.includes('likeMedia'), 'Members must be able to like and unlike media.');
+assert.ok(app.includes('addComment'), 'Members must be able to comment on media.');
+assert.ok(app.includes('reportContent'), 'Members must be able to report media.');
 assert.match(app, /setInterval\(\(\) => loadLiveChat\(false\), 5000\)/,
   'Live chat must refresh while a live stream is open.');
 assert.match(app, /function ensureHls\(\)/,
