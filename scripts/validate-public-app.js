@@ -19,12 +19,17 @@ assert.match(http, /stream\.status !== 'live'/,
   'The public live listing must only return active streams.');
 assert.match(http, /creatorMemberId|memberId/,
   'The private creator member identity must be used only for internal authorization.');
+assert.match(http, /\.skip\(offset\)/,
+  'The public catalogue must support offset pagination.');
+assert.match(http, /nextOffset, hasMore/,
+  'The public catalogue must report its pagination cursor.');
+
 assert.match(http, /mediaManager\.getVideoPlaybackUrl/,
   'Wix-hosted uploaded videos must use Wix playback URL generation.');
 
 for (const required of [
   'mo-discover', 'mo-live', 'mo-creators', 'mo-search',
-  'mo-type', 'mo-rating', '/_functions/publicCatalog',
+  'mo-type', 'mo-rating', 'mo-load-more', 'loadMoreCatalog', '/_functions/publicCatalog',
   '/_functions/publicLiveStreams', '/_functions/publicCreators',
   '/_functions/publicPlayback'
 ]) {
