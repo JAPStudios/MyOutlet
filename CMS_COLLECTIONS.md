@@ -11,7 +11,7 @@ Fields:
 - `mediaUploadSessionId` — Text; associated MediaUploadSessions record ID when uploaded through MyOutlet
 - `thumbnailUrl` — Text
 - `contentType` — Text: `video`, `livestream` or `audio`
-- `contentRating` — Text: `TV-Y`, `TV-Y7`, `TV-G` or `Unrated`
+- `contentRating` — Text: `TV-Y`, `TV-Y7`, `TV-G`, `TV-PG`, `TV-14`, `TV-MA` or `Unrated`
 - `category` — Text
 - `tags` — Array of Text
 - `language` — Language code
@@ -51,7 +51,7 @@ Permissions: `ADMIN` (site administrators) for direct collection access. Applica
 
 Fields:
 - `memberId` — Text, required; site-member ID that owns the preference
-- `maxContentRating` — Text: `TV-Y`, `TV-Y7` or `TV-G`
+- `maxContentRating` — Text: `TV-Y`, `TV-Y7`, `TV-G`, `TV-PG`, `TV-14` or `TV-MA`
 - `hideUnrated` — Boolean
 - `updatedAt` — Date and time
 
