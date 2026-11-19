@@ -69,7 +69,7 @@
       <div class="mo-wrap mo-nav-inner">
         <a class="mo-brand" href="/myoutlet/home" aria-label="MyOutlet home">My<span>Outlet</span></a>
         <nav class="mo-links" aria-label="Main navigation">
-          <a href="#mo-discover">Discover</a><a href="#mo-live">Live</a><a href="#mo-creators">Creators</a>
+          <a href="#mo-discover">Discover</a><a href="#mo-live">Live</a><a href="#mo-productions">Productions</a><a href="#mo-creators">Creators</a>
           <a href="/myoutlet/faq">FAQ</a>
         </nav>
       </div>
@@ -102,6 +102,12 @@
         <div class="mo-grid" id="mo-live-grid"></div>
       </div>
     </section>
+    <section class="mo-section" id="mo-productions">
+      <div class="mo-wrap">
+        <div class="mo-section-head"><div><h2>Jelly &amp; Peanut Productions</h2><p class="mo-sub">Production slate</p></div></div>
+        <div class="mo-grid" id="mo-production-grid"></div>
+      </div>
+    </section>
     <section class="mo-section" id="mo-creators">
       <div class="mo-wrap">
         <div class="mo-section-head"><div><h2>Creator channels</h2><p class="mo-sub">Explore the channels publishing on MyOutlet.</p></div></div>
@@ -121,6 +127,7 @@
   const catalogNode = $("#mo-catalog");
   const liveNode = $("#mo-live-grid");
   const creatorsNode = $("#mo-creators-grid");
+  const productionNode = $("#mo-production-grid");
   const catalogStatus = $("#mo-catalog-status");
   const liveStatus = $("#mo-live-status");
   const creatorsStatus = $("#mo-creators-status");
@@ -272,6 +279,40 @@
   modal.addEventListener("click", event => { if (event.target === modal) closePlayer(); });
   document.addEventListener("keydown", event => { if (event.key === "Escape" && modal.classList.contains("open")) closePlayer(); });
 
+  const productionSlate = [
+    { title: "PB&J", description: "Three children, whether friends or family, set out on mysterious quests." },
+    { title: "O.M.G. / Oh My Gawd", description: "An anthropomorphic dog detective investigates cases with the catchphrase “Oh. My. God.” A joke episode features a God detective whose catchphrase is “Oh. My. Dog.”" },
+    { title: "Creespyracies", description: "In the year 3000, paranormal activists Minvida and Ursa Birch investigate Earth's ancient paranormal history and its science, accompanied by an anthropomorphic pyramid. The series combines animation, live action and analogue-style image and video editing." },
+    { title: "Tales of Grimwald", description: "An animated adaptation of the original story published on WaveWeaver, drawing inspiration from Gravity Falls, The Owl House, Helluva Boss and Hazbin Hotel." },
+    { title: "The Shakespearience", description: "A reimagining of Shakespeare's greatest work as an experience at a milkshake parlour." }
+  ];
+
+  function renderProductions() {
+    productionNode.replaceChildren();
+    productionSlate.forEach(production => {
+      const article = document.createElement("article");
+      article.className = "mo-card";
+      const thumb = document.createElement("div");
+      thumb.className = "mo-thumb";
+      const label = document.createElement("span");
+      label.textContent = "Jelly & Peanut Productions";
+      thumb.appendChild(label);
+      const body = document.createElement("div");
+      body.className = "mo-card-body";
+      const title = document.createElement("h3");
+      title.className = "mo-card-title";
+      title.textContent = production.title;
+      const description = document.createElement("p");
+      description.className = "mo-desc";
+      description.style.display = "block";
+      description.style.webkitLineClamp = "unset";
+      description.textContent = production.description;
+      body.append(title, description);
+      article.append(thumb, body);
+      productionNode.appendChild(article);
+    });
+  }
+
   async function init() {
     if (!window.Hls) {
       const script = document.createElement("script");
@@ -326,5 +367,6 @@
     }
   }
 
+  renderProductions();
   init();
 })();
