@@ -173,6 +173,15 @@ assert.match(app, /HLS playback is unavailable because the player library could 
   'The player must report an unavailable HLS playback engine.');
 assert.match(app, /ratingOrder\.indexOf\(itemRating\) <= maximumRating/,
   'The maximum-rating selector must include items at or below the selected rating.');
+assert.ok(app.includes('const ratingOrder = ["TV-Y", "TV-Y7", "TV-G", "TV-PG", "TV-14", "TV-MA"];'),
+  'The public catalogue must retain the complete rating order.');
+for (const rating of ['TV-Y', 'TV-Y7', 'TV-G', 'TV-PG', 'TV-14', 'TV-MA', 'Unrated']) {
+  assert.ok(app.includes('<option>' + rating + '</option>'),
+    'Creator media and live-stream forms must retain ' + rating + ' options.');
+}
+assert.ok(app.includes('preference.maxContentRating || "TV-MA"'),
+  'The public app must preserve the highest saved viewer rating preference.');
+
 assert.match(app, /Ratings are creator-supplied content classifications/,
   'The interface must distinguish creator ratings from verified age checks.');
 assert.match(app, /No published videos or audio are available yet/,
