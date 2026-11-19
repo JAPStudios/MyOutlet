@@ -1348,6 +1348,8 @@
     try {
       creatorChannel = await getJson(siteBase + "/_functions/myChannel");
       signInButton.hidden = true;
+      if (creatorChannel && !$("#mo-rights-holder").value) $("#mo-rights-holder").value = creatorChannel.name || "";
+      if (!$("#mo-rights-from").value) $("#mo-rights-from").value = new Date().toISOString().slice(0, 10);
       studioStatus.textContent = creatorChannel
         ? "Signed in. Creator channel: @" + creatorChannel.handle
         : "Signed in. Create a channel profile to begin publishing.";
