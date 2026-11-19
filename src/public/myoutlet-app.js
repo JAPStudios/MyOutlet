@@ -71,7 +71,7 @@
         <a class="mo-brand" href="/myoutlet/home" aria-label="MyOutlet home">My<span>Outlet</span></a>
         <nav class="mo-links" aria-label="Main navigation">
           <a href="#mo-discover">Discover</a><a href="#mo-live">Live</a><a href="#mo-creators">Creators</a>
-          <a href="/myoutlet/faq">FAQ</a>
+          <a href="#mo-faq">FAQ</a>
         </nav>
       </div>
     </header>
@@ -246,7 +246,20 @@
         <div class="mo-studio-list" id="mo-notifications"></div>
       </div>
     </section>
-    <footer class="mo-footer"><div class="mo-wrap">MyOutlet · Audiovisual publishing, streaming and creator channels</div></footer>
+    <section class="mo-section" id="mo-faq">
+  <div class="mo-wrap">
+    <div class="mo-section-head"><div><h2>Frequently asked questions</h2><p class="mo-sub">How publishing, ratings and live features work on MyOutlet.</p></div></div>
+    <div class="mo-studio-grid">
+      <article class="mo-studio-card"><h3>What can creators publish?</h3><p>Creator channels can submit video and audio. MP4 uploads are processed through the platform media service; creators can also submit an HTTPS media URL.</p></article>
+      <article class="mo-studio-card"><h3>How do content ratings work?</h3><p>Creators assign a content classification when submitting media. Viewer preferences filter the catalogue, but these classifications are not independently verified age checks.</p></article>
+      <article class="mo-studio-card"><h3>How are distribution rights reviewed?</h3><p>Creators submit a declaration identifying the rights basis, rights holder, details and validity period. Media is not published until the declaration has been reviewed and verified for worldwide distribution.</p></article>
+      <article class="mo-studio-card"><h3>How does live streaming work?</h3><p>Creators request a live-stream session in Creator Studio. A session must be reviewed before it can go live. Streaming requires the platform RTMPS ingest and HLS playback services to be configured and available.</p></article>
+      <article class="mo-studio-card"><h3>Can viewers pay for song requests?</h3><p>The creator studio currently provides a song-request queue for live-stream moderation. Paid requests and payment processing are not currently available.</p></article>
+      <article class="mo-studio-card"><h3>Do viewers need an account?</h3><p>Published media, live broadcasts and creator channels can be browsed publicly. An account is required for member features such as following channels, saving media, commenting and joining live chat.</p></article>
+    </div>
+  </div>
+</section>
+<footer class="mo-footer"><div class="mo-wrap">MyOutlet · Audiovisual publishing, streaming and creator channels</div></footer>
     <div class="mo-modal" id="mo-modal" role="dialog" aria-modal="true" aria-label="Media player">
       <div class="mo-player"><video id="mo-video" controls playsinline></video><div class="mo-player-info"><strong id="mo-player-title">Now playing</strong><button class="mo-close" id="mo-close" type="button">Close</button></div><section class="mo-chat" id="mo-chat" aria-label="Live chat"><h3>Live chat</h3><div class="mo-chat-messages" id="mo-chat-messages" aria-live="polite"></div><form class="mo-chat-form" id="mo-chat-form"><input class="mo-chat-input" id="mo-chat-input" type="text" maxlength="500" placeholder="Sign in to join the conversation" aria-label="Live chat message"><button class="mo-btn" type="submit">Send</button></form><p class="mo-chat-status" id="mo-chat-status" role="status"></p></section><section class="mo-engagement" id="mo-engagement" aria-label="Media engagement"><div class="mo-engagement-head"><button class="mo-btn" id="mo-like-button" type="button">Like</button><span id="mo-engagement-counts">Loading engagement…</span></div><div class="mo-engagement-head"><select id="mo-playlist-select" aria-label="Select playlist"><option value="">Choose a playlist</option></select><button class="mo-btn" id="mo-add-to-playlist" type="button">Add to playlist</button></div><h3>Comments</h3><div class="mo-comments" id="mo-comments" aria-live="polite"></div><form class="mo-comment-form" id="mo-comment-form"><textarea id="mo-comment-input" maxlength="2000" placeholder="Sign in to comment" aria-label="Comment"></textarea><button class="mo-btn" type="submit">Post comment</button></form><div class="mo-engagement-head"><select id="mo-report-reason" aria-label="Report reason"><option value="other">Other</option><option value="copyright">Copyright</option><option value="harassment">Harassment</option><option value="hate">Hate</option><option value="sexual_content">Sexual content</option><option value="violence">Violence</option><option value="self_harm">Self-harm</option><option value="misinformation">Misinformation</option><option value="spam">Spam</option></select><button class="mo-btn" id="mo-report-content" type="button">Report media</button></div><p class="mo-chat-status" id="mo-engagement-status" role="status"></p></section></div>
     </div>
