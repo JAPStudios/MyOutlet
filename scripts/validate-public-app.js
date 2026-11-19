@@ -46,6 +46,8 @@ for (const forbidden of [
 
 assert.ok(app.includes('const siteBase = "/myoutlet";'),
   'Public HTTP requests must include the MyOutlet Wix site path.');
+assert.match(app, /ratingOrder\.indexOf\(itemRating\) <= maximumRating/,
+  'The maximum-rating selector must include items at or below the selected rating.');
 assert.match(app, /Ratings are creator-supplied content classifications/,
   'The interface must distinguish creator ratings from verified age checks.');
 assert.match(app, /No published videos or audio are available yet/,
