@@ -247,6 +247,14 @@
   const catalogStatus = $("#mo-catalog-status");
   const liveStatus = $("#mo-live-status");
   const creatorsStatus = $("#mo-creators-status");
+  const profileSection = $("#mo-creator-profile");
+  const profileName = $("#mo-profile-name");
+  const profileHandle = $("#mo-profile-handle");
+  const profileDescription = $("#mo-profile-description");
+  const profileBanner = $("#mo-profile-banner");
+  const profileAvatar = $("#mo-profile-avatar");
+  const profileLinks = $("#mo-profile-links");
+  const profileMedia = $("#mo-profile-media");
   const modal = $("#mo-modal");
   const video = $("#mo-video");
   const playerTitle = $("#mo-player-title");
@@ -1053,6 +1061,43 @@
 
   $("#mo-refresh-moderation").addEventListener("click", loadModeration);
 
+  async function loadCreatorProfile(handle) {
+    try {
+      const result = await getJson(siteBase + "/_functions/creatorProfile?handle=" + encodeURIComponent(handle));
+      if (!result || !result.channel) throw new Error("Creator channel was not found.");
+      const channel = result.channel;
+      profileName.textContent = channel.name;
+      profileHandle.textContent = "@" + channel.handle;
+      profileDescription.textContent = channel.description || "";
+      profileBanner.hidden = !/^https:\/\//i.test(channel.bannerUrl || "");
+      if (!profileBanner.hidden) profileBanner.src = channel.bannerUrl;
+      profileAvatar.hidden = !/^https:\/\//i.test(channel.avatarUrl || "");
+      if (!profileAvatar.hidden) profileAvatar.src = channel.avatarUrl;
+      profileLinks.replaceChildren();
+      const links = [channel.websiteUrl, ...(Array.isArray(channel.socialLinks) ? channel.socialLinks : [])];
+      links.filter(link => /^https:\/\//i.test(link || "")).forEach(link => {
+        const anchor = document.createElement("a");
+        anchor.href = link;
+        anchor.target = "_blank";
+        anchor.rel = "noopener noreferrer";
+        anchor.textContent = link;
+        profileLinks.appendChild(anchor);
+      });
+      profileMedia.replaceChildren();
+      const items = Array.isArray(result.media) ? result.media : [];
+      if (items.length) items.forEach(item => profileMedia.appendChild(card(item, false)));
+      else profileMedia.textContent = "No published media yet.";
+      profileSection.hidden = false;
+      profileSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (error) {
+      creatorsStatus.textContent = error.message || "The creator profile could not be loaded.";
+    }
+  }
+
+  $("#mo-profile-close").addEventListener("click", () => {
+    profileSection.hidden = true;
+  });
+
   async function loadViewerLibrary() {
     const results = await Promise.allSettled([
       getJson(siteBase + "/_functions/myWatchlist?limit=50"),
@@ -1681,7 +1726,13 @@
         const description = document.createElement("p");
         description.className = "mo-desc";
         description.textContent = text(creator.description);
-        item.append(title, handle);
+        item.append(title, handle, description);
+        const view = document.createElement("button");
+        view.className = "mo-btn";
+        view.type = "button";
+        view.textContent = "View channel";
+        view.addEventListener("click", () => loadCreatorProfile(creator.handle));
+        item.appendChild(view);
         const follow = document.createElement("button");
         follow.className = "mo-btn";
         follow.type = "button";
