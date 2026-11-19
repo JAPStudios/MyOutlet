@@ -217,7 +217,7 @@
   const submissionsStatus = $("#mo-submissions-status");
   const analyticsNode = $("#mo-analytics");
   const liveForm = $("#mo-live-form");
-  const liveStatus = $("#mo-live-status");
+  const creatorLiveStatus = $("#mo-live-status");
   const ingestUrlNode = $("#mo-ingest-url");
   const myLiveStreamsNode = $("#mo-my-live-streams");
   const queueStatus = $("#mo-queue-status");
@@ -835,11 +835,11 @@
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ streamId: stream._id })
             });
-            liveStatus.textContent = "The live-stream session has ended.";
+            creatorLiveStatus.textContent = "The live-stream session has ended.";
             await loadMyLiveStreams();
             await refreshSongQueue();
           } catch (error) {
-            liveStatus.textContent = error.message || "The stream could not be ended.";
+            creatorLiveStatus.textContent = error.message || "The stream could not be ended.";
             end.disabled = false;
           }
         });
@@ -904,7 +904,7 @@
   liveForm.addEventListener("submit", async event => {
     event.preventDefault();
     if (!creatorChannel) {
-      liveStatus.textContent = "Create a creator channel before starting a live stream.";
+      creatorLiveStatus.textContent = "Create a creator channel before starting a live stream.";
       return;
     }
     const button = liveForm.querySelector('button[type="submit"]');
@@ -923,10 +923,10 @@
         })
       });
       ingestUrlNode.value = result.ingestUrl || "";
-      liveStatus.textContent = "Live-stream session created with status: " + result.status + ". Complete rights review and moderation before broadcasting.";
+      creatorLiveStatus.textContent = "Live-stream session created with status: " + result.status + ". Complete rights review and moderation before broadcasting.";
       await loadMyLiveStreams();
     } catch (error) {
-      liveStatus.textContent = error.message || "The live-stream session could not be created.";
+      creatorLiveStatus.textContent = error.message || "The live-stream session could not be created.";
     } finally {
       button.disabled = false;
     }
