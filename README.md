@@ -38,6 +38,10 @@ MyOutlet's staffing scope includes paid software-engineering personnel and paid 
 
 See [UPSTREAM_COMPONENTS.md](UPSTREAM_COMPONENTS.md) for the upstream repository inventory and license notes. A Git submodule entry records a pinned commit; it does not copy source files into the MyOutlet application.
 
+## Availability monitoring
+
+The public `/_functions/health` endpoint checks that the Wix backend can read the media and live-stream CMS collections. The scheduled GitHub Actions monitor checks this endpoint every five minutes and fails when the site or its CMS read path is unavailable. This is an uptime/readiness check for the Wix application; it does not certify the separate RTMPS/HLS streaming host, payment processing or media-delivery performance.
+
 ## Source validation
 
 Run `node scripts/validate-backend.js` (or `npm test`) to check that all exported backend web methods have explicit permissions, private collections are documented, and the MyOutlet site binding, media event/uploader wiring and feature modules remain consistent. GitHub Actions syntax-checks every Velo JavaScript source file and validates every exported web method against the documented collections on relevant pushes and pull requests.
