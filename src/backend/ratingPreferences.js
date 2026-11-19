@@ -13,7 +13,8 @@ export async function getViewerRatingPreference(memberId) {
     return { maxContentRating: 'TV-G', hideUnrated: false };
   }
   return {
-    maxContentRating: RATING_ORDER.includes(result.items[0].maxContentRating)\n      ? result.items[0].maxContentRating : 'TV-G',
+    maxContentRating: RATING_ORDER.includes(result.items[0].maxContentRating)
+      ? result.items[0].maxContentRating : 'TV-G',
     hideUnrated: result.items[0].hideUnrated === true,
     updatedAt: result.items[0].updatedAt
   };
