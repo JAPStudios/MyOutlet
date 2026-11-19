@@ -5,6 +5,8 @@ import { getPublishedMediaPlayback } from "backend/media.jsw";
 import { getLiveChatMessages, sendLiveChatMessage, reportLiveChatMessage, listLiveChatReports, resolveLiveChatReport } from "backend/liveChat.jsw";
 import { getMediaEngagement, listComments, likeMedia, unlikeMedia, addComment } from "backend/engagement.jsw";
 import { reportContent, listContentReports, resolveContentReport } from "backend/reports.jsw";
+import { getMyPlaylists, createPlaylist, getPlaylist, addMediaToPlaylist, removeMediaFromPlaylist, updatePlaylist, deletePlaylist } from "backend/playlists.jsw";
+import { getMyNotifications, markNotificationRead, markAllNotificationsRead } from "backend/notifications.jsw";
 import { getMyChannel, saveMyChannel, submitContent, getMySubmissions } from "backend/catalog.jsw";
 import { createVideoUpload, getMyVideoUploads } from "backend/media.jsw";
 import { getMyCreatorAnalytics } from "backend/viewer.jsw";
@@ -134,6 +136,26 @@ async function handleRequest(detail) {
       result = await listContentReports(query);
     } else if (method === "POST" && route === "resolveContentReport") {
       result = await resolveContentReport(body);
+    } else if (method === "GET" && route === "myPlaylists") {
+      result = await getMyPlaylists(query);
+    } else if (method === "POST" && route === "createPlaylist") {
+      result = await createPlaylist(body);
+    } else if (method === "GET" && route === "playlist") {
+      result = await getPlaylist(query);
+    } else if (method === "POST" && route === "addMediaToPlaylist") {
+      result = await addMediaToPlaylist(body);
+    } else if (method === "POST" && route === "removeMediaFromPlaylist") {
+      result = await removeMediaFromPlaylist(body);
+    } else if (method === "POST" && route === "updatePlaylist") {
+      result = await updatePlaylist(body);
+    } else if (method === "POST" && route === "deletePlaylist") {
+      result = await deletePlaylist(body);
+    } else if (method === "GET" && route === "myNotifications") {
+      result = await getMyNotifications(query);
+    } else if (method === "POST" && route === "markNotificationRead") {
+      result = await markNotificationRead(body);
+    } else if (method === "POST" && route === "markAllNotificationsRead") {
+      result = await markAllNotificationsRead();
     } else {
       throw new Error("Unsupported MyOutlet request.");
     }
