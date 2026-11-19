@@ -53,7 +53,7 @@ assert.ok(homePage.includes('from "backend/media.jsw"'),
   'The homepage Velo page code must import the media playback web module.');
 assert.ok(homePage.includes('from "backend/liveChat.jsw"'),
   'The homepage Velo page code must import the live-chat web module.');
-for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'publicPlayback', 'liveChatMessages', 'sendLiveChatMessage', 'reportLiveChatMessage', 'myChannel', 'saveMyChannel', 'submitContent', 'mySubmissions', 'createVideoUpload', 'myVideoUploads', 'myCreatorAnalytics', 'createLiveStream', 'myLiveStreams', 'endLiveStream', 'songQueue', 'setSongRequestStatus']) {
+for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'publicPlayback', 'liveChatMessages', 'sendLiveChatMessage', 'reportLiveChatMessage', 'myChannel', 'saveMyChannel', 'submitContent', 'mySubmissions', 'createVideoUpload', 'myVideoUploads', 'myCreatorAnalytics', 'createLiveStream', 'myLiveStreams', 'endLiveStream', 'songQueue', 'setSongRequestStatus', 'followCreator', 'unfollowCreator', 'addToWatchlist', 'removeFromWatchlist', 'myWatchlist', 'continueWatching', 'myFollowing', 'followingFeed', 'recordPlaybackProgress', 'myViewingPreferences', 'setMyViewingPreferences']) {
   assert.ok(homePage.includes(route), 'The Velo bridge must handle ' + route + '.');
 }
 assert.match(homePage, /window\.addEventListener\(REQUEST_EVENT/,
@@ -88,6 +88,11 @@ assert.match(app, /id="mo-live-form"/, 'Creators must be able to request a live-
 assert.match(app, /id="mo-song-queue"/, 'Creators must be able to review their live song queue.');
 assert.match(app, /endLiveStream/, 'Creators must be able to end their own live-stream sessions.');
 assert.match(app, /setSongRequestStatus/, 'Creators must be able to mark queued songs played or skipped.');
+assert.ok(app.includes('id="mo-library"'), 'Members must have a personal media library.');
+assert.ok(app.includes('Save to watchlist'), 'Published media must be saveable to the member watchlist.');
+assert.ok(app.includes('followCreator'), 'Members must be able to follow creator channels.');
+assert.ok(app.includes('recordPlaybackProgress'), 'On-demand playback must record member progress.');
+assert.ok(app.includes('setMyViewingPreferences'), 'Member content-rating preferences must persist through the backend.');
 assert.match(app, /setInterval\(\(\) => loadLiveChat\(false\), 5000\)/,
   'Live chat must refresh while a live stream is open.');
 assert.match(app, /function ensureHls\(\)/,
