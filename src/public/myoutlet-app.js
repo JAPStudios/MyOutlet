@@ -227,6 +227,14 @@
   const chatForm = $("#mo-chat-form");
   const chatInput = $("#mo-chat-input");
   const chatStatus = $("#mo-chat-status");
+  const engagementCounts = $("#mo-engagement-counts");
+  const engagementStatus = $("#mo-engagement-status");
+  const likeButton = $("#mo-like-button");
+  const commentsNode = $("#mo-comments");
+  const commentForm = $("#mo-comment-form");
+  const commentInput = $("#mo-comment-input");
+  const reportReason = $("#mo-report-reason");
+  const reportContentButton = $("#mo-report-content");
   const studioStatus = $("#mo-studio-status");
   const signInButton = $("#mo-sign-in");
   const channelForm = $("#mo-channel-form");
@@ -258,6 +266,8 @@
   let pendingUploadStatus = "";
   let activeLiveStreamId = "";
   let activeMediaItem = null;
+  let activeMediaItemId = "";
+  let activeMediaLiked = false;
   let lastProgressPosition = 0;
   let liveChatCursor = null;
   let liveChatTimer = null;
@@ -524,8 +534,10 @@
     }
     playerTitle.textContent = text(item.title) || "Now playing";
     activeMediaItem = isLive ? null : item;
+    activeMediaItemId = item.mediaItemId || item._id || "";
     lastProgressPosition = 0;
     modal.classList.add("open");
+    await loadEngagement(activeMediaItemId);
     if (isLive) {
       activeLiveStreamId = item._id;
       liveChatCursor = null;
@@ -564,6 +576,7 @@
     }
     activeLiveStreamId = "";
     activeMediaItem = null;
+    activeMediaItemId = "";
     lastProgressPosition = 0;
     liveChatCursor = null;
     chatPanel.classList.remove("open");
@@ -576,6 +589,95 @@
     }
     modal.classList.remove("open");
   }
+
+  async function loadEngagement(mediaItemId) {
+    if (!mediaItemId) return;
+    engagementCounts.textContent = "Loading engagement…";
+    const results = await Promise.allSettled([
+      getJson(siteBase + "/_functions/mediaEngagement?mediaItemId=" + encodeURIComponent(mediaItemId)),
+      getJson(siteBase + "/_functions/mediaComments?mediaItemId=" + encodeURIComponent(mediaItemId) + "&limit=50")
+    ]);
+    if (results[0].status === "fulfilled") {
+      const engagement = results[0].value;
+      activeMediaLiked = engagement.likedByCurrentMember === true;
+      likeButton.textContent = (activeMediaLiked ? "Unlike" : "Like") + " (" + (engagement.likes || 0) + ")";
+      engagementCounts.textContent = (engagement.comments || 0) + " comments";
+    } else {
+      engagementCounts.textContent = "Engagement unavailable.";
+    }
+    commentsNode.replaceChildren();
+    if (results[1].status === "fulfilled") {
+      const items = Array.isArray(results[1].value.items) ? results[1].value.items : [];
+      if (items.length) {
+        items.forEach(comment => {
+          const node = document.createElement("div");
+          node.className = "mo-comment";
+          node.textContent = comment.body;
+          commentsNode.appendChild(node);
+        });
+      } else {
+        commentsNode.textContent = "No comments yet.";
+      }
+    } else {
+      commentsNode.textContent = "Comments are temporarily unavailable.";
+    }
+  }
+
+  likeButton.addEventListener("click", async () => {
+    if (!activeMediaItemId) return;
+    likeButton.disabled = true;
+    try {
+      await getJson(siteBase + (activeMediaLiked ? "/_functions/unlikeMedia" : "/_functions/likeMedia"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mediaItemId: activeMediaItemId })
+      });
+      await loadEngagement(activeMediaItemId);
+      engagementStatus.textContent = activeMediaLiked ? "Media liked." : "Like removed.";
+    } catch (error) {
+      engagementStatus.textContent = error.message || "Sign in to like media.";
+    } finally {
+      likeButton.disabled = false;
+    }
+  });
+
+  commentForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!activeMediaItemId || !commentInput.value.trim()) return;
+    const submit = commentForm.querySelector('button[type="submit"]');
+    submit.disabled = true;
+    try {
+      await getJson(siteBase + "/_functions/addComment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mediaItemId: activeMediaItemId, body: commentInput.value.trim() })
+      });
+      commentInput.value = "";
+      engagementStatus.textContent = "Comment posted.";
+      await loadEngagement(activeMediaItemId);
+    } catch (error) {
+      engagementStatus.textContent = error.message || "Sign in to comment.";
+    } finally {
+      submit.disabled = false;
+    }
+  });
+
+  reportContentButton.addEventListener("click", async () => {
+    if (!activeMediaItemId) return;
+    reportContentButton.disabled = true;
+    try {
+      await getJson(siteBase + "/_functions/reportContent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mediaItemId: activeMediaItemId, reason: reportReason.value })
+      });
+      engagementStatus.textContent = "Media report submitted.";
+    } catch (error) {
+      engagementStatus.textContent = error.message || "Sign in to report media.";
+    } finally {
+      reportContentButton.disabled = false;
+    }
+  });
 
   function appendChatMessage(message) {
     const line = document.createElement("div");
