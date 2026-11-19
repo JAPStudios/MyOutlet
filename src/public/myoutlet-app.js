@@ -55,6 +55,7 @@
       #myoutlet-app .mo-empty{padding:26px;border:1px dashed var(--mo-line);border-radius:12px;color:var(--mo-muted);text-align:center}
       #myoutlet-app .mo-footer{border-top:1px solid var(--mo-line);padding:24px 0 34px;color:var(--mo-muted);font-size:13px}
       #myoutlet-app .mo-status{font-size:13px;color:var(--mo-muted);min-height:22px;margin:8px 0}
+      #myoutlet-app .mo-load-more{display:block;margin:22px auto 0;min-width:180px}
       #myoutlet-app .mo-modal{position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;padding:20px}
       #myoutlet-app .mo-modal.open{display:flex}
       #myoutlet-app .mo-player{width:min(1000px,100%);background:#101824;border:1px solid #34445b;border-radius:14px;overflow:hidden}
@@ -93,6 +94,7 @@
         <p class="mo-rating-note">Ratings are creator-supplied content classifications. The selector filters displayed items; it does not verify a viewer's age.</p>
         <div class="mo-status" id="mo-catalog-status" role="status">Loading published content…</div>
         <div class="mo-grid" id="mo-catalog"></div>
+        <button class="mo-btn mo-load-more" id="mo-load-more" type="button" hidden>Load more</button>
       </div>
     </section>
     <section class="mo-section" id="mo-live">
@@ -128,6 +130,10 @@
   const video = $("#mo-video");
   const playerTitle = $("#mo-player-title");
   let catalog = [];
+  let catalogOffset = 0;
+  let catalogTotal = 0;
+  let catalogHasMore = false;
+  let catalogLoading = false;
   let creators = [];
   let hlsInstance = null;
 
@@ -192,6 +198,36 @@
     body.appendChild(button);
     article.append(thumb, body);
     return article;
+  }
+
+  function updateCatalogStatus() {
+    catalogStatus.textContent = catalogTotal > catalog.length
+      ? "Showing " + catalog.length + " of " + catalogTotal + " published items"
+      : catalog.length + " published item" + (catalog.length === 1 ? "" : "s");
+    const more = $("#mo-load-more");
+    more.hidden = !catalogHasMore;
+    more.disabled = catalogLoading;
+    more.textContent = catalogLoading ? "Loading…" : "Load more";
+  }
+
+  async function loadMoreCatalog() {
+    if (catalogLoading || !catalogHasMore) return;
+    catalogLoading = true;
+    updateCatalogStatus();
+    try {
+      const payload = await getJson(siteBase + "/_functions/publicCatalog?offset=" + catalogOffset);
+      const nextItems = Array.isArray(payload.items) ? payload.items : [];
+      catalog = catalog.concat(nextItems);
+      catalogOffset = Number.isInteger(payload.nextOffset) ? payload.nextOffset : catalogOffset + 50;
+      catalogTotal = Number.isFinite(payload.total) ? payload.total : catalogTotal;
+      catalogHasMore = payload.hasMore === true;
+      renderCatalog();
+    } catch (error) {
+      catalogStatus.textContent = "More published content could not be loaded. Try again.";
+    } finally {
+      catalogLoading = false;
+      updateCatalogStatus();
+    }
   }
 
   function renderCatalog() {
@@ -265,6 +301,7 @@
     modal.classList.remove("open");
   }
 
+  $("#mo-load-more").addEventListener("click", loadMoreCatalog);
   $("#mo-search").addEventListener("input", renderCatalog);
   $("#mo-type").addEventListener("change", renderCatalog);
   $("#mo-rating").addEventListener("change", renderCatalog);
@@ -280,13 +317,16 @@
       document.head.appendChild(script);
     }
     const tasks = await Promise.allSettled([
-      getJson(siteBase + "/_functions/publicCatalog"),
+      getJson(siteBase + "/_functions/publicCatalog?offset=0"),
       getJson(siteBase + "/_functions/publicLiveStreams"),
       getJson(siteBase + "/_functions/publicCreators")
     ]);
     if (tasks[0].status === "fulfilled") {
       catalog = Array.isArray(tasks[0].value.items) ? tasks[0].value.items : [];
-      catalogStatus.textContent = catalog.length + " published item" + (catalog.length === 1 ? "" : "s");
+      catalogOffset = Number.isInteger(tasks[0].value.nextOffset) ? tasks[0].value.nextOffset : catalog.length;
+      catalogTotal = Number.isFinite(tasks[0].value.total) ? tasks[0].value.total : catalog.length;
+      catalogHasMore = tasks[0].value.hasMore === true;
+      updateCatalogStatus();
       renderCatalog();
     } else {
       catalogStatus.textContent = "Published content is temporarily unavailable.";
