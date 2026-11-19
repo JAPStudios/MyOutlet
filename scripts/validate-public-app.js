@@ -11,7 +11,7 @@ for (const name of ['get_publicCatalog', 'get_publicLiveStreams', 'get_publicCre
     'The public HTTP API must expose ' + name + '.');
 }
 
-assert.match(http, /item\.status !== 'published'/,
+assert.match(http, /media\.status !== 'published'/,
   'Public media responses must require published media.');
 assert.match(http, /isMediaRightsCurrent\(media\)/,
   'Public media and playback responses must enforce current verified rights.');
