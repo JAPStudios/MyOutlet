@@ -137,6 +137,9 @@ assert.ok(app.includes('mo-my-pending-comments'), 'Creators must be able to mode
 assert.ok(app.includes('id=\"mo-playlists\"'), 'Members must be able to manage playlists.');
 assert.ok(app.includes('addMediaToPlaylist'), 'Members must be able to add media to their playlists.');
 assert.ok(app.includes('markAllNotificationsRead'), 'Members must be able to manage notifications.');
+assert.ok(app.includes('href=\"#mo-faq\"'), 'The FAQ navigation must lead to the homepage FAQ section.');
+assert.ok(app.includes('id=\"mo-faq\"'), 'The homepage must contain its FAQ destination.');
+assert.ok(app.includes('Paid requests and payment processing are not currently available.'), 'The FAQ must disclose the current song-request payment limitation.');
 assert.match(app, /setInterval\(\(\) => loadLiveChat\(false\), 5000\)/,
   'Live chat must refresh while a live stream is open.');
 assert.match(app, /function ensureHls\(\)/,
