@@ -13,6 +13,17 @@ const tick = String.fromCharCode(96);
 
 assert.equal(site.siteId, '60a568ee-e9cb-4a45-8f02-e6343427552c',
   'wix.config.json must target the live MyOutlet Wix site');
+
+const catalogSource = read('src/backend/catalog.jsw');
+const liveStreamsSource = read('src/backend/liveStreams.jsw');
+const ratingPreferencesSource = read('src/backend/ratingPreferences.js');
+assert.match(catalogSource, /const RATINGS = \['TV-Y', 'TV-Y7', 'TV-G', 'Unrated'\]/,
+  'Media submissions and catalogue filters must use the supported rating range.');
+assert.match(liveStreamsSource, /const RATINGS = \['TV-Y', 'TV-Y7', 'TV-G', 'Unrated'\]/,
+  'Live streams must use the supported rating range.');
+assert.match(ratingPreferencesSource, /const RATING_ORDER = \['TV-Y', 'TV-Y7', 'TV-G'\]/,
+  'Viewer rating preferences must use the supported rating range.');
+
 assert.equal(permissions['*']['*'].siteMember.invoke, false,
   'Unlisted web methods must not be callable by site members');
 assert.equal(permissions['*']['*'].anonymous.invoke, false,
