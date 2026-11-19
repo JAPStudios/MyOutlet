@@ -118,6 +118,10 @@ async function handleRequest(detail) {
       result = await listPendingRights(query);
     } else if (method === "POST" && route === "reviewRightsDeclaration") {
       result = await reviewRightsDeclaration(body);
+    } else if (method === "POST" && route === "submitRightsDeclaration") {
+      result = await submitRightsDeclaration(body);
+    } else if (method === "GET" && route === "myRightsRecords") {
+      result = await getMyRightsRecords(query);
     } else if (method === "GET" && route === "listLiveChatReports") {
       result = await listLiveChatReports(query);
     } else if (method === "POST" && route === "resolveLiveChatReport") {
