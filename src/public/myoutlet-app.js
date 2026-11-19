@@ -244,6 +244,13 @@
             <p class="mo-studio-status" id="mo-queue-status" role="status"></p>
             <div class="mo-studio-list" id="mo-song-queue"></div>
           </section>
+          <section class="mo-studio-card">
+            <h3>Live-chat restrictions</h3>
+            <p class="mo-studio-status">Manage timeouts and channel bans for members who violate chat rules.</p>
+            <button class="mo-btn" id="mo-refresh-chat-bans" type="button">Refresh restrictions</button>
+            <p class="mo-studio-status" id="mo-chat-bans-status" role="status"></p>
+            <div class="mo-studio-list" id="mo-chat-bans"></div>
+          </section>
         </div>
       </div>
     </section>
@@ -373,6 +380,8 @@
   const myLiveStreamsNode = $("#mo-my-live-streams");
   const queueStatus = $("#mo-queue-status");
   const songQueueNode = $("#mo-song-queue");
+  const liveChatBansNode = $("#mo-chat-bans");
+  const liveChatBansStatus = $("#mo-chat-bans-status");
   let creatorChannel = null;
   let pendingUploadSessionId = "";
   let pendingUploadStatus = "";
