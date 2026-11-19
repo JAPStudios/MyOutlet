@@ -53,7 +53,7 @@ assert.ok(homePage.includes('from "backend/media.jsw"'),
   'The homepage Velo page code must import the media playback web module.');
 assert.ok(homePage.includes('from "backend/liveChat.jsw"'),
   'The homepage Velo page code must import the live-chat web module.');
-for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'creatorProfile', 'publicPlayback', 'liveChatMessages', 'sendLiveChatMessage', 'reportLiveChatMessage', 'myChannel', 'saveMyChannel', 'submitContent', 'mySubmissions', 'createVideoUpload', 'myVideoUploads', 'myCreatorAnalytics', 'createLiveStream', 'myLiveStreams', 'endLiveStream', 'songQueue', 'setSongRequestStatus', 'followCreator', 'unfollowCreator', 'addToWatchlist', 'removeFromWatchlist', 'myWatchlist', 'continueWatching', 'myFollowing', 'followingFeed', 'recordPlaybackProgress', 'myViewingPreferences', 'setMyViewingPreferences', 'promptLogin', 'listPendingContent', 'moderateContent', 'listPendingRights', 'reviewRightsDeclaration', 'listLiveChatReports', 'resolveLiveChatReport', 'mediaEngagement', 'mediaComments', 'likeMedia', 'unlikeMedia', 'addComment', 'reportContent', 'listContentReports', 'resolveContentReport', 'listPendingComments', 'listMyPendingComments', 'moderateComment', 'moderateMyChannelComment', 'myPlaylists', 'createPlaylist', 'playlist', 'addMediaToPlaylist', 'removeMediaFromPlaylist', 'updatePlaylist', 'deletePlaylist', 'myNotifications', 'markNotificationRead', 'markAllNotificationsRead']) {
+for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'creatorProfile', 'publicPlayback', 'liveChatMessages', 'sendLiveChatMessage', 'reportLiveChatMessage', 'myChannel', 'saveMyChannel', 'submitContent', 'mySubmissions', 'createVideoUpload', 'myVideoUploads', 'myCreatorAnalytics', 'createLiveStream', 'myLiveStreams', 'endLiveStream', 'songQueue', 'setSongRequestStatus', 'followCreator', 'unfollowCreator', 'addToWatchlist', 'removeFromWatchlist', 'myWatchlist', 'continueWatching', 'myFollowing', 'followingFeed', 'recordPlaybackProgress', 'myViewingPreferences', 'setMyViewingPreferences', 'promptLogin', 'listPendingContent', 'moderateContent', 'listPendingRights', 'reviewRightsDeclaration', 'submitRightsDeclaration', 'myRightsRecords', 'listLiveChatReports', 'resolveLiveChatReport', 'mediaEngagement', 'mediaComments', 'likeMedia', 'unlikeMedia', 'addComment', 'reportContent', 'listContentReports', 'resolveContentReport', 'listPendingComments', 'listMyPendingComments', 'moderateComment', 'moderateMyChannelComment', 'myPlaylists', 'createPlaylist', 'playlist', 'addMediaToPlaylist', 'removeMediaFromPlaylist', 'updatePlaylist', 'deletePlaylist', 'myNotifications', 'markNotificationRead', 'markAllNotificationsRead']) {
   assert.ok(homePage.includes(route), 'The Velo bridge must handle ' + route + '.');
 }
 assert.match(homePage, /window\.addEventListener\(REQUEST_EVENT/,
@@ -76,6 +76,10 @@ assert.match(app, /id="mo-creator-studio"/,
   'The homepage must include the creator studio.');
 assert.match(app, /id="mo-channel-form"/,
   'Creators must be able to create or update their channel profile.');
+assert.match(app, /id="mo-rights-form"/,
+  'Creators must be able to submit distribution-rights declarations.');
+assert.match(app, /submitRightsDeclaration/,
+  'The creator rights form must call the rights declaration backend.');
 assert.match(app, /id="mo-media-form"/,
   'Creators must be able to submit audiovisual media for review.');
 assert.match(app, /uploadMp4\(file, ticket\)/,
