@@ -142,10 +142,55 @@
     return payload && payload.result ? payload.result : payload;
   }
 
+  let bridgeSequence = 0;
+
+  function waitForVeloBridge() {
+    if (window.__myOutletVeloReady === true) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const timeout = window.setTimeout(() => {
+        window.removeEventListener("myoutlet:bridge-ready", ready);
+        reject(new Error("The MyOutlet page connection is unavailable."));
+      }, 10000);
+      function ready() {
+        window.clearTimeout(timeout);
+        resolve();
+      }
+      window.addEventListener("myoutlet:bridge-ready", ready, { once: true });
+      if (window.__myOutletVeloReady === true) ready();
+    });
+  }
+
   async function getJson(path, options) {
-    const response = await fetch(path, Object.assign({ credentials: "same-origin", cache: "no-store" }, options || {}));
-    if (!response.ok) throw new Error("Request failed (" + response.status + ").");
-    return unwrap(await response.json());
+    await waitForVeloBridge();
+    const url = new URL(path, window.location.origin);
+    const route = url.pathname.split("/").pop();
+    const method = options && options.method ? options.method.toUpperCase() : "GET";
+    let body = {};
+    if (options && typeof options.body === "string" && options.body) {
+      try { body = JSON.parse(options.body); } catch (_) {
+        throw new Error("The MyOutlet request body is invalid.");
+      }
+    }
+    const query = Object.fromEntries(url.searchParams.entries());
+    const id = "myoutlet-" + Date.now() + "-" + (++bridgeSequence);
+    return new Promise((resolve, reject) => {
+      const timeout = window.setTimeout(() => {
+        window.removeEventListener("myoutlet:response", receive);
+        reject(new Error("The MyOutlet service did not respond."));
+      }, 20000);
+      function receive(event) {
+        const response = event.detail;
+        if (!response || response.id !== id) return;
+        window.clearTimeout(timeout);
+        window.removeEventListener("myoutlet:response", receive);
+        if (response.ok) resolve(response.data);
+        else reject(new Error(response.error || "The MyOutlet request could not be completed."));
+      }
+      window.addEventListener("myoutlet:response", receive);
+      window.dispatchEvent(new CustomEvent("myoutlet:request", {
+        detail: { id, route, method, query, body }
+      }));
+    });
   }
 
   function text(value) {
