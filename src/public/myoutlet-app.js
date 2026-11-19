@@ -1349,7 +1349,7 @@
       creatorChannel = await getJson(siteBase + "/_functions/myChannel");
       signInButton.hidden = true;
       if (creatorChannel && !$("#mo-rights-holder").value) $("#mo-rights-holder").value = creatorChannel.name || "";
-      if (!$("#mo-rights-from").value) $("#mo-rights-from").value = new Date().toISOString().slice(0, 10);
+      if (!$("#mo-rights-from").value) {\n        const today = new Date();\n        $("#mo-rights-from").value = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");\n      }
       studioStatus.textContent = creatorChannel
         ? "Signed in. Creator channel: @" + creatorChannel.handle
         : "Signed in. Create a channel profile to begin publishing.";
