@@ -1,4 +1,5 @@
 import { browseCatalog, browseCreators } from "backend/catalog.jsw";
+import { authentication } from "wix-members-frontend";
 import { browseLiveStreams } from "backend/liveStreams.jsw";
 import { getPublishedMediaPlayback } from "backend/media.jsw";
 import { getLiveChatMessages, sendLiveChatMessage, reportLiveChatMessage } from "backend/liveChat.jsw";
@@ -99,6 +100,9 @@ async function handleRequest(detail) {
       result = await getMyViewingPreferences();
     } else if (method === "POST" && route === "setMyViewingPreferences") {
       result = await setMyViewingPreferences(body);
+    } else if (method === "POST" && route === "promptLogin") {
+      await authentication.promptLogin({ mode: "login", modal: true });
+      result = { loggedIn: true };
     } else {
       throw new Error("Unsupported MyOutlet request.");
     }
