@@ -2,12 +2,13 @@ import { browseCatalog, browseCreators } from "backend/catalog.jsw";
 import { authentication } from "wix-members-frontend";
 import { browseLiveStreams } from "backend/liveStreams.jsw";
 import { getPublishedMediaPlayback } from "backend/media.jsw";
-import { getLiveChatMessages, sendLiveChatMessage, reportLiveChatMessage } from "backend/liveChat.jsw";
+import { getLiveChatMessages, sendLiveChatMessage, reportLiveChatMessage, listLiveChatReports, resolveLiveChatReport } from "backend/liveChat.jsw";
 import { getMyChannel, saveMyChannel, submitContent, getMySubmissions } from "backend/catalog.jsw";
 import { createVideoUpload, getMyVideoUploads } from "backend/media.jsw";
 import { getMyCreatorAnalytics } from "backend/viewer.jsw";
 import { createLiveStream, getMyLiveStreams, endLiveStream } from "backend/liveStreams.jsw";
-import { getSongQueue, setSongRequestStatus } from "backend/catalog.jsw";
+import { listPendingRights, reviewRightsDeclaration } from "backend/rights.jsw";
+import { getSongQueue, setSongRequestStatus, listPendingContent, moderateContent } from "backend/catalog.jsw";
 import { followCreator, unfollowCreator, addToWatchlist, removeFromWatchlist, getMyWatchlist, getContinueWatching, getMyFollowing, getFollowingFeed, recordPlaybackProgress, getMyViewingPreferences, setMyViewingPreferences } from "backend/viewer.jsw";
 
 const REQUEST_EVENT = "myoutlet:request";
@@ -103,6 +104,18 @@ async function handleRequest(detail) {
     } else if (method === "POST" && route === "promptLogin") {
       await authentication.promptLogin({ mode: "login", modal: true });
       result = { loggedIn: true };
+    } else if (method === "GET" && route === "listPendingContent") {
+      result = await listPendingContent(query);
+    } else if (method === "POST" && route === "moderateContent") {
+      result = await moderateContent(body);
+    } else if (method === "GET" && route === "listPendingRights") {
+      result = await listPendingRights(query);
+    } else if (method === "POST" && route === "reviewRightsDeclaration") {
+      result = await reviewRightsDeclaration(body);
+    } else if (method === "GET" && route === "listLiveChatReports") {
+      result = await listLiveChatReports(query);
+    } else if (method === "POST" && route === "resolveLiveChatReport") {
+      result = await resolveLiveChatReport(body);
     } else {
       throw new Error("Unsupported MyOutlet request.");
     }
