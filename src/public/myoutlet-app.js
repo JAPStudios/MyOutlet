@@ -295,6 +295,10 @@
   const submissionsList = $("#mo-submissions-list");
   const submissionsStatus = $("#mo-submissions-status");
   const analyticsNode = $("#mo-analytics");
+  const rightsForm = $("#mo-rights-form");
+  const rightsMediaSelect = $("#mo-rights-media");
+  const rightsStatus = $("#mo-rights-status");
+  const rightsRecordsNode = $("#mo-rights-records");
   const myPendingCommentsNode = $("#mo-my-pending-comments");
   const pendingCommentsNode = $("#mo-pending-comments");
   const moderationSection = $("#mo-moderation");
@@ -1360,12 +1364,24 @@
         getJson(siteBase + "/_functions/mySubmissions?limit=50"),
         getJson(siteBase + "/_functions/myVideoUploads?limit=50"),
         getJson(siteBase + "/_functions/myCreatorAnalytics?limit=500"),
-        getJson(siteBase + "/_functions/listMyPendingComments?limit=50")
+        getJson(siteBase + "/_functions/listMyPendingComments?limit=50"),
+        getJson(siteBase + "/_functions/myRightsRecords?limit=100")
       ]);
       if (results[0].status === "fulfilled") {
         const items = Array.isArray(results[0].value.items) ? results[0].value.items : [];
         submissionsStatus.textContent = items.length + " submission" + (items.length === 1 ? "" : "s");
         renderStudioRows(submissionsList, items, "No media submissions yet.", item => item.title || "Untitled media", item => item.status || "Unknown");
+        rightsMediaSelect.replaceChildren();
+        const defaultRightsOption = document.createElement("option");
+        defaultRightsOption.value = "";
+        defaultRightsOption.textContent = "Select media";
+        rightsMediaSelect.appendChild(defaultRightsOption);
+        items.filter(item => !["removed", "rejected"].includes(item.status)).forEach(item => {
+          const option = document.createElement("option");
+          option.value = item._id;
+          option.textContent = item.title + " · " + item.status;
+          rightsMediaSelect.appendChild(option);
+        });
       } else {
         submissionsStatus.textContent = "Submissions could not be loaded.";
       }
@@ -1375,6 +1391,12 @@
         analyticsNode.textContent = "Playback starts: " + (totals.playbackStarts || 0) +
           " · Watch time: " + Math.round((totals.watchTimeSeconds || 0) / 60) + " min" +
           " · Completions: " + (totals.completions || 0);
+      }
+      if (results[4].status === "fulfilled") {
+        const records = Array.isArray(results[4].value.items) ? results[4].value.items : [];
+        renderStudioRows(rightsRecordsNode, records, "No rights declarations submitted yet.",
+          item => item.mediaItemId,
+          item => item.status + (item.validUntil ? " · until " + String(item.validUntil).slice(0, 10) : ""));
       }
       if (results[3].status === "fulfilled") {
         const pending = Array.isArray(results[3].value.items) ? results[3].value.items : [];
@@ -1489,6 +1511,37 @@
       if (!pendingUploadSessionId) mediaStatus.textContent = "Select and upload an MP4 before checking its processing status.";
     } catch (error) {
       mediaStatus.textContent = error.message || "Upload status could not be checked.";
+    }
+  });
+
+  rightsForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!rightsMediaSelect.value) {
+      rightsStatus.textContent = "Select one of your submitted media items.";
+      return;
+    }
+    const button = rightsForm.querySelector('button[type="submit"]');
+    button.disabled = true;
+    try {
+      const result = await getJson(siteBase + "/_functions/submitRightsDeclaration", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mediaItemId: rightsMediaSelect.value,
+          rightsBasis: $("#mo-rights-basis").value,
+          rightsHolder: $("#mo-rights-holder").value,
+          sourceDetails: $("#mo-rights-details").value,
+          territories: ["WORLDWIDE"],
+          validFrom: $("#mo-rights-from").value,
+          validUntil: $("#mo-rights-until").value || null,
+          evidenceUrl: $("#mo-rights-evidence").value
+        })
+      });
+      rightsStatus.textContent = "Rights declaration submitted for review: " + result.status + ".";
+      await loadCreatorStudio();
+    } catch (error) {
+      rightsStatus.textContent = error.message || "The rights declaration could not be submitted.";
+    } finally {
+      button.disabled = false;
     }
   });
 
