@@ -2,7 +2,7 @@ import { browseCatalog, browseCreators, getCreatorProfile } from "backend/catalo
 import { authentication } from "wix-members-frontend";
 import { browseLiveStreams } from "backend/liveStreams.jsw";
 import { getPublishedMediaPlayback } from "backend/media.jsw";
-import { getLiveChatMessages, sendLiveChatMessage, reportLiveChatMessage, listLiveChatReports, resolveLiveChatReport } from "backend/liveChat.jsw";
+import { getLiveChatMessages, sendLiveChatMessage, reportLiveChatMessage, moderateMyChannelChatMessage, banLiveChatMember, unbanLiveChatMember, getMyLiveChatBans, listLiveChatReports, resolveLiveChatReport } from "backend/liveChat.jsw";
 import { getMediaEngagement, listComments, likeMedia, unlikeMedia, addComment, listPendingComments, listMyPendingComments, moderateComment, moderateMyChannelComment } from "backend/engagement.jsw";
 import { reportContent, listContentReports, resolveContentReport } from "backend/reports.jsw";
 import { getMyPlaylists, createPlaylist, getPlaylist, addMediaToPlaylist, removeMediaFromPlaylist, updatePlaylist, deletePlaylist } from "backend/playlists.jsw";
@@ -61,6 +61,14 @@ async function handleRequest(detail) {
       result = await sendLiveChatMessage(body);
     } else if (method === "POST" && route === "reportLiveChatMessage") {
       result = await reportLiveChatMessage(body);
+    } else if (method === "POST" && route === "moderateMyChannelChatMessage") {
+      result = await moderateMyChannelChatMessage(body);
+    } else if (method === "POST" && route === "banLiveChatMember") {
+      result = await banLiveChatMember(body);
+    } else if (method === "POST" && route === "unbanLiveChatMember") {
+      result = await unbanLiveChatMember(body);
+    } else if (method === "GET" && route === "myLiveChatBans") {
+      result = await getMyLiveChatBans(query);
     } else if (method === "GET" && route === "myChannel") {
       result = await getMyChannel();
     } else if (method === "POST" && route === "saveMyChannel") {
