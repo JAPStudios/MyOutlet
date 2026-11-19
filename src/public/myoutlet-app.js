@@ -293,7 +293,7 @@
       const timeout = window.setTimeout(() => {
         window.removeEventListener("myoutlet:response", receive);
         reject(new Error("The MyOutlet service did not respond."));
-      }, 20000);
+      }, route === "promptLogin" ? 180000 : 20000);
       function receive(event) {
         const response = event.detail;
         if (!response || response.id !== id) return;
@@ -754,6 +754,7 @@
   async function loadCreatorStudio() {
     try {
       creatorChannel = await getJson(siteBase + "/_functions/myChannel");
+      signInButton.hidden = true;
       studioStatus.textContent = creatorChannel
         ? "Signed in. Creator channel: @" + creatorChannel.handle
         : "Signed in. Create a channel profile to begin publishing.";
