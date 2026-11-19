@@ -1,12 +1,14 @@
 (() => {
   "use strict";
 
-  if (window.__myOutletAppLoaded) return;
-  window.__myOutletAppLoaded = true;
-
   const rawPath = window.location.pathname.replace(/\/+$/, "") || "/";
   const path = rawPath.replace(/^\/myoutlet(?=\/|$)/i, "") || "/";
-  if (path !== "/" && path !== "/home") return;
+  const existing = document.getElementById("myoutlet-app");
+  if (path !== "/" && path !== "/home") {
+    if (existing) existing.remove();
+    return;
+  }
+  if (existing) return;
 
   const root = document.createElement("main");
   root.id = "myoutlet-app";
