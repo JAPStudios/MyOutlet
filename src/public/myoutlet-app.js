@@ -62,7 +62,7 @@
       #myoutlet-app .mo-player video{display:block;width:100%;max-height:72vh;background:#000}
       #myoutlet-app .mo-player-info{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px}
       #myoutlet-app .mo-close{border:1px solid #53647a;background:#1d2a3a;color:#fff;border-radius:8px;padding:8px 12px;cursor:pointer}
-      #myoutlet-app .mo-rating-note{font-size:12px;color:var(--mo-muted);margin-top:10px}\n      #myoutlet-app .mo-chat{display:none;border-top:1px solid var(--mo-line);padding:16px 18px}\n      #myoutlet-app .mo-chat.open{display:block}\n      #myoutlet-app .mo-chat h3{font-size:16px;margin:0 0 10px}\n      #myoutlet-app .mo-chat-messages{max-height:220px;overflow:auto;display:flex;flex-direction:column;gap:9px;padding:10px;border:1px solid var(--mo-line);border-radius:9px;background:#0c1420}\n      #myoutlet-app .mo-chat-message{font-size:13px;overflow-wrap:anywhere}\n      #myoutlet-app .mo-chat-message strong{color:var(--mo-accent)}\n      #myoutlet-app .mo-chat-message button{margin-left:8px;border:0;background:transparent;color:var(--mo-muted);font-size:11px;text-decoration:underline;cursor:pointer}\n      #myoutlet-app .mo-chat-form{display:flex;gap:8px;margin-top:10px}\n      #myoutlet-app .mo-chat-input{flex:1;min-width:0;border:1px solid var(--mo-line);border-radius:8px;background:#111a27;color:var(--mo-text);padding:10px}\n      #myoutlet-app .mo-chat-status{font-size:12px;color:var(--mo-muted);min-height:18px;margin:8px 0 0}
+      #myoutlet-app .mo-rating-note{font-size:12px;color:var(--mo-muted);margin-top:10px}\n      #myoutlet-app .mo-chat{display:none;border-top:1px solid var(--mo-line);padding:16px 18px}\n      #myoutlet-app .mo-chat.open{display:block}\n      #myoutlet-app .mo-chat h3{font-size:16px;margin:0 0 10px}\n      #myoutlet-app .mo-chat-messages{max-height:220px;overflow:auto;display:flex;flex-direction:column;gap:9px;padding:10px;border:1px solid var(--mo-line);border-radius:9px;background:#0c1420}\n      #myoutlet-app .mo-chat-message{font-size:13px;overflow-wrap:anywhere}\n      #myoutlet-app .mo-chat-message strong{color:var(--mo-accent)}\n      #myoutlet-app .mo-chat-message button{margin-left:8px;border:0;background:transparent;color:var(--mo-muted);font-size:11px;text-decoration:underline;cursor:pointer}\n      #myoutlet-app .mo-chat-form{display:flex;gap:8px;margin-top:10px}\n      #myoutlet-app .mo-chat-input{flex:1;min-width:0;border:1px solid var(--mo-line);border-radius:8px;background:#111a27;color:var(--mo-text);padding:10px}\n      #myoutlet-app .mo-chat-status{font-size:12px;color:var(--mo-muted);min-height:18px;margin:8px 0 0}\n      #myoutlet-app .mo-studio-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}\n      #myoutlet-app .mo-studio-card{border:1px solid var(--mo-line);border-radius:14px;background:var(--mo-panel);padding:18px;min-width:0}\n      #myoutlet-app .mo-studio-card h3{font-size:18px;margin:0 0 12px}\n      #myoutlet-app .mo-studio-form{display:grid;gap:9px}\n      #myoutlet-app .mo-studio-form label{font-size:12px;color:var(--mo-muted);display:grid;gap:4px}\n      #myoutlet-app .mo-studio-form input,#myoutlet-app .mo-studio-form textarea,#myoutlet-app .mo-studio-form select{width:100%;min-height:40px;border:1px solid var(--mo-line);border-radius:8px;background:#111a27;color:var(--mo-text);padding:9px}\n      #myoutlet-app .mo-studio-form textarea{min-height:82px;resize:vertical}\n      #myoutlet-app .mo-studio-status{font-size:12px;color:var(--mo-muted);min-height:18px;margin:10px 0}\n      #myoutlet-app .mo-studio-list{display:grid;gap:8px;margin-top:12px}\n      #myoutlet-app .mo-studio-row{padding:10px;border:1px solid var(--mo-line);border-radius:8px;font-size:13px;display:flex;justify-content:space-between;gap:10px}\n      #myoutlet-app .mo-studio-row span:last-child{color:var(--mo-muted)}\n      #myoutlet-app .mo-studio-metrics{display:flex;gap:20px;flex-wrap:wrap;color:var(--mo-muted);font-size:13px}\n      @media(max-width:700px){#myoutlet-app .mo-studio-grid{grid-template-columns:1fr}}
       @media(max-width:850px){#myoutlet-app .mo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#myoutlet-app .mo-hero{padding:48px 0 40px}}
       @media(max-width:560px){#myoutlet-app .mo-wrap{width:min(100% - 28px,1180px)}#myoutlet-app .mo-nav-inner{align-items:flex-start;flex-direction:column;padding:14px 0;gap:10px}#myoutlet-app .mo-links{gap:14px}#myoutlet-app .mo-grid{grid-template-columns:1fr}#myoutlet-app .mo-section-head{align-items:flex-start;flex-direction:column}}
     </style>
@@ -109,6 +109,59 @@
         <div class="mo-section-head"><div><h2>Creator channels</h2><p class="mo-sub">Explore the channels publishing on MyOutlet.</p></div></div>
         <div class="mo-status" id="mo-creators-status" role="status">Loading channels…</div>
         <div class="mo-grid" id="mo-creators-grid"></div>
+      </div>
+    </section>
+    <section class="mo-section" id="mo-creator-studio">
+      <div class="mo-wrap">
+        <div class="mo-section-head"><div><h2>Creator studio</h2><p class="mo-sub">Manage a creator channel, submit media and review performance.</p></div></div>
+        <p class="mo-studio-status" id="mo-studio-status" role="status">Sign in to manage a creator channel.</p>
+        <div class="mo-studio-grid">
+          <section class="mo-studio-card">
+            <h3>Channel profile</h3>
+            <form class="mo-studio-form" id="mo-channel-form">
+              <label>Channel name<input id="mo-channel-name" maxlength="80" required></label>
+              <label>Channel handle<input id="mo-channel-handle" maxlength="30" placeholder="channel_handle" required></label>
+              <label>Description<textarea id="mo-channel-description" maxlength="500"></textarea></label>
+              <label>Website URL<input id="mo-channel-website" type="url" placeholder="https://"></label>
+              <label>Avatar image URL<input id="mo-channel-avatar" type="url" placeholder="https://"></label>
+              <label>Banner image URL<input id="mo-channel-banner" type="url" placeholder="https://"></label>
+              <label>Social links, one HTTPS URL per line<textarea id="mo-channel-social" placeholder="https://"></textarea></label>
+              <button class="mo-btn primary" type="submit">Save channel</button>
+            </form>
+            <p class="mo-studio-status" id="mo-channel-status" role="status"></p>
+          </section>
+          <section class="mo-studio-card">
+            <h3>Submit media</h3>
+            <form class="mo-studio-form" id="mo-media-form">
+              <label>Title<input id="mo-media-title" maxlength="120" required></label>
+              <label>Description<textarea id="mo-media-description" maxlength="2000"></textarea></label>
+              <label>Format<select id="mo-media-type"><option value="video">Video</option><option value="audio">Audio</option></select></label>
+              <label>Content rating<select id="mo-media-rating"><option>TV-Y</option><option>TV-Y7</option><option>TV-G</option><option>TV-PG</option><option>TV-14</option><option>TV-MA</option><option>Unrated</option></select></label>
+              <label>Category<input id="mo-media-category" maxlength="50" value="Other"></label>
+              <label>Tags, separated by commas<input id="mo-media-tags" maxlength="300"></label>
+              <label>Language code<input id="mo-media-language" maxlength="5" placeholder="en"></label>
+              <label>Duration in seconds<input id="mo-media-duration" type="number" min="0" max="86400" value="0"></label>
+              <label>Thumbnail HTTPS URL<input id="mo-media-thumbnail" type="url" placeholder="https://"></label>
+              <label>External media HTTPS URL<input id="mo-media-url" type="url" placeholder="Use this or upload an MP4"></label>
+              <label>MP4 video file<input id="mo-media-file" type="file" accept="video/mp4,.mp4"></label>
+              <button class="mo-btn" id="mo-upload-video" type="button">Upload MP4</button>
+              <button class="mo-btn" id="mo-check-upload" type="button">Check upload processing</button>
+              <button class="mo-btn primary" type="submit">Submit for review</button>
+            </form>
+            <p class="mo-studio-status" id="mo-media-status" role="status"></p>
+            <div class="mo-studio-list" id="mo-upload-list"></div>
+          </section>
+          <section class="mo-studio-card">
+            <h3>My submissions</h3>
+            <div class="mo-studio-status" id="mo-submissions-status" role="status"></div>
+            <div class="mo-studio-list" id="mo-submissions-list"></div>
+          </section>
+          <section class="mo-studio-card">
+            <h3>Creator analytics</h3>
+            <div class="mo-studio-metrics" id="mo-analytics"></div>
+            <p class="mo-studio-status">Playback starts, client-reported watch time and completions are estimates, not audited audience measurements.</p>
+          </section>
+        </div>
       </div>
     </section>
     <footer class="mo-footer"><div class="mo-wrap">MyOutlet · Audiovisual publishing, streaming and creator channels</div></footer>
