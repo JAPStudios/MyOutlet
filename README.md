@@ -18,7 +18,7 @@ Current MyOutlet site state:
 
 ## Visitor-facing homepage
 
-The existing Wix homepage has an enabled custom embed that loads `src/public/myoutlet-app.js` from this repository. The interface provides a media discovery catalogue, title/description/category search, video/audio and creator-rating filters, a live-broadcast section, a creator directory, a media player and a separate Jelly & Peanut Productions programme-slate section for PB&J, O.M.G., Creespyracies, Tales of Grimwald and The Shakespearience. It reads published media, live sessions and creator channels through the public HTTP functions in `src/backend/http-functions.js`. Creator-supplied ratings are classifications and viewer filters; they are not identity or age verification.
+The existing Wix homepage has an enabled custom embed that loads `src/public/myoutlet-app.js` from this repository. The interface provides a media discovery catalogue, title/description/category search, video/audio and creator-rating filters, a live-broadcast section, a creator directory and a media player. It reads published media, live sessions and creator channels through the public HTTP functions in `src/backend/http-functions.js`. Creator-supplied ratings are classifications and viewer filters; they are not identity or age verification.
 
 The public HTTP functions return only published media with current worldwide rights records, active live sessions and public creator-profile fields. Wix-hosted uploaded videos use Wix-generated playback URLs; externally hosted media must use HTTPS. The application does not fabricate catalogue items when no published content is available.
 
