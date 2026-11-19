@@ -7,6 +7,7 @@ import { createVideoUpload, getMyVideoUploads } from "backend/media.jsw";
 import { getMyCreatorAnalytics } from "backend/viewer.jsw";
 import { createLiveStream, getMyLiveStreams, endLiveStream } from "backend/liveStreams.jsw";
 import { getSongQueue, setSongRequestStatus } from "backend/catalog.jsw";
+import { followCreator, unfollowCreator, addToWatchlist, removeFromWatchlist, getMyWatchlist, getContinueWatching, getMyFollowing, getFollowingFeed, recordPlaybackProgress, getMyViewingPreferences, setMyViewingPreferences } from "backend/viewer.jsw";
 
 const REQUEST_EVENT = "myoutlet:request";
 const RESPONSE_EVENT = "myoutlet:response";
@@ -76,6 +77,28 @@ async function handleRequest(detail) {
       result = await getSongQueue(query);
     } else if (method === "POST" && route === "setSongRequestStatus") {
       result = await setSongRequestStatus(body);
+    } else if (method === "POST" && route === "followCreator") {
+      result = await followCreator(body);
+    } else if (method === "POST" && route === "unfollowCreator") {
+      result = await unfollowCreator(body);
+    } else if (method === "POST" && route === "addToWatchlist") {
+      result = await addToWatchlist(body);
+    } else if (method === "POST" && route === "removeFromWatchlist") {
+      result = await removeFromWatchlist(body);
+    } else if (method === "GET" && route === "myWatchlist") {
+      result = await getMyWatchlist(query);
+    } else if (method === "GET" && route === "continueWatching") {
+      result = await getContinueWatching(query);
+    } else if (method === "GET" && route === "myFollowing") {
+      result = await getMyFollowing(query);
+    } else if (method === "GET" && route === "followingFeed") {
+      result = await getFollowingFeed(query);
+    } else if (method === "POST" && route === "recordPlaybackProgress") {
+      result = await recordPlaybackProgress(body);
+    } else if (method === "GET" && route === "myViewingPreferences") {
+      result = await getMyViewingPreferences();
+    } else if (method === "POST" && route === "setMyViewingPreferences") {
+      result = await setMyViewingPreferences(body);
     } else {
       throw new Error("Unsupported MyOutlet request.");
     }
