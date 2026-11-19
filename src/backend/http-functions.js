@@ -49,17 +49,23 @@ function publicMedia(item) {
   };
 }
 
-export async function get_publicCatalog() {
+export async function get_publicCatalog(request) {
+  const rawOffset = request && request.query ? request.query.offset : '0';
+  const offset = rawOffset === undefined ? 0 : Number(rawOffset);
+  if (!Number.isSafeInteger(offset) || offset < 0 || offset > 100000) return badRequest();
+
   try {
     const result = await wixData.query(MEDIA)
       .eq('status', 'published')
       .descending('publishedAt')
+      .skip(offset)
       .limit(50)
       .find({ suppressAuth: true, returnTotalCount: true });
     const items = result.items
       .filter(item => isMediaRightsCurrent(item) && ['video', 'audio'].includes(item.contentType))
       .map(publicMedia);
-    return ok({ items, total: result.totalCount });
+    const nextOffset = offset + result.items.length;
+    return ok({ items, total: result.totalCount, nextOffset, hasMore: nextOffset < result.totalCount });
   } catch (error) {
     console.error('MyOutlet public catalogue request failed.', error);
     return serverError();
