@@ -191,7 +191,7 @@
         <div class="mo-studio-grid">
           <section class="mo-studio-card"><h3>Rights declarations</h3><div class="mo-studio-list" id="mo-pending-rights"></div></section>
           <section class="mo-studio-card"><h3>Media submissions</h3><div class="mo-studio-list" id="mo-pending-content"></div></section>
-          <section class="mo-studio-card"><h3>Live-chat reports</h3><div class="mo-studio-list" id="mo-chat-reports"></div></section>
+          <section class="mo-studio-card"><h3>Live-chat reports</h3><div class="mo-studio-list" id="mo-chat-reports"></div></section><section class="mo-studio-card"><h3>Content reports</h3><div class="mo-studio-list" id="mo-content-reports"></div></section>
         </div>
       </div>
     </section>
@@ -250,6 +250,7 @@
   const pendingRightsNode = $("#mo-pending-rights");
   const pendingContentNode = $("#mo-pending-content");
   const chatReportsNode = $("#mo-chat-reports");
+  const contentReportsNode = $("#mo-content-reports");
   const libraryStatus = $("#mo-library-status");
   const continueWatchingNode = $("#mo-continue-watching");
   const watchlistNode = $("#mo-watchlist");
@@ -856,7 +857,8 @@
     const results = await Promise.allSettled([
       getJson(siteBase + "/_functions/listPendingRights?limit=100"),
       getJson(siteBase + "/_functions/listPendingContent?limit=100"),
-      getJson(siteBase + "/_functions/listLiveChatReports?limit=100&status=open")
+      getJson(siteBase + "/_functions/listLiveChatReports?limit=100&status=open"),
+      getJson(siteBase + "/_functions/listContentReports?limit=100&status=open")
     ]);
     if (results.every(result => result.status === "rejected")) {
       moderationSection.hidden = true;
@@ -866,6 +868,7 @@
     pendingRightsNode.replaceChildren();
     pendingContentNode.replaceChildren();
     chatReportsNode.replaceChildren();
+    contentReportsNode.replaceChildren();
 
     const rights = results[0].status === "fulfilled" && Array.isArray(results[0].value.items)
       ? results[0].value.items : [];
@@ -950,6 +953,34 @@
       chatReportsNode.appendChild(row);
     });
     if (!reports.length) chatReportsNode.textContent = "No open live-chat reports.";
+
+    const contentReports = results[3].status === "fulfilled" && Array.isArray(results[3].value.items)
+      ? results[3].value.items : [];
+    contentReports.forEach(item => {
+      const row = makeModerationRow(item.mediaTitle || "Media item", (item.reason || "other") + " · " + (item.details || "No additional details"),
+        [
+          { label: "Remove media", onClick: async () => {
+            try {
+              await getJson(siteBase + "/_functions/resolveContentReport", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ reportId: item._id, status: "resolved", resolution: "remove_content" })
+              });
+              await loadModeration();
+            } catch (error) { moderationStatus.textContent = error.message || "The content report could not be resolved."; }
+          }},
+          { label: "Dismiss", onClick: async () => {
+            try {
+              await getJson(siteBase + "/_functions/resolveContentReport", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ reportId: item._id, status: "dismissed", resolution: "no_action" })
+              });
+              await loadModeration();
+            } catch (error) { moderationStatus.textContent = error.message || "The content report could not be dismissed."; }
+          }}
+        ]);
+      contentReportsNode.appendChild(row);
+    });
+    if (!contentReports.length) contentReportsNode.textContent = "No open content reports.";
     moderationStatus.textContent = "Moderation queues refreshed.";
   }
 
