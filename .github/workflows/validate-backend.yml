@@ -55,6 +55,8 @@ jobs:
         run: node scripts/validate-backend.js
       - name: Validate live authorization and notification regression cases
         run: node scripts/validate-live-auth.js
+      - name: Validate public application and HTTP routes
+        run: node scripts/validate-public-app.js
       - name: Validate MediaMTX configuration
         run: |
           mkdir -p live-streaming/certs
