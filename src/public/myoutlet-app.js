@@ -636,6 +636,37 @@
     }).catch(() => {});
   });
 
+  async function saveRatingPreferences() {
+    const selected = $("#mo-rating").value;
+    const maxContentRating = ["TV-Y", "TV-Y7", "TV-G", "TV-PG", "TV-14", "TV-MA"].includes(selected)
+      ? selected : "TV-MA";
+    try {
+      await getJson(siteBase + "/_functions/setMyViewingPreferences", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          maxContentRating,
+          hideUnrated: $("#mo-hide-unrated").checked
+        })
+      });
+      catalog = [];
+      catalogOffset = 0;
+      catalogTotal = 0;
+      catalogHasMore = true;
+      await loadMoreCatalog();
+      renderCatalog();
+    } catch (error) {
+      catalogStatus.textContent = error.message || "Sign in to save viewing preferences.";
+      renderCatalog();
+    }
+  }
+
+  $("#mo-hide-unrated").addEventListener("change", saveRatingPreferences);
+  $("#mo-rating").addEventListener("change", () => {
+    renderCatalog();
+    saveRatingPreferences();
+  });
+
   $("#mo-load-more").addEventListener("click", loadMoreCatalog);
   $("#mo-search").addEventListener("input", renderCatalog);
   $("#mo-type").addEventListener("change", renderCatalog);
@@ -669,8 +700,15 @@
     const results = await Promise.allSettled([
       getJson(siteBase + "/_functions/myWatchlist?limit=50"),
       getJson(siteBase + "/_functions/continueWatching?limit=30"),
-      getJson(siteBase + "/_functions/followingFeed?limit=30")
+      getJson(siteBase + "/_functions/followingFeed?limit=30"),
+      getJson(siteBase + "/_functions/myViewingPreferences")
     ]);
+    if (results[3].status === "fulfilled") {
+      const preference = results[3].value;
+      $("#mo-rating").value = preference.maxContentRating || "TV-MA";
+      $("#mo-hide-unrated").checked = preference.hideUnrated === true;
+      renderCatalog();
+    }
     const successful = results.filter(result => result.status === "fulfilled").length;
     if (!successful) {
       libraryStatus.textContent = "Sign in to view saved media, continue watching and followed-channel updates.";
