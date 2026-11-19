@@ -4,7 +4,8 @@
   if (window.__myOutletAppLoaded) return;
   window.__myOutletAppLoaded = true;
 
-  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+  const rawPath = window.location.pathname.replace(/\/+$/, "") || "/";
+  const path = rawPath.replace(/^\/myoutlet(?=\/|$)/i, "") || "/";
   if (path !== "/" && path !== "/home") return;
 
   const root = document.createElement("main");
@@ -63,10 +64,10 @@
     </style>
     <header class="mo-nav">
       <div class="mo-wrap mo-nav-inner">
-        <a class="mo-brand" href="/home" aria-label="MyOutlet home">My<span>Outlet</span></a>
+        <a class="mo-brand" href="/myoutlet/home" aria-label="MyOutlet home">My<span>Outlet</span></a>
         <nav class="mo-links" aria-label="Main navigation">
           <a href="#mo-discover">Discover</a><a href="#mo-live">Live</a><a href="#mo-creators">Creators</a>
-          <a href="/faq">FAQ</a>
+          <a href="/myoutlet/faq">FAQ</a>
         </nav>
       </div>
     </header>
