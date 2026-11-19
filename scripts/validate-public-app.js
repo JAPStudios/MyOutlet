@@ -6,6 +6,7 @@ const root = path.join(__dirname, '..');
 const http = fs.readFileSync(path.join(root, 'src', 'backend', 'http-functions.js'), 'utf8');
 const app = fs.readFileSync(path.join(root, 'src', 'public', 'myoutlet-app.js'), 'utf8');
 const homePage = fs.readFileSync(path.join(root, 'src', 'pages', 'Home.c1dmp.js'), 'utf8');
+const chat = fs.readFileSync(path.join(root, 'src', 'backend', 'liveChat.jsw'), 'utf8');
 const styleStart = app.indexOf('<style>');
 const styleEnd = app.indexOf('</style>', styleStart);
 assert.ok(styleStart >= 0 && styleEnd > styleStart, 'The homepage must contain an embedded stylesheet.');
@@ -65,7 +66,7 @@ assert.ok(homePage.includes('from "backend/media.jsw"'),
   'The homepage Velo page code must import the media playback web module.');
 assert.ok(homePage.includes('from "backend/liveChat.jsw"'),
   'The homepage Velo page code must import the live-chat web module.');
-for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'creatorProfile', 'publicPlayback', 'liveChatMessages', 'sendLiveChatMessage', 'reportLiveChatMessage', 'myChannel', 'saveMyChannel', 'submitContent', 'mySubmissions', 'createVideoUpload', 'myVideoUploads', 'myCreatorAnalytics', 'createLiveStream', 'myLiveStreams', 'endLiveStream', 'songQueue', 'setSongRequestStatus', 'followCreator', 'unfollowCreator', 'addToWatchlist', 'removeFromWatchlist', 'myWatchlist', 'continueWatching', 'myFollowing', 'followingFeed', 'recordPlaybackProgress', 'myViewingPreferences', 'setMyViewingPreferences', 'promptLogin', 'listPendingContent', 'moderateContent', 'listPendingRights', 'reviewRightsDeclaration', 'submitRightsDeclaration', 'myRightsRecords', 'listLiveChatReports', 'resolveLiveChatReport', 'mediaEngagement', 'mediaComments', 'likeMedia', 'unlikeMedia', 'addComment', 'reportContent', 'listContentReports', 'resolveContentReport', 'listPendingComments', 'listMyPendingComments', 'moderateComment', 'moderateMyChannelComment', 'myPlaylists', 'createPlaylist', 'playlist', 'addMediaToPlaylist', 'removeMediaFromPlaylist', 'updatePlaylist', 'deletePlaylist', 'myNotifications', 'markNotificationRead', 'markAllNotificationsRead']) {
+for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'creatorProfile', 'publicPlayback', 'liveChatMessages', 'sendLiveChatMessage', 'reportLiveChatMessage', 'moderateMyChannelChatMessage', 'banLiveChatMember', 'unbanLiveChatMember', 'myLiveChatBans', 'myChannel', 'saveMyChannel', 'submitContent', 'mySubmissions', 'createVideoUpload', 'myVideoUploads', 'myCreatorAnalytics', 'createLiveStream', 'myLiveStreams', 'endLiveStream', 'songQueue', 'setSongRequestStatus', 'followCreator', 'unfollowCreator', 'addToWatchlist', 'removeFromWatchlist', 'myWatchlist', 'continueWatching', 'myFollowing', 'followingFeed', 'recordPlaybackProgress', 'myViewingPreferences', 'setMyViewingPreferences', 'promptLogin', 'listPendingContent', 'moderateContent', 'listPendingRights', 'reviewRightsDeclaration', 'submitRightsDeclaration', 'myRightsRecords', 'listLiveChatReports', 'resolveLiveChatReport', 'mediaEngagement', 'mediaComments', 'likeMedia', 'unlikeMedia', 'addComment', 'reportContent', 'listContentReports', 'resolveContentReport', 'listPendingComments', 'listMyPendingComments', 'moderateComment', 'moderateMyChannelComment', 'myPlaylists', 'createPlaylist', 'playlist', 'addMediaToPlaylist', 'removeMediaFromPlaylist', 'updatePlaylist', 'deletePlaylist', 'myNotifications', 'markNotificationRead', 'markAllNotificationsRead']) {
   assert.ok(homePage.includes(route), 'The Velo bridge must handle ' + route + '.');
 }
 const backendImports = [...homePage.matchAll(/import\s*\{([^}]+)\}\s*from\s*["']backend\/([^"']+)["']/gs)];
@@ -104,6 +105,18 @@ assert.match(app, /sendLiveChatMessage/,
   'Signed-in viewers must be able to submit live-chat messages.');
 assert.match(app, /reportLiveChatMessage/,
   'Viewers must be able to report live-chat messages.');
+assert.match(chat, /channel\.memberId === viewerMemberId/,
+  'Only the owning creator channel may receive chat sender member IDs.');
+assert.ok(app.includes('chatAction = "remove"'),
+  'Creator channel owners must have a live-chat message removal control.');
+assert.ok(app.includes('chatAction = "timeout"'),
+  'Creator channel owners must have a live-chat timeout control.');
+assert.ok(app.includes('chatAction = "ban"'),
+  'Creator channel owners must have a live-chat ban control.');
+assert.ok(app.includes('unbanLiveChatMember'),
+  'Creator channel owners must be able to lift live-chat restrictions.');
+assert.ok(app.includes('loadMyLiveChatBans'),
+  'Creator Studio must list active live-chat restrictions.');
 assert.match(app, /id="mo-creator-studio"/,
   'The homepage must include the creator studio.');
 assert.match(app, /id="mo-channel-form"/,
