@@ -44,8 +44,8 @@ async function getLiveContext(streamId) {
   return { stream, media, channel };
 }
 
-function publicMessage(item, stream, channel) {
-  return {
+function publicMessage(item, stream, channel, viewerMemberId) {
+  const message = {
     _id: item._id,
     liveStreamId: item.liveStreamId,
     senderName: item.senderName || (item.senderMemberId === stream.creatorMemberId ? channel.name : 'Viewer'),
@@ -53,11 +53,16 @@ function publicMessage(item, stream, channel) {
     body: item.body,
     createdAt: item.createdAt
   };
+  if (viewerMemberId && channel.memberId === viewerMemberId) {
+    message.senderMemberId = item.senderMemberId;
+  }
+  return message;
 }
 
 export async function getLiveChatMessages(input = {}) {
   const streamId = requiredText(input.streamId, 'Live-stream ID', 100);
   const { stream, channel } = await getLiveContext(streamId);
+  const viewerMemberId = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
   const requested = Number(input.limit);
   const limit = Math.min(Math.max(Number.isFinite(requested) && requested ? requested : 50, 1), 100);
   const after = input.after === undefined || input.after === null || input.after === ''
@@ -79,7 +84,7 @@ export async function getLiveChatMessages(input = {}) {
   const items = after ? result.items : result.items.reverse();
   return {
     liveStreamId: streamId,
-    items: items.map(item => publicMessage(item, stream, channel)),
+    items: items.map(item => publicMessage(item, stream, channel, viewerMemberId)),
     nextAfter: items.length ? items[items.length - 1].createdAt : (after || null),
     live: true
   };
