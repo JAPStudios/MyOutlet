@@ -49,6 +49,19 @@ function publicMedia(item) {
   };
 }
 
+export async function get_health() {
+  try {
+    await Promise.all([
+      wixData.query(MEDIA).limit(1).find({ suppressAuth: true }),
+      wixData.query(LIVE).limit(1).find({ suppressAuth: true })
+    ]);
+    return ok({ status: 'ok', service: 'myoutlet' });
+  } catch (error) {
+    console.error('MyOutlet health check failed.', error);
+    return serverError();
+  }
+}
+
 export async function get_publicCatalog(request) {
   const rawOffset = request && request.query ? request.query.offset : '0';
   const offset = rawOffset === undefined ? 0 : Number(rawOffset);
