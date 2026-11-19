@@ -184,6 +184,15 @@
         </div>
       </div>
     </section>
+    <section class="mo-section" id="mo-library">
+      <div class="mo-wrap">
+        <div class="mo-section-head"><div><h2>Your library</h2><p class="mo-sub">Saved media, continue watching and followed-channel updates.</p></div><button class="mo-btn" id="mo-refresh-library" type="button">Refresh library</button></div>
+        <p class="mo-studio-status" id="mo-library-status" role="status">Sign in to view your library.</p>
+        <h3>Continue watching</h3><div class="mo-grid" id="mo-continue-watching"></div>
+        <h3>Watchlist</h3><div class="mo-grid" id="mo-watchlist"></div>
+        <h3>Following feed</h3><div class="mo-grid" id="mo-following-feed"></div>
+      </div>
+    </section>
     <footer class="mo-footer"><div class="mo-wrap">MyOutlet · Audiovisual publishing, streaming and creator channels</div></footer>
     <div class="mo-modal" id="mo-modal" role="dialog" aria-modal="true" aria-label="Media player">
       <div class="mo-player"><video id="mo-video" controls playsinline></video><div class="mo-player-info"><strong id="mo-player-title">Now playing</strong><button class="mo-close" id="mo-close" type="button">Close</button></div><section class="mo-chat" id="mo-chat" aria-label="Live chat"><h3>Live chat</h3><div class="mo-chat-messages" id="mo-chat-messages" aria-live="polite"></div><form class="mo-chat-form" id="mo-chat-form"><input class="mo-chat-input" id="mo-chat-input" type="text" maxlength="500" placeholder="Sign in to join the conversation" aria-label="Live chat message"><button class="mo-btn" type="submit">Send</button></form><p class="mo-chat-status" id="mo-chat-status" role="status"></p></section></div>
@@ -342,6 +351,28 @@
     body.append(title, meta);
     if (description.textContent) body.appendChild(description);
     body.appendChild(button);
+    if (!live) {
+      const save = document.createElement("button");
+      save.className = "mo-btn";
+      save.type = "button";
+      save.textContent = "Save to watchlist";
+      save.addEventListener("click", async () => {
+        save.disabled = true;
+        try {
+          await getJson(siteBase + "/_functions/addToWatchlist", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mediaItemId: item._id })
+          });
+          save.textContent = "Saved";
+          await loadViewerLibrary();
+        } catch (error) {
+          save.textContent = "Sign in to save";
+          save.disabled = false;
+        }
+      });
+      body.appendChild(save);
+    }
     article.append(thumb, body);
     return article;
   }
@@ -976,6 +1007,26 @@
         description.className = "mo-desc";
         description.textContent = text(creator.description);
         item.append(title, handle);
+        const follow = document.createElement("button");
+        follow.className = "mo-btn";
+        follow.type = "button";
+        follow.textContent = "Follow";
+        follow.addEventListener("click", async () => {
+          follow.disabled = true;
+          try {
+            await getJson(siteBase + "/_functions/followCreator", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ creatorChannelId: creator._id })
+            });
+            follow.textContent = "Following";
+            await loadViewerLibrary();
+          } catch (error) {
+            follow.textContent = "Sign in to follow";
+            follow.disabled = false;
+          }
+        });
+        item.appendChild(follow);
         if (description.textContent) item.appendChild(description);
         creatorsNode.appendChild(item);
       });
