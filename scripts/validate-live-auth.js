@@ -25,7 +25,7 @@ assert.match(source, /wixData\.bulkInsert\(NOTIFICATIONS, notifications/,
   'Notifications must be written in batches.');
 assert.ok(source.includes("while (path.startsWith('/'))") &&
   source.includes("path.toLowerCase().endsWith('/index.m3u8')") &&
-  source.includes("path = path.slice(0, -12)"),
+  source.includes("path = path.slice(0, -11)"),
   'The auth callback must normalize HLS playlist paths to the stored stream path.');
 assert.match(source, /if \(stream\.status !== 'live'\) return forbidden\(\)/,
   'HLS readers must be rejected after the stream is no longer live.');
