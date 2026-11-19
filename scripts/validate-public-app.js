@@ -56,6 +56,13 @@ assert.ok(homePage.includes('from "backend/liveChat.jsw"'),
 for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'creatorProfile', 'publicPlayback', 'liveChatMessages', 'sendLiveChatMessage', 'reportLiveChatMessage', 'myChannel', 'saveMyChannel', 'submitContent', 'mySubmissions', 'createVideoUpload', 'myVideoUploads', 'myCreatorAnalytics', 'createLiveStream', 'myLiveStreams', 'endLiveStream', 'songQueue', 'setSongRequestStatus', 'followCreator', 'unfollowCreator', 'addToWatchlist', 'removeFromWatchlist', 'myWatchlist', 'continueWatching', 'myFollowing', 'followingFeed', 'recordPlaybackProgress', 'myViewingPreferences', 'setMyViewingPreferences', 'promptLogin', 'listPendingContent', 'moderateContent', 'listPendingRights', 'reviewRightsDeclaration', 'submitRightsDeclaration', 'myRightsRecords', 'listLiveChatReports', 'resolveLiveChatReport', 'mediaEngagement', 'mediaComments', 'likeMedia', 'unlikeMedia', 'addComment', 'reportContent', 'listContentReports', 'resolveContentReport', 'listPendingComments', 'listMyPendingComments', 'moderateComment', 'moderateMyChannelComment', 'myPlaylists', 'createPlaylist', 'playlist', 'addMediaToPlaylist', 'removeMediaFromPlaylist', 'updatePlaylist', 'deletePlaylist', 'myNotifications', 'markNotificationRead', 'markAllNotificationsRead']) {
   assert.ok(homePage.includes(route), 'The Velo bridge must handle ' + route + '.');
 }
+const frontendRoutes = new Set([...app.matchAll(/_functions\/([A-Za-z0-9]+)/g)].map(match => match[1]));
+const bridgeRoutes = new Set([...homePage.matchAll(/route === "([^"]+)"/g)].map(match => match[1]));
+for (const route of frontendRoutes) {
+  assert.ok(bridgeRoutes.has(route),
+    'Every frontend API request must have a matching Velo bridge handler: ' + route + '.');
+}
+
 assert.match(homePage, /window\.addEventListener\(REQUEST_EVENT/,
   'The Velo page code must receive homepage requests.');
 assert.match(homePage, /window\.dispatchEvent\(new CustomEvent\(RESPONSE_EVENT/,
