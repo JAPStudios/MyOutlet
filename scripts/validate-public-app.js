@@ -160,6 +160,10 @@ assert.match(app, /HLS playback is unavailable because the player library could 
   'The player must report an unavailable HLS playback engine.');
 assert.match(app, /ratingOrder\.indexOf\(itemRating\) <= maximumRating/,
   'The maximum-rating selector must include items at or below the selected rating.');
+assert.ok(app.includes('const ratingOrder = ["TV-Y", "TV-Y7", "TV-G"];'),
+  'The public catalogue filter must use MyOutlet\'s supported rating range.');
+assert.doesNotMatch(app, /TV-PG|TV-14|TV-MA/,
+  'The public interface must not offer ratings outside MyOutlet\'s supported range.');
 assert.match(app, /Ratings are creator-supplied content classifications/,
   'The interface must distinguish creator ratings from verified age checks.');
 assert.match(app, /No published videos or audio are available yet/,
