@@ -12,7 +12,15 @@ const NOTIFICATIONS = 'Notifications';
 
 function normalizePath(value) {
   if (typeof value !== 'string') return '';
-  return value.trim().replace(/^\\/+|\\/+$/g, '').replace(/\\/index\\.m3u8$/i, '');
+  let path = value.trim();
+  while (path.startsWith('/')) path = path.slice(1);
+  while (path.endsWith('/')) path = path.slice(0, -1);
+  if (path.toLowerCase().endsWith('/index.m3u8')) path = path.slice(0, -12);
+  return path;
+}
+
+function isHttpsUrl(value) {
+  return typeof value === 'string' && value.slice(0, 8).toLowerCase() === 'https://';
 }
 
 function matchesStreamKey(candidate, storedHash) {
