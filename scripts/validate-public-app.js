@@ -53,7 +53,7 @@ assert.ok(homePage.includes('from "backend/media.jsw"'),
   'The homepage Velo page code must import the media playback web module.');
 assert.ok(homePage.includes('from "backend/liveChat.jsw"'),
   'The homepage Velo page code must import the live-chat web module.');
-for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'publicPlayback', 'liveChatMessages', 'sendLiveChatMessage', 'reportLiveChatMessage', 'myChannel', 'saveMyChannel', 'submitContent', 'mySubmissions', 'createVideoUpload', 'myVideoUploads', 'myCreatorAnalytics', 'createLiveStream', 'myLiveStreams', 'endLiveStream', 'songQueue', 'setSongRequestStatus', 'followCreator', 'unfollowCreator', 'addToWatchlist', 'removeFromWatchlist', 'myWatchlist', 'continueWatching', 'myFollowing', 'followingFeed', 'recordPlaybackProgress', 'myViewingPreferences', 'setMyViewingPreferences', 'promptLogin']) {
+for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'publicPlayback', 'liveChatMessages', 'sendLiveChatMessage', 'reportLiveChatMessage', 'myChannel', 'saveMyChannel', 'submitContent', 'mySubmissions', 'createVideoUpload', 'myVideoUploads', 'myCreatorAnalytics', 'createLiveStream', 'myLiveStreams', 'endLiveStream', 'songQueue', 'setSongRequestStatus', 'followCreator', 'unfollowCreator', 'addToWatchlist', 'removeFromWatchlist', 'myWatchlist', 'continueWatching', 'myFollowing', 'followingFeed', 'recordPlaybackProgress', 'myViewingPreferences', 'setMyViewingPreferences', 'promptLogin', 'listPendingContent', 'moderateContent', 'listPendingRights', 'reviewRightsDeclaration', 'listLiveChatReports', 'resolveLiveChatReport']) {
   assert.ok(homePage.includes(route), 'The Velo bridge must handle ' + route + '.');
 }
 assert.match(homePage, /window\.addEventListener\(REQUEST_EVENT/,
@@ -96,6 +96,10 @@ assert.ok(app.includes('setMyViewingPreferences'), 'Member content-rating prefer
 assert.ok(app.includes('mo-sign-in'), 'Visitors must have a sign-in action for member-only features.');
 assert.ok(homePage.includes('wix-members-frontend'), 'The Velo page must use Wix Members authentication.');
 assert.ok(homePage.includes('authentication.promptLogin'), 'The Velo page must invoke the supported Wix sign-in prompt.');
+assert.ok(app.includes('id=\"mo-moderation\"'), 'The homepage must include a site-owner moderation area.');
+assert.ok(app.includes('reviewRightsDeclaration'), 'Site owners must be able to review distribution-rights declarations.');
+assert.ok(app.includes('moderateContent'), 'Site owners must be able to approve or reject media submissions.');
+assert.ok(app.includes('resolveLiveChatReport'), 'Site owners must be able to resolve live-chat reports.');
 assert.match(app, /setInterval\(\(\) => loadLiveChat\(false\), 5000\)/,
   'Live chat must refresh while a live stream is open.');
 assert.match(app, /function ensureHls\(\)/,
