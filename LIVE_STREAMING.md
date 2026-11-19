@@ -38,7 +38,7 @@ The live-chat service is implemented in `src/backend/liveChat.jsw` and uses the 
 
 Chat reads and writes require the stream to remain live and its media to remain published with current verified worldwide rights. The current best-effort rate limit is five messages per member per stream per ten seconds. Removed messages remain part of the rate-limit count. The two composite CMS indexes for stream/status/time and stream/member/time were created on November 17, 2026; both reached `ACTIVE` during verification on November 17, 2026, so the documented indexed chat queries are ready for use.
 
-The backend and CMS schema are present, but this repository change does not create or wire a visible chat panel into the Wix Editor page. The page-level chat interface still needs to be connected to these web methods.
+The homepage application includes the live-chat panel, message reporting, creator-owned message removal, one-hour timeouts and permanent channel bans. Creator Studio lists active restrictions and lets the channel owner lift them. Sender member IDs are returned only when the signed-in viewer owns the channel; the backend independently checks channel ownership before every moderation or ban operation. Site-owner review of viewer reports remains available through the site moderation area.
 
 ## Ordered song-request queue
 
