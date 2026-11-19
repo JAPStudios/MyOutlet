@@ -1,4 +1,4 @@
-import { browseCatalog, browseCreators } from "backend/catalog.jsw";
+import { browseCatalog, browseCreators, getCreatorProfile } from "backend/catalog.jsw";
 import { authentication } from "wix-members-frontend";
 import { browseLiveStreams } from "backend/liveStreams.jsw";
 import { getPublishedMediaPlayback } from "backend/media.jsw";
@@ -51,6 +51,8 @@ async function handleRequest(detail) {
       result = await browseLiveStreams({ limit: 50, offset: 0 });
     } else if (method === "GET" && route === "publicCreators") {
       result = await browseCreators({ limit: 50, offset: 0 });
+    } else if (method === "GET" && route === "creatorProfile") {
+      result = await getCreatorProfile(query);
     } else if (method === "POST" && route === "publicPlayback") {
       result = await getPublishedMediaPlayback(body);
     } else if (method === "GET" && route === "liveChatMessages") {
