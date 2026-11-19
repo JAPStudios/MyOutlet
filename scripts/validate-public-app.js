@@ -53,7 +53,7 @@ assert.ok(homePage.includes('from "backend/media.jsw"'),
   'The homepage Velo page code must import the media playback web module.');
 assert.ok(homePage.includes('from "backend/liveChat.jsw"'),
   'The homepage Velo page code must import the live-chat web module.');
-for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'publicPlayback', 'liveChatMessages', 'sendLiveChatMessage', 'reportLiveChatMessage', 'myChannel', 'saveMyChannel', 'submitContent', 'mySubmissions', 'createVideoUpload', 'myVideoUploads', 'myCreatorAnalytics', 'createLiveStream', 'myLiveStreams', 'endLiveStream', 'songQueue', 'setSongRequestStatus', 'followCreator', 'unfollowCreator', 'addToWatchlist', 'removeFromWatchlist', 'myWatchlist', 'continueWatching', 'myFollowing', 'followingFeed', 'recordPlaybackProgress', 'myViewingPreferences', 'setMyViewingPreferences']) {
+for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'publicPlayback', 'liveChatMessages', 'sendLiveChatMessage', 'reportLiveChatMessage', 'myChannel', 'saveMyChannel', 'submitContent', 'mySubmissions', 'createVideoUpload', 'myVideoUploads', 'myCreatorAnalytics', 'createLiveStream', 'myLiveStreams', 'endLiveStream', 'songQueue', 'setSongRequestStatus', 'followCreator', 'unfollowCreator', 'addToWatchlist', 'removeFromWatchlist', 'myWatchlist', 'continueWatching', 'myFollowing', 'followingFeed', 'recordPlaybackProgress', 'myViewingPreferences', 'setMyViewingPreferences', 'promptLogin']) {
   assert.ok(homePage.includes(route), 'The Velo bridge must handle ' + route + '.');
 }
 assert.match(homePage, /window\.addEventListener\(REQUEST_EVENT/,
@@ -93,6 +93,9 @@ assert.ok(app.includes('Save to watchlist'), 'Published media must be saveable t
 assert.ok(app.includes('followCreator'), 'Members must be able to follow creator channels.');
 assert.ok(app.includes('recordPlaybackProgress'), 'On-demand playback must record member progress.');
 assert.ok(app.includes('setMyViewingPreferences'), 'Member content-rating preferences must persist through the backend.');
+assert.ok(app.includes('mo-sign-in'), 'Visitors must have a sign-in action for member-only features.');
+assert.ok(homePage.includes('wix-members-frontend'), 'The Velo page must use Wix Members authentication.');
+assert.ok(homePage.includes('authentication.promptLogin'), 'The Velo page must invoke the supported Wix sign-in prompt.');
 assert.match(app, /setInterval\(\(\) => loadLiveChat\(false\), 5000\)/,
   'Live chat must refresh while a live stream is open.');
 assert.match(app, /function ensureHls\(\)/,
