@@ -187,6 +187,18 @@
   const chatForm = $("#mo-chat-form");
   const chatInput = $("#mo-chat-input");
   const chatStatus = $("#mo-chat-status");
+  const studioStatus = $("#mo-studio-status");
+  const channelForm = $("#mo-channel-form");
+  const channelStatus = $("#mo-channel-status");
+  const mediaForm = $("#mo-media-form");
+  const mediaStatus = $("#mo-media-status");
+  const uploadList = $("#mo-upload-list");
+  const submissionsList = $("#mo-submissions-list");
+  const submissionsStatus = $("#mo-submissions-status");
+  const analyticsNode = $("#mo-analytics");
+  let creatorChannel = null;
+  let pendingUploadSessionId = "";
+  let pendingUploadStatus = "";
   let activeLiveStreamId = "";
   let liveChatCursor = null;
   let liveChatTimer = null;
@@ -546,6 +558,225 @@
   $("#mo-close").addEventListener("click", closePlayer);
   modal.addEventListener("click", event => { if (event.target === modal) closePlayer(); });
   document.addEventListener("keydown", event => { if (event.key === "Escape" && modal.classList.contains("open")) closePlayer(); });
+
+  function renderStudioRows(node, items, emptyText, getLeft, getRight) {
+    node.replaceChildren();
+    if (!items.length) {
+      const empty = document.createElement("div");
+      empty.className = "mo-empty";
+      empty.textContent = emptyText;
+      node.appendChild(empty);
+      return;
+    }
+    items.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "mo-studio-row";
+      const left = document.createElement("span");
+      left.textContent = getLeft(item);
+      const right = document.createElement("span");
+      right.textContent = getRight(item);
+      row.append(left, right);
+      node.appendChild(row);
+    });
+  }
+
+  async function loadCreatorStudio() {
+    try {
+      creatorChannel = await getJson(siteBase + "/_functions/myChannel");
+      studioStatus.textContent = creatorChannel
+        ? "Signed in. Creator channel: @" + creatorChannel.handle
+        : "Signed in. Create a channel profile to begin publishing.";
+      if (creatorChannel) {
+        $("#mo-channel-name").value = creatorChannel.name || "";
+        $("#mo-channel-handle").value = creatorChannel.handle || "";
+        $("#mo-channel-description").value = creatorChannel.description || "";
+        $("#mo-channel-website").value = creatorChannel.websiteUrl || "";
+        $("#mo-channel-avatar").value = creatorChannel.avatarUrl || "";
+        $("#mo-channel-banner").value = creatorChannel.bannerUrl || "";
+        $("#mo-channel-social").value = Array.isArray(creatorChannel.socialLinks) ? creatorChannel.socialLinks.join("\n") : "";
+      }
+      const results = await Promise.allSettled([
+        getJson(siteBase + "/_functions/mySubmissions?limit=50"),
+        getJson(siteBase + "/_functions/myVideoUploads?limit=50"),
+        getJson(siteBase + "/_functions/myCreatorAnalytics?limit=500")
+      ]);
+      if (results[0].status === "fulfilled") {
+        const items = Array.isArray(results[0].value.items) ? results[0].value.items : [];
+        submissionsStatus.textContent = items.length + " submission" + (items.length === 1 ? "" : "s");
+        renderStudioRows(submissionsList, items, "No media submissions yet.", item => item.title || "Untitled media", item => item.status || "Unknown");
+      } else {
+        submissionsStatus.textContent = "Submissions could not be loaded.";
+      }
+      if (results[1].status === "fulfilled") renderUploadHistory(results[1].value.items || []);
+      if (results[2].status === "fulfilled") {
+        const totals = results[2].value.totals || {};
+        analyticsNode.textContent = "Playback starts: " + (totals.playbackStarts || 0) +
+          " · Watch time: " + Math.round((totals.watchTimeSeconds || 0) / 60) + " min" +
+          " · Completions: " + (totals.completions || 0);
+      }
+    } catch (error) {
+      studioStatus.textContent = error.message || "Sign in to manage a creator channel.";
+    }
+  }
+
+  function renderUploadHistory(items) {
+    renderStudioRows(uploadList, items, "No MP4 uploads yet.", item => item.fileName || "Video upload", item => item.status || "Unknown");
+    if (pendingUploadSessionId) {
+      const pending = items.find(item => item._id === pendingUploadSessionId);
+      if (pending) {
+        pendingUploadStatus = pending.status;
+        if (pending.status === "ready") {
+          mediaStatus.textContent = "The MP4 is ready for submission.";
+        } else if (pending.status === "failed") {
+          mediaStatus.textContent = pending.failureMessage || "The MP4 upload failed.";
+        } else {
+          mediaStatus.textContent = "Wix video processing status: " + pending.status + ".";
+        }
+      }
+    }
+  }
+
+  async function refreshUploadHistory() {
+    const result = await getJson(siteBase + "/_functions/myVideoUploads?limit=50");
+    renderUploadHistory(Array.isArray(result.items) ? result.items : []);
+  }
+
+  function uploadMp4(file, ticket) {
+    return new Promise((resolve, reject) => {
+      const formData = new FormData();
+      formData.append(ticket.multipartFieldName || "file", file, file.name);
+      const request = new XMLHttpRequest();
+      request.open(ticket.method || "POST", ticket.uploadUrl, true);
+      request.upload.onprogress = event => {
+        if (event.lengthComputable) {
+          mediaStatus.textContent = "Uploading MP4: " + Math.round(event.loaded / event.total * 100) + "%";
+        }
+      };
+      request.onload = () => {
+        if (request.status >= 200 && request.status < 300) resolve();
+        else reject(new Error("The MP4 upload failed with HTTP status " + request.status + "."));
+      };
+      request.onerror = () => reject(new Error("The MP4 upload could not complete because of a network error."));
+      request.onabort = () => reject(new Error("The MP4 upload was cancelled."));
+      request.send(formData);
+    });
+  }
+
+  $("#mo-upload-video").addEventListener("click", async () => {
+    const file = $("#mo-media-file").files[0];
+    if (!file) {
+      mediaStatus.textContent = "Select an MP4 video file first.";
+      return;
+    }
+    if (!creatorChannel) {
+      mediaStatus.textContent = "Create or sign in to a creator channel before uploading.";
+      return;
+    }
+    const button = $("#mo-upload-video");
+    button.disabled = true;
+    try {
+      const ticket = await getJson(siteBase + "/_functions/createVideoUpload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileName: file.name })
+      });
+      await uploadMp4(file, ticket);
+      pendingUploadSessionId = ticket.uploadSessionId;
+      pendingUploadStatus = "uploading";
+      mediaStatus.textContent = "Upload received. Wix is processing the video; check its status before submitting.";
+      await refreshUploadHistory();
+    } catch (error) {
+      mediaStatus.textContent = error.message || "The MP4 upload could not be started.";
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  $("#mo-check-upload").addEventListener("click", async () => {
+    try {
+      await refreshUploadHistory();
+      if (!pendingUploadSessionId) mediaStatus.textContent = "Select and upload an MP4 before checking its processing status.";
+    } catch (error) {
+      mediaStatus.textContent = error.message || "Upload status could not be checked.";
+    }
+  });
+
+  channelForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    const button = channelForm.querySelector('button[type="submit"]');
+    button.disabled = true;
+    try {
+      creatorChannel = await getJson(siteBase + "/_functions/saveMyChannel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: $("#mo-channel-name").value,
+          handle: $("#mo-channel-handle").value,
+          description: $("#mo-channel-description").value,
+          websiteUrl: $("#mo-channel-website").value,
+          avatarUrl: $("#mo-channel-avatar").value,
+          bannerUrl: $("#mo-channel-banner").value,
+          socialLinks: $("#mo-channel-social").value.split("\n").map(value => value.trim()).filter(Boolean)
+        })
+      });
+      studioStatus.textContent = "Channel saved: @" + creatorChannel.handle;
+      channelStatus.textContent = "Channel profile updated.";
+    } catch (error) {
+      channelStatus.textContent = error.message || "The channel profile could not be saved.";
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  mediaForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!creatorChannel) {
+      mediaStatus.textContent = "Create a creator channel before submitting media.";
+      return;
+    }
+    const file = $("#mo-media-file").files[0];
+    const mediaUrl = $("#mo-media-url").value.trim();
+    if (file && (!pendingUploadSessionId || pendingUploadStatus !== "ready")) {
+      mediaStatus.textContent = "Upload the MP4 and wait until Wix reports that it is ready before submitting.";
+      return;
+    }
+    if (!file && !mediaUrl) {
+      mediaStatus.textContent = "Provide an external HTTPS media URL or upload an MP4 video.";
+      return;
+    }
+    const button = mediaForm.querySelector('button[type="submit"]');
+    button.disabled = true;
+    try {
+      const payload = {
+        creatorChannelId: creatorChannel._id,
+        title: $("#mo-media-title").value,
+        description: $("#mo-media-description").value,
+        contentType: $("#mo-media-type").value,
+        contentRating: $("#mo-media-rating").value,
+        category: $("#mo-media-category").value,
+        tags: $("#mo-media-tags").value.split(",").map(value => value.trim()).filter(Boolean),
+        language: $("#mo-media-language").value,
+        durationSeconds: $("#mo-media-duration").value,
+        thumbnailUrl: $("#mo-media-thumbnail").value
+      };
+      if (file) payload.mediaUploadSessionId = pendingUploadSessionId;
+      else payload.mediaUrl = mediaUrl;
+      const result = await getJson(siteBase + "/_functions/submitContent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      mediaStatus.textContent = "Submitted for review: " + result.title + ".";
+      mediaForm.reset();
+      pendingUploadSessionId = "";
+      pendingUploadStatus = "";
+      await loadCreatorStudio();
+    } catch (error) {
+      mediaStatus.textContent = error.message || "The media submission could not be completed.";
+    } finally {
+      button.disabled = false;
+    }
+  });
 
   async function init() {
     const tasks = await Promise.allSettled([
