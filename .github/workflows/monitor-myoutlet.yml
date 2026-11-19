@@ -1,0 +1,33 @@
+name: Monitor MyOutlet availability
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check the published MyOutlet application and CMS
+        shell: bash
+        env:
+          HEALTH_URL: https://japbstudios.wixsite.com/myoutlet/_functions/health
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if response="$(curl --fail --silent --show-error --max-time 20 "$HEALTH_URL")" &&
+              printf '%s' "$response" | jq --exit-status '.status == "ok" and .service == "myoutlet"' >/dev/null; then
+              printf '%s\n' "MyOutlet health check passed."
+              exit 0
+            fi
+            if [[ "$attempt" -lt 3 ]]; then
+              sleep 5
+            fi
+          done
+          printf '%s\n' "::error::MyOutlet health endpoint failed after three attempts."
+          exit 1
