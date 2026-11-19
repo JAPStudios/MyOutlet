@@ -237,6 +237,7 @@ assert.match(catalog, /bannerUrl/);
 assert.match(catalog, /session\.status\s*!==\s*'ready'/,
   'Content submission must wait for successful transcoding');
 
+const liveStreams = read('src/backend/liveStreams.jsw');
 const ratingPreferences = read('src/backend/ratingPreferences.js');
 const supportedContentRatings = ['TV-Y', 'TV-Y7', 'TV-G', 'TV-PG', 'TV-14', 'TV-MA'];
 for (const rating of supportedContentRatings) {
@@ -315,7 +316,7 @@ assert.match(viewer, /setMyViewingPreferences/);
 assert.match(viewer, /isMediaRightsCurrent/);
 assert.match(engagement, /isMediaRightsCurrent/);
 assert.match(playlists, /isMediaRightsCurrent/);
-const liveStreams = read('src/backend/liveStreams.jsw');
+
 const liveChat = read('src/backend/liveChat.jsw');
 assert.match(liveChat, /getLiveChatMessages/);
 assert.match(liveChat, /sendLiveChatMessage/);
