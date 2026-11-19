@@ -249,6 +249,7 @@ assert.match(viewer, /previous\.completed === true && safePosition <= 5/);
 const reports = read('src/backend/reports.jsw');
 assert.match(reports, /reportContent/);
 assert.match(reports, /resolveContentReport/);
+assert.match(reports, /content-report limit is ten reports per 24 hours/);
 assert.match(reports, /const LIVE = 'LiveStreams'/);
 const reportedRemoval = reports.slice(
   reports.indexOf("if (resolution === 'remove_content')"),
