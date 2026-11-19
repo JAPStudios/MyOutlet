@@ -12,7 +12,14 @@ assert.ok(styleStart >= 0 && styleEnd > styleStart, 'The homepage must contain a
 assert.doesNotMatch(app.slice(styleStart, styleEnd), /\\\\n/,
   'The embedded stylesheet must use real line breaks, not literal \\n separators.');
 
-assert.match(http, /export async function get_health\\(\\)/,\n  'The public HTTP API must expose a CMS-backed health endpoint.');\nassert.match(http, /wixData\\.query\\(MEDIA\\)\\.limit\\(1\\)/,\n  'The health endpoint must verify CMS read access to media data.');\nassert.match(http, /wixData\\.query\\(LIVE\\)\\.limit\\(1\\)/,\n  'The health endpoint must verify CMS read access to live-stream data.');\n\nfor (const name of ['get_publicCatalog', 'get_publicLiveStreams', 'get_publicCreators', 'post_publicPlayback']) {
+assert.match(http, /export async function get_health\(\)/,
+  'The public HTTP API must expose a CMS-backed health endpoint.');
+assert.match(http, /wixData\.query\(MEDIA\)\.limit\(1\)/,
+  'The health endpoint must verify CMS read access to media data.');
+assert.match(http, /wixData\.query\(LIVE\)\.limit\(1\)/,
+  'The health endpoint must verify CMS read access to live-stream data.');
+
+for (const name of ['get_publicCatalog', 'get_publicLiveStreams', 'get_publicCreators', 'post_publicPlayback']) {
   assert.match(http, new RegExp('export async function ' + name + '\\('),
     'The public HTTP API must expose ' + name + '.');
 }
