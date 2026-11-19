@@ -3,6 +3,7 @@ import wixUsersBackend from 'wix-users-backend';
 
 const MEDIA = 'MediaItems';
 const REPORTS = 'ContentReports';
+const LIVE = 'LiveStreams';
 const REASONS = [
   'copyright',
   'harassment',
@@ -146,6 +147,19 @@ export async function resolveContentReport(input = {}) {
         moderationNote: note || 'Removed after viewer content report.'
       }, { suppressAuth: true });
     }
+    const sessions = await wixData.query(LIVE)
+      .eq('mediaItemId', report.mediaItemId)
+      .limit(100)
+      .find({ suppressAuth: true });
+    const endedAt = new Date();
+    await Promise.all(sessions.items
+      .filter(session => !['ended', 'cancelled'].includes(session.status))
+      .map(session => wixData.update(LIVE, {
+        ...session,
+        status: 'cancelled',
+        endedAt,
+        updatedAt: endedAt
+      }, { suppressAuth: true })));
   } else if (resolution === 'rating_corrected') {
     if (!RATINGS.includes(input.correctedRating)) {
       throw new Error('A valid corrected content rating is required.');
