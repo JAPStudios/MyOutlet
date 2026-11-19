@@ -5,6 +5,7 @@ const path = require('node:path');
 const root = path.join(__dirname, '..');
 const http = fs.readFileSync(path.join(root, 'src', 'backend', 'http-functions.js'), 'utf8');
 const app = fs.readFileSync(path.join(root, 'src', 'public', 'myoutlet-app.js'), 'utf8');
+const homePage = fs.readFileSync(path.join(root, 'src', 'pages', 'Home.c1dmp.js'), 'utf8');
 
 for (const name of ['get_publicCatalog', 'get_publicLiveStreams', 'get_publicCreators', 'post_publicPlayback']) {
   assert.match(http, new RegExp('export async function ' + name + '\\('),
@@ -44,8 +45,25 @@ for (const forbidden of [
     'The MyOutlet homepage must not include the unrequested production slate: ' + forbidden);
 }
 
-assert.ok(app.includes('const siteBase = "/myoutlet";'),
-  'Public HTTP requests must include the MyOutlet Wix site path.');
+assert.ok(homePage.includes('from "backend/catalog.jsw"'),
+  'The homepage Velo page code must import the catalogue and creator web module.');
+assert.ok(homePage.includes('from "backend/liveStreams.jsw"'),
+  'The homepage Velo page code must import the live-stream web module.');
+assert.ok(homePage.includes('from "backend/media.jsw"'),
+  'The homepage Velo page code must import the media playback web module.');
+for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'publicPlayback']) {
+  assert.ok(homePage.includes(route), 'The Velo bridge must handle ' + route + '.');
+}
+assert.match(homePage, /window\.addEventListener\(REQUEST_EVENT/,
+  'The Velo page code must receive homepage requests.');
+assert.match(homePage, /window\.dispatchEvent\(new CustomEvent\(RESPONSE_EVENT/,
+  'The Velo page code must return request results to the homepage.');
+assert.match(app, /waitForVeloBridge\(\)/,
+  'The homepage must wait for the Velo bridge before requesting data.');
+assert.match(app, /myoutlet:request/,
+  'The homepage must send API requests through the Velo bridge.');
+assert.match(app, /myoutlet:response/,
+  'The homepage must receive API responses from the Velo bridge.');
 assert.match(app, /function ensureHls\(\)/,
   'The player must wait for HLS.js before attempting HLS playback.');
 assert.match(app, /HLS playback is unavailable because the player library could not be loaded/,
