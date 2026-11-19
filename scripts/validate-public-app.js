@@ -53,7 +53,7 @@ assert.ok(homePage.includes('from "backend/media.jsw"'),
   'The homepage Velo page code must import the media playback web module.');
 assert.ok(homePage.includes('from "backend/liveChat.jsw"'),
   'The homepage Velo page code must import the live-chat web module.');
-for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'publicPlayback', 'liveChatMessages', 'sendLiveChatMessage', 'reportLiveChatMessage']) {
+for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'publicPlayback', 'liveChatMessages', 'sendLiveChatMessage', 'reportLiveChatMessage', 'myChannel', 'saveMyChannel', 'submitContent', 'mySubmissions', 'createVideoUpload', 'myVideoUploads', 'myCreatorAnalytics']) {
   assert.ok(homePage.includes(route), 'The Velo bridge must handle ' + route + '.');
 }
 assert.match(homePage, /window\.addEventListener\(REQUEST_EVENT/,
@@ -72,6 +72,18 @@ assert.match(app, /sendLiveChatMessage/,
   'Signed-in viewers must be able to submit live-chat messages.');
 assert.match(app, /reportLiveChatMessage/,
   'Viewers must be able to report live-chat messages.');
+assert.match(app, /id="mo-creator-studio"/,
+  'The homepage must include the creator studio.');
+assert.match(app, /id="mo-channel-form"/,
+  'Creators must be able to create or update their channel profile.');
+assert.match(app, /id="mo-media-form"/,
+  'Creators must be able to submit audiovisual media for review.');
+assert.match(app, /uploadMp4\(file, ticket\)/,
+  'The creator studio must upload MP4 files through the signed Wix upload URL.');
+assert.match(app, /mediaUploadSessionId = pendingUploadSessionId/,
+  'The creator studio must submit uploaded videos only after Wix reports them ready.');
+assert.match(app, /myCreatorAnalytics/,
+  'The creator studio must display the signed-in creator analytics.');
 assert.match(app, /setInterval\(\(\) => loadLiveChat\(false\), 5000\)/,
   'Live chat must refresh while a live stream is open.');
 assert.match(app, /function ensureHls\(\)/,
