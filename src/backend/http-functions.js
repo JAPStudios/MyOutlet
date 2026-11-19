@@ -15,7 +15,7 @@ function normalizePath(value) {
   let path = value.trim();
   while (path.startsWith('/')) path = path.slice(1);
   while (path.endsWith('/')) path = path.slice(0, -1);
-  if (path.toLowerCase().endsWith('/index.m3u8')) path = path.slice(0, -12);
+  if (path.toLowerCase().endsWith('/index.m3u8')) path = path.slice(0, -11);
   return path;
 }
 
