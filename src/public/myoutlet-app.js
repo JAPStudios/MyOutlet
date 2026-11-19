@@ -161,6 +161,26 @@
             <div class="mo-studio-metrics" id="mo-analytics"></div>
             <p class="mo-studio-status">Playback starts, client-reported watch time and completions are estimates, not audited audience measurements.</p>
           </section>
+          <section class="mo-studio-card">
+            <h3>Live broadcast</h3>
+            <form class="mo-studio-form" id="mo-live-form">
+              <label>Stream title<input id="mo-live-title" maxlength="120" required></label>
+              <label>Description<textarea id="mo-live-description" maxlength="2000"></textarea></label>
+              <label>Content rating<select id="mo-live-rating"><option>TV-Y</option><option>TV-Y7</option><option>TV-G</option><option>TV-PG</option><option>TV-14</option><option>TV-MA</option><option>Unrated</option></select></label>
+              <label>Category<input id="mo-live-category" maxlength="50" value="Live"></label>
+              <label>Thumbnail HTTPS URL<input id="mo-live-thumbnail" type="url" placeholder="https://"></label>
+              <button class="mo-btn primary" type="submit">Create live stream</button>
+            </form>
+            <p class="mo-studio-status" id="mo-live-status" role="status"></p>
+            <label class="mo-studio-form">RTMPS ingest address<textarea id="mo-ingest-url" readonly></textarea></label>
+            <div class="mo-studio-list" id="mo-my-live-streams"></div>
+          </section>
+          <section class="mo-studio-card">
+            <h3>Live song queue</h3>
+            <button class="mo-btn" id="mo-refresh-queue" type="button">Refresh queue</button>
+            <p class="mo-studio-status" id="mo-queue-status" role="status"></p>
+            <div class="mo-studio-list" id="mo-song-queue"></div>
+          </section>
         </div>
       </div>
     </section>
