@@ -110,6 +110,14 @@ async function handleRequest(detail) {
     } else if (method === "POST" && route === "promptLogin") {
       await authentication.promptLogin({ mode: "login", modal: true });
       result = { loggedIn: true };
+    } else if (method === "GET" && route === "listPendingComments") {
+      result = await listPendingComments(query);
+    } else if (method === "GET" && route === "listMyPendingComments") {
+      result = await listMyPendingComments(query);
+    } else if (method === "POST" && route === "moderateComment") {
+      result = await moderateComment(body);
+    } else if (method === "POST" && route === "moderateMyChannelComment") {
+      result = await moderateMyChannelComment(body);
     } else if (method === "GET" && route === "listPendingContent") {
       result = await listPendingContent(query);
     } else if (method === "POST" && route === "moderateContent") {
