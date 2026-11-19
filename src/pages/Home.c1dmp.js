@@ -2,6 +2,9 @@ import { browseCatalog, browseCreators } from "backend/catalog.jsw";
 import { browseLiveStreams } from "backend/liveStreams.jsw";
 import { getPublishedMediaPlayback } from "backend/media.jsw";
 import { getLiveChatMessages, sendLiveChatMessage, reportLiveChatMessage } from "backend/liveChat.jsw";
+import { getMyChannel, saveMyChannel, submitContent, getMySubmissions } from "backend/catalog.jsw";
+import { createVideoUpload, getMyVideoUploads } from "backend/media.jsw";
+import { getMyCreatorAnalytics } from "backend/viewer.jsw";
 
 const REQUEST_EVENT = "myoutlet:request";
 const RESPONSE_EVENT = "myoutlet:response";
@@ -47,6 +50,20 @@ async function handleRequest(detail) {
       result = await sendLiveChatMessage(body);
     } else if (method === "POST" && route === "reportLiveChatMessage") {
       result = await reportLiveChatMessage(body);
+    } else if (method === "GET" && route === "myChannel") {
+      result = await getMyChannel();
+    } else if (method === "POST" && route === "saveMyChannel") {
+      result = await saveMyChannel(body);
+    } else if (method === "POST" && route === "submitContent") {
+      result = await submitContent(body);
+    } else if (method === "GET" && route === "mySubmissions") {
+      result = await getMySubmissions(query);
+    } else if (method === "POST" && route === "createVideoUpload") {
+      result = await createVideoUpload(body);
+    } else if (method === "GET" && route === "myVideoUploads") {
+      result = await getMyVideoUploads(query);
+    } else if (method === "GET" && route === "myCreatorAnalytics") {
+      result = await getMyCreatorAnalytics(query);
     } else {
       throw new Error("Unsupported MyOutlet request.");
     }
