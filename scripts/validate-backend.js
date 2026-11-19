@@ -249,6 +249,13 @@ assert.match(viewer, /previous\.completed === true && safePosition <= 5/);
 const reports = read('src/backend/reports.jsw');
 assert.match(reports, /reportContent/);
 assert.match(reports, /resolveContentReport/);
+assert.match(reports, /const LIVE = 'LiveStreams'/);
+const reportedRemoval = reports.slice(
+  reports.indexOf("if (resolution === 'remove_content')"),
+  reports.indexOf("} else if (resolution === 'rating_corrected')")
+);
+assert.match(reportedRemoval, /wixData\.query\(LIVE\)/);
+assert.match(reportedRemoval, /status: 'cancelled'/);
 
 const engagement = read('src/backend/engagement.jsw');
 assert.match(engagement, /likeMedia/);
