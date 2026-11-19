@@ -51,6 +51,16 @@ export async function reportContent(input = {}) {
     return { _id: existing.items[0]._id, status: 'open', alreadyReported: true };
   }
 
+  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const recentReports = await wixData.query(REPORTS)
+    .eq('reporterMemberId', reporterMemberId)
+    .ge('createdAt', cutoff)
+    .limit(10)
+    .find({ suppressAuth: true });
+  if (recentReports.items.length >= 10) {
+    throw new Error('The content-report limit is ten reports per 24 hours.');
+  }
+
   const details = typeof input.details === 'string' ? input.details.trim().slice(0, 2000) : '';
   const created = await wixData.insert(REPORTS, {
     mediaItemId,
