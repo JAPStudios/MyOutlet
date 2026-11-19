@@ -14,11 +14,11 @@ Current MyOutlet site state:
 1. The 20 custom CMS collections documented in `CMS_COLLECTIONS.md` have been created on the MyOutlet site.
 2. Their direct collection permissions are set to `ADMIN`; application-level public, member and site-owner access is controlled by `src/backend/permissions.json`.
 3. The repository's Wix site binding now targets MyOutlet.
-4. The automated source-contract check is available as `npm test`; live Velo runtime behavior still requires execution against the site; the live-chat, live-chat-report and live-chat-ban collections have been created on the MyOutlet site; all chat-report and chat-ban query indexes are active.
+4. The automated source-contract check is available as `npm test`; the homepage bridge and chat interface have been committed and the Wix site has been published, but live visitor-session behavior still requires runtime verification; the live-chat, live-chat-report and live-chat-ban collections have been created on the MyOutlet site; all chat-report and chat-ban query indexes are active.
 
 ## Visitor-facing homepage
 
-The existing Wix homepage has an enabled custom embed that loads `src/public/myoutlet-app.js` from this repository. The interface provides a media discovery catalogue, title/description/category search, video/audio and creator-rating filters, a live-broadcast section, a creator directory and a media player. It reads published media, live sessions and creator channels through the public HTTP functions in `src/backend/http-functions.js`. Creator-supplied ratings are classifications and viewer filters; they are not identity or age verification.
+The existing Wix homepage has an enabled custom embed that loads `src/public/myoutlet-app.js` from this repository. The interface provides a media discovery catalogue, title/description/category search, video/audio and creator-rating filters, a live-broadcast section, a creator directory and a media player. `src/pages/Home.c1dmp.js` connects the custom homepage to the Velo web modules for catalogue browsing, creator discovery, live-stream discovery and playback through a same-page request/response bridge. The live player also connects to the live-chat web module for message retrieval, signed-in posting and viewer reporting. Creator-supplied ratings are classifications and viewer filters; they are not identity or age verification.
 
 The public HTTP functions return only published media with current worldwide rights records, active live sessions and public creator-profile fields. Wix-hosted uploaded videos use Wix-generated playback URLs; externally hosted media must use HTTPS. The application does not fabricate catalogue items when no published content is available.
 
