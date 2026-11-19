@@ -6,6 +6,11 @@ const root = path.join(__dirname, '..');
 const http = fs.readFileSync(path.join(root, 'src', 'backend', 'http-functions.js'), 'utf8');
 const app = fs.readFileSync(path.join(root, 'src', 'public', 'myoutlet-app.js'), 'utf8');
 const homePage = fs.readFileSync(path.join(root, 'src', 'pages', 'Home.c1dmp.js'), 'utf8');
+const styleStart = app.indexOf('<style>');
+const styleEnd = app.indexOf('</style>', styleStart);
+assert.ok(styleStart >= 0 && styleEnd > styleStart, 'The homepage must contain an embedded stylesheet.');
+assert.doesNotMatch(app.slice(styleStart, styleEnd), /\\\\n/,
+  'The embedded stylesheet must use real line breaks, not literal \\n separators.');
 
 for (const name of ['get_publicCatalog', 'get_publicLiveStreams', 'get_publicCreators', 'post_publicPlayback']) {
   assert.match(http, new RegExp('export async function ' + name + '\\('),
