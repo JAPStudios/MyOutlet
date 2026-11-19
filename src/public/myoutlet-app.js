@@ -269,6 +269,14 @@
   const watchlistNode = $("#mo-watchlist");
   const followingFeedNode = $("#mo-following-feed");
   const followingChannelsNode = $("#mo-following-channels");
+  const playlistsNode = $("#mo-playlists");
+  const playlistItemsNode = $("#mo-playlist-items");
+  const playlistStatus = $("#mo-playlist-status");
+  const playlistForm = $("#mo-playlist-form");
+  const playlistSelect = $("#mo-playlist-select");
+  const notificationsNode = $("#mo-notifications");
+  const notificationsStatus = $("#mo-notifications-status");
+  let viewerPlaylists = [];
   const liveForm = $("#mo-live-form");
   const creatorLiveStatus = $("#mo-live-status");
   const ingestUrlNode = $("#mo-ingest-url");
@@ -1005,7 +1013,9 @@
       getJson(siteBase + "/_functions/continueWatching?limit=30"),
       getJson(siteBase + "/_functions/followingFeed?limit=30"),
       getJson(siteBase + "/_functions/myViewingPreferences"),
-      getJson(siteBase + "/_functions/myFollowing?limit=100")
+      getJson(siteBase + "/_functions/myFollowing?limit=100"),
+      getJson(siteBase + "/_functions/myPlaylists?limit=100"),
+      getJson(siteBase + "/_functions/myNotifications?limit=50")
     ]);
     if (results[3].status === "fulfilled") {
       const preference = results[3].value;
@@ -1029,6 +1039,9 @@
     watchlistNode.replaceChildren();
     followingFeedNode.replaceChildren();
     followingChannelsNode.replaceChildren();
+    playlistsNode.replaceChildren();
+    playlistItemsNode.replaceChildren();
+    notificationsNode.replaceChildren();
     const followed = results[4].status === "fulfilled" && Array.isArray(results[4].value.items)
       ? results[4].value.items : [];
     if (followed.length) {
@@ -1069,6 +1082,81 @@
     if (watchlist.length) watchlist.forEach(item => watchlistNode.appendChild(card(item, false)));
     else watchlistNode.innerHTML = '<div class="mo-empty">Your watchlist is empty.</div>';
     if (feed.length) feed.forEach(item => followingFeedNode.appendChild(card(item, false)));
+    viewerPlaylists = results[5].status === "fulfilled" && Array.isArray(results[5].value.items)
+      ? results[5].value.items : [];
+    playlistSelect.replaceChildren();
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.textContent = "Choose a playlist";
+    playlistSelect.appendChild(defaultOption);
+    viewerPlaylists.forEach(playlist => {
+      const option = document.createElement("option");
+      option.value = playlist._id;
+      option.textContent = playlist.title;
+      playlistSelect.appendChild(option);
+      const row = document.createElement("div");
+      row.className = "mo-studio-row";
+      const label = document.createElement("span");
+      label.textContent = playlist.title + " · " + playlist.itemCount + " items · " + playlist.visibility;
+      const view = document.createElement("button");
+      view.className = "mo-btn";
+      view.type = "button";
+      view.textContent = "View";
+      view.addEventListener("click", async () => {
+        try {
+          const detail = await getJson(siteBase + "/_functions/playlist?playlistId=" + encodeURIComponent(playlist._id));
+          playlistItemsNode.replaceChildren();
+          (detail.items || []).forEach(item => playlistItemsNode.appendChild(card(item, false)));
+          playlistStatus.textContent = detail.title + " · " + detail.total + " media items";
+        } catch (error) { playlistStatus.textContent = error.message || "Playlist could not be opened."; }
+      });
+      const remove = document.createElement("button");
+      remove.className = "mo-btn";
+      remove.type = "button";
+      remove.textContent = "Delete";
+      remove.addEventListener("click", async () => {
+        try {
+          await getJson(siteBase + "/_functions/deletePlaylist", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ playlistId: playlist._id })
+          });
+          await loadViewerLibrary();
+        } catch (error) { playlistStatus.textContent = error.message || "Playlist could not be deleted."; }
+      });
+      row.append(label, view, remove);
+      playlistsNode.appendChild(row);
+    });
+    if (!viewerPlaylists.length) playlistsNode.textContent = "No playlists yet.";
+    const notifications = results[6].status === "fulfilled" && Array.isArray(results[6].value.items)
+      ? results[6].value.items : [];
+    notificationsStatus.textContent = results[6].status === "fulfilled"
+      ? notifications.length + " notifications · " + (results[6].value.unreadCount || 0) + " unread"
+      : "Sign in to view notifications.";
+    notifications.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "mo-studio-row";
+      const label = document.createElement("span");
+      label.textContent = item.message + (item.readAt ? " · Read" : " · Unread");
+      row.appendChild(label);
+      if (!item.readAt) {
+        const read = document.createElement("button");
+        read.className = "mo-btn";
+        read.type = "button";
+        read.textContent = "Mark read";
+        read.addEventListener("click", async () => {
+          try {
+            await getJson(siteBase + "/_functions/markNotificationRead", {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ notificationId: item._id })
+            });
+            await loadViewerLibrary();
+          } catch (error) { notificationsStatus.textContent = error.message || "Notification could not be marked read."; }
+        });
+        row.appendChild(read);
+      }
+      notificationsNode.appendChild(row);
+    });
+    if (!notifications.length) notificationsNode.textContent = "No notifications.";
     else followingFeedNode.innerHTML = '<div class="mo-empty">No new media from followed channels.</div>';
   }
 
@@ -1085,6 +1173,63 @@
       studioStatus.textContent = error.message || "Sign-in was cancelled or could not be completed.";
     } finally {
       signInButton.disabled = false;
+    }
+  });
+
+  playlistForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!creatorChannel) {
+      playlistStatus.textContent = "Create a creator channel before creating playlists.";
+      return;
+    }
+    const button = playlistForm.querySelector('button[type="submit"]');
+    button.disabled = true;
+    try {
+      await getJson(siteBase + "/_functions/createPlaylist", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          creatorChannelId: creatorChannel._id,
+          title: $("#mo-playlist-title").value,
+          description: $("#mo-playlist-description").value,
+          visibility: $("#mo-playlist-visibility").value
+        })
+      });
+      playlistForm.reset();
+      playlistStatus.textContent = "Playlist created.";
+      await loadViewerLibrary();
+    } catch (error) {
+      playlistStatus.textContent = error.message || "Playlist could not be created.";
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  $("#mo-add-to-playlist").addEventListener("click", async () => {
+    if (!activeMediaItemId || !playlistSelect.value) {
+      engagementStatus.textContent = "Choose a playlist before adding this media.";
+      return;
+    }
+    try {
+      await getJson(siteBase + "/_functions/addMediaToPlaylist", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ playlistId: playlistSelect.value, mediaItemId: activeMediaItemId })
+      });
+      engagementStatus.textContent = "Media added to playlist.";
+      await loadViewerLibrary();
+    } catch (error) {
+      engagementStatus.textContent = error.message || "Media could not be added to the playlist.";
+    }
+  });
+
+  $("#mo-mark-all-notifications").addEventListener("click", async () => {
+    try {
+      const result = await getJson(siteBase + "/_functions/markAllNotificationsRead", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: "{}"
+      });
+      notificationsStatus.textContent = result.updatedCount + " notifications marked read.";
+      await loadViewerLibrary();
+    } catch (error) {
+      notificationsStatus.textContent = error.message || "Notifications could not be updated.";
     }
   });
 
