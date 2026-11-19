@@ -5,6 +5,8 @@ import { getLiveChatMessages, sendLiveChatMessage, reportLiveChatMessage } from 
 import { getMyChannel, saveMyChannel, submitContent, getMySubmissions } from "backend/catalog.jsw";
 import { createVideoUpload, getMyVideoUploads } from "backend/media.jsw";
 import { getMyCreatorAnalytics } from "backend/viewer.jsw";
+import { createLiveStream, getMyLiveStreams, endLiveStream } from "backend/liveStreams.jsw";
+import { getSongQueue, setSongRequestStatus } from "backend/catalog.jsw";
 
 const REQUEST_EVENT = "myoutlet:request";
 const RESPONSE_EVENT = "myoutlet:response";
@@ -64,6 +66,16 @@ async function handleRequest(detail) {
       result = await getMyVideoUploads(query);
     } else if (method === "GET" && route === "myCreatorAnalytics") {
       result = await getMyCreatorAnalytics(query);
+    } else if (method === "POST" && route === "createLiveStream") {
+      result = await createLiveStream(body);
+    } else if (method === "GET" && route === "myLiveStreams") {
+      result = await getMyLiveStreams(query);
+    } else if (method === "POST" && route === "endLiveStream") {
+      result = await endLiveStream(body);
+    } else if (method === "GET" && route === "songQueue") {
+      result = await getSongQueue(query);
+    } else if (method === "POST" && route === "setSongRequestStatus") {
+      result = await setSongRequestStatus(body);
     } else {
       throw new Error("Unsupported MyOutlet request.");
     }
