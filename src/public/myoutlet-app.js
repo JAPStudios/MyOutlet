@@ -114,7 +114,7 @@
     <section class="mo-section" id="mo-creator-studio">
       <div class="mo-wrap">
         <div class="mo-section-head"><div><h2>Creator studio</h2><p class="mo-sub">Manage a creator channel, submit media and review performance.</p></div></div>
-        <p class="mo-studio-status" id="mo-studio-status" role="status">Sign in to manage a creator channel.</p>
+        <p class="mo-studio-status" id="mo-studio-status" role="status">Sign in to manage a creator channel.</p><button class="mo-btn" id="mo-sign-in" type="button">Sign in</button>
         <div class="mo-studio-grid">
           <section class="mo-studio-card">
             <h3>Channel profile</h3>
@@ -217,6 +217,7 @@
   const chatInput = $("#mo-chat-input");
   const chatStatus = $("#mo-chat-status");
   const studioStatus = $("#mo-studio-status");
+  const signInButton = $("#mo-sign-in");
   const channelForm = $("#mo-channel-form");
   const channelStatus = $("#mo-channel-status");
   const mediaForm = $("#mo-media-form");
@@ -732,6 +733,22 @@
     else followingFeedNode.innerHTML = '<div class="mo-empty">No new media from followed channels.</div>';
   }
 
+  signInButton.addEventListener("click", async () => {
+    signInButton.disabled = true;
+    try {
+      await getJson(siteBase + "/_functions/promptLogin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}"
+      });
+      await Promise.allSettled([loadCreatorStudio(), loadViewerLibrary()]);
+    } catch (error) {
+      studioStatus.textContent = error.message || "Sign-in was cancelled or could not be completed.";
+    } finally {
+      signInButton.disabled = false;
+    }
+  });
+
   $("#mo-refresh-library").addEventListener("click", loadViewerLibrary);
 
   async function loadCreatorStudio() {
@@ -769,6 +786,7 @@
           " · Completions: " + (totals.completions || 0);
       }
     } catch (error) {
+      signInButton.hidden = false;
       studioStatus.textContent = error.message || "Sign in to manage a creator channel.";
     }
   }
