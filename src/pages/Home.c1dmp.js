@@ -11,7 +11,7 @@ import { getMyChannel, saveMyChannel, submitContent, getMySubmissions } from "ba
 import { createVideoUpload, getMyVideoUploads } from "backend/media.jsw";
 import { getMyCreatorAnalytics } from "backend/viewer.jsw";
 import { createLiveStream, getMyLiveStreams, endLiveStream } from "backend/liveStreams.jsw";
-import { listPendingRights, reviewRightsDeclaration } from "backend/rights.jsw";
+import { listPendingRights, reviewRightsDeclaration, submitRightsDeclaration, getMyRightsRecords } from "backend/rights.jsw";
 import { getSongQueue, setSongRequestStatus, listPendingContent, moderateContent } from "backend/catalog.jsw";
 import { followCreator, unfollowCreator, addToWatchlist, removeFromWatchlist, getMyWatchlist, getContinueWatching, getMyFollowing, getFollowingFeed, recordPlaybackProgress, getMyViewingPreferences, setMyViewingPreferences } from "backend/viewer.jsw";
 
