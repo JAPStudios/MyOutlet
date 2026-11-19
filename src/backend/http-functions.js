@@ -77,7 +77,7 @@ export async function get_publicLiveStreams() {
       const media = await wixData.get(MEDIA, stream.mediaItemId, { suppressAuth: true });
       if (!media || media.status !== 'published' || media.contentType !== 'livestream' ||
           !isMediaRightsCurrent(media) || typeof media.mediaUrl !== 'string' ||
-          !/^https:\/\/\//i.test(media.mediaUrl)) return null;
+          !isHttpsUrl(media.mediaUrl)) return null;
       return {
         _id: stream._id,
         mediaItemId: media._id,
@@ -150,7 +150,7 @@ export async function post_publicPlayback(request) {
       const playback = await mediaManager.getVideoPlaybackUrl(media.mediaUrl, requestedFormat);
       playbackUrl = typeof playback === 'string' ? playback : playback;
       format = requestedFormat;
-    } else if (!/^https:\/\/\//i.test(media.mediaUrl)) {
+    } else if (!isHttpsUrl(media.mediaUrl)) {
       return forbidden();
     }
     return ok({
