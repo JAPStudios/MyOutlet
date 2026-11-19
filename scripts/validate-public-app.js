@@ -46,7 +46,7 @@ for (const forbidden of [
 
 assert.ok(app.includes('const siteBase = "/myoutlet";'),
   'Public HTTP requests must include the MyOutlet Wix site path.');
-assert.match(app, /ratingOrder\.indexOf\(itemRating\) <= maximumRating/,
+assert.match(app, /function ensureHls\(\)/,\n  'The player must wait for HLS.js before attempting HLS playback.');\nassert.match(app, /HLS playback is unavailable because the player library could not be loaded/,\n  'The player must report an unavailable HLS playback engine.');\nassert.match(app, /ratingOrder\.indexOf\(itemRating\) <= maximumRating/,
   'The maximum-rating selector must include items at or below the selected rating.');
 assert.match(app, /Ratings are creator-supplied content classifications/,
   'The interface must distinguish creator ratings from verified age checks.');
