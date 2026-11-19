@@ -234,11 +234,17 @@
     const term = $("#mo-search").value.trim().toLowerCase();
     const type = $("#mo-type").value;
     const rating = $("#mo-rating").value;
+    const ratingOrder = ["TV-Y", "TV-Y7", "TV-G", "TV-PG", "TV-14", "TV-MA"];
+    const maximumRating = ratingOrder.indexOf(rating);
     const filtered = catalog.filter(item => {
       const searchable = [item.title, item.description, item.category, ...(item.tags || [])].join(" ").toLowerCase();
+      const itemRating = text(item.contentRating) || "Unrated";
+      const ratingMatches = rating === "all" ||
+        (rating === "Unrated" ? itemRating === "Unrated" :
+          ratingOrder.indexOf(itemRating) !== -1 && ratingOrder.indexOf(itemRating) <= maximumRating);
       return (!term || searchable.includes(term)) &&
         (type === "all" || item.contentType === type) &&
-        (rating === "all" || item.contentRating === rating);
+        ratingMatches;
     });
     catalogNode.replaceChildren();
     if (!filtered.length) {
