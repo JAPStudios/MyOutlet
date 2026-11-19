@@ -190,7 +190,7 @@
         <p class="mo-studio-status" id="mo-library-status" role="status">Sign in to view your library.</p>
         <h3>Continue watching</h3><div class="mo-grid" id="mo-continue-watching"></div>
         <h3>Watchlist</h3><div class="mo-grid" id="mo-watchlist"></div>
-        <h3>Following feed</h3><div class="mo-grid" id="mo-following-feed"></div>
+        <h3>Following channels</h3><div class="mo-studio-list" id="mo-following-channels"></div>\n        <h3>Following feed</h3><div class="mo-grid" id="mo-following-feed"></div>
       </div>
     </section>
     <footer class="mo-footer"><div class="mo-wrap">MyOutlet · Audiovisual publishing, streaming and creator channels</div></footer>
@@ -230,6 +230,7 @@
   const continueWatchingNode = $("#mo-continue-watching");
   const watchlistNode = $("#mo-watchlist");
   const followingFeedNode = $("#mo-following-feed");
+  const followingChannelsNode = $("#mo-following-channels");
   const liveForm = $("#mo-live-form");
   const creatorLiveStatus = $("#mo-live-status");
   const ingestUrlNode = $("#mo-ingest-url");
@@ -488,6 +489,14 @@
       hlsInstance = null;
     }
     video.pause();
+    const resumePosition = Number(item.positionSeconds) || 0;
+    if (!isLive && resumePosition > 0) {
+      video.addEventListener("loadedmetadata", () => {
+        if (Number.isFinite(video.duration) && video.duration > 1) {
+          video.currentTime = Math.min(resumePosition, Math.max(0, video.duration - 1));
+        }
+      }, { once: true });
+    }
     video.removeAttribute("src");
     video.load();
     if (isHls && window.Hls && window.Hls.isSupported()) {
@@ -522,6 +531,17 @@
   }
 
   function closePlayer() {
+    if (activeMediaItem && Number.isFinite(video.duration) && video.duration > 1 && video.currentTime > 0) {
+      getJson(siteBase + "/_functions/recordPlaybackProgress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mediaItemId: activeMediaItem._id,
+          durationSeconds: video.duration,
+          positionSeconds: video.currentTime
+        })
+      }).catch(() => {});
+    }
     if (liveChatTimer) {
       window.clearInterval(liveChatTimer);
       liveChatTimer = null;
@@ -702,7 +722,8 @@
       getJson(siteBase + "/_functions/myWatchlist?limit=50"),
       getJson(siteBase + "/_functions/continueWatching?limit=30"),
       getJson(siteBase + "/_functions/followingFeed?limit=30"),
-      getJson(siteBase + "/_functions/myViewingPreferences")
+      getJson(siteBase + "/_functions/myViewingPreferences"),
+      getJson(siteBase + "/_functions/myFollowing?limit=100")
     ]);
     if (results[3].status === "fulfilled") {
       const preference = results[3].value;
@@ -725,6 +746,42 @@
     continueWatchingNode.replaceChildren();
     watchlistNode.replaceChildren();
     followingFeedNode.replaceChildren();
+    followingChannelsNode.replaceChildren();
+    const followed = results[4].status === "fulfilled" && Array.isArray(results[4].value.items)
+      ? results[4].value.items : [];
+    if (followed.length) {
+      followed.forEach(channel => {
+        const row = document.createElement("div");
+        row.className = "mo-studio-row";
+        const name = document.createElement("span");
+        name.textContent = channel.name + " · @" + channel.handle;
+        const unfollow = document.createElement("button");
+        unfollow.className = "mo-btn";
+        unfollow.type = "button";
+        unfollow.textContent = "Unfollow";
+        unfollow.addEventListener("click", async () => {
+          unfollow.disabled = true;
+          try {
+            await getJson(siteBase + "/_functions/unfollowCreator", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ creatorChannelId: channel._id })
+            });
+            await loadViewerLibrary();
+          } catch (error) {
+            libraryStatus.textContent = error.message || "The channel could not be unfollowed.";
+            unfollow.disabled = false;
+          }
+        });
+        row.append(name, unfollow);
+        followingChannelsNode.appendChild(row);
+      });
+    } else {
+      const empty = document.createElement("div");
+      empty.className = "mo-empty";
+      empty.textContent = "No followed channels yet.";
+      followingChannelsNode.appendChild(empty);
+    }
     if (continuing.length) continuing.forEach(item => continueWatchingNode.appendChild(card(item, false)));
     else continueWatchingNode.innerHTML = '<div class="mo-empty">Nothing to continue watching.</div>';
     if (watchlist.length) watchlist.forEach(item => watchlistNode.appendChild(card(item, false)));
