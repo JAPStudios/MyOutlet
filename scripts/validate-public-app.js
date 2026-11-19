@@ -23,7 +23,7 @@ assert.match(http, /mediaManager\.getVideoPlaybackUrl/,
   'Wix-hosted uploaded videos must use Wix playback URL generation.');
 
 for (const required of [
-  'mo-discover', 'mo-live', 'mo-productions', 'mo-creators', 'mo-search',
+  'mo-discover', 'mo-live', 'mo-creators', 'mo-search',
   'mo-type', 'mo-rating', '/_functions/publicCatalog',
   '/_functions/publicLiveStreams', '/_functions/publicCreators',
   '/_functions/publicPlayback'
@@ -31,9 +31,8 @@ for (const required of [
   assert.ok(app.includes(required), 'The homepage application must include ' + required + '.');
 }
 
-for (const title of ['PB&J', 'O.M.G. / Oh My Gawd', 'Creespyracies', 'Tales of Grimwald', 'The Shakespearience']) {
-  assert.ok(app.includes(title), 'The production slate must include ' + title + '.');
-}
+assert.doesNotMatch(app, /mo-productions|PB&J|O\\.M\\.G\\. \/ Oh My Gawd|Creespyracies|Tales of Grimwald|The Shakespearience/,
+  'The MyOutlet homepage must not include the unrequested production slate.');
 
 assert.ok(app.includes('const siteBase = "/myoutlet";'),
   'Public HTTP requests must include the MyOutlet Wix site path.');
