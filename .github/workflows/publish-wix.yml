@@ -1,0 +1,40 @@
+name: Publish MyOutlet to Wix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "wix.config.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/publish-wix.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: myoutlet-wix-production
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: ${{ secrets.WIX_CLI_API_KEY != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the MyOutlet site repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.22.1"
+          cache: npm
+      - name: Install site dependencies and Wix CLI
+        run: npm ci
+      - name: Authenticate Wix CLI
+        run: npm run wix login -- --api-key "$WIX_CLI_API_KEY"
+        env:
+          WIX_CLI_API_KEY: ${{ secrets.WIX_CLI_API_KEY }}
+      - name: Publish the default-branch site code
+        run: npm run wix publish
