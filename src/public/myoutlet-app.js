@@ -62,7 +62,41 @@
       #myoutlet-app .mo-player video{display:block;width:100%;max-height:72vh;background:#000}
       #myoutlet-app .mo-player-info{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px}
       #myoutlet-app .mo-close{border:1px solid #53647a;background:#1d2a3a;color:#fff;border-radius:8px;padding:8px 12px;cursor:pointer}
-      #myoutlet-app .mo-rating-note{font-size:12px;color:var(--mo-muted);margin-top:10px}\n      #myoutlet-app .mo-rating-toggle{display:flex;align-items:center;gap:7px;color:var(--mo-muted);font-size:13px}\n      #myoutlet-app .mo-chat{display:none;border-top:1px solid var(--mo-line);padding:16px 18px}\n      #myoutlet-app .mo-chat.open{display:block}\n      #myoutlet-app .mo-chat h3{font-size:16px;margin:0 0 10px}\n      #myoutlet-app .mo-chat-messages{max-height:220px;overflow:auto;display:flex;flex-direction:column;gap:9px;padding:10px;border:1px solid var(--mo-line);border-radius:9px;background:#0c1420}\n      #myoutlet-app .mo-chat-message{font-size:13px;overflow-wrap:anywhere}\n      #myoutlet-app .mo-chat-message strong{color:var(--mo-accent)}\n      #myoutlet-app .mo-chat-message button{margin-left:8px;border:0;background:transparent;color:var(--mo-muted);font-size:11px;text-decoration:underline;cursor:pointer}\n      #myoutlet-app .mo-chat-form{display:flex;gap:8px;margin-top:10px}\n      #myoutlet-app .mo-chat-input{flex:1;min-width:0;border:1px solid var(--mo-line);border-radius:8px;background:#111a27;color:var(--mo-text);padding:10px}\n      #myoutlet-app .mo-chat-status{font-size:12px;color:var(--mo-muted);min-height:18px;margin:8px 0 0}\n      #myoutlet-app .mo-engagement{border-top:1px solid var(--mo-line);padding:16px 18px}\n      #myoutlet-app .mo-engagement-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap}\n      #myoutlet-app .mo-comments{display:grid;gap:8px;margin:12px 0;max-height:220px;overflow:auto}\n      #myoutlet-app .mo-comment{padding:9px;border:1px solid var(--mo-line);border-radius:8px;font-size:13px;overflow-wrap:anywhere}\n      #myoutlet-app .mo-comment-form{display:grid;gap:8px}\n      #myoutlet-app .mo-comment-form textarea,#myoutlet-app .mo-comment-form select{border:1px solid var(--mo-line);border-radius:8px;background:#111a27;color:var(--mo-text);padding:9px}\n      #myoutlet-app .mo-studio-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}\n      #myoutlet-app .mo-profile-banner{width:100%;max-height:220px;object-fit:cover;border-radius:12px;margin:14px 0}\n      #myoutlet-app .mo-profile-heading{display:flex;gap:14px;align-items:center}\n      #myoutlet-app .mo-profile-avatar{width:72px;height:72px;border-radius:50%;object-fit:cover}\n      #myoutlet-app .mo-profile-links{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}\n      #myoutlet-app .mo-studio-card{border:1px solid var(--mo-line);border-radius:14px;background:var(--mo-panel);padding:18px;min-width:0}\n      #myoutlet-app .mo-studio-card h3{font-size:18px;margin:0 0 12px}\n      #myoutlet-app .mo-studio-form{display:grid;gap:9px}\n      #myoutlet-app .mo-studio-form label{font-size:12px;color:var(--mo-muted);display:grid;gap:4px}\n      #myoutlet-app .mo-studio-form input,#myoutlet-app .mo-studio-form textarea,#myoutlet-app .mo-studio-form select{width:100%;min-height:40px;border:1px solid var(--mo-line);border-radius:8px;background:#111a27;color:var(--mo-text);padding:9px}\n      #myoutlet-app .mo-studio-form textarea{min-height:82px;resize:vertical}\n      #myoutlet-app .mo-studio-status{font-size:12px;color:var(--mo-muted);min-height:18px;margin:10px 0}\n      #myoutlet-app .mo-studio-list{display:grid;gap:8px;margin-top:12px}\n      #myoutlet-app .mo-studio-row{padding:10px;border:1px solid var(--mo-line);border-radius:8px;font-size:13px;display:flex;justify-content:space-between;gap:10px}\n      #myoutlet-app .mo-studio-row span:last-child{color:var(--mo-muted)}\n      #myoutlet-app .mo-studio-metrics{display:flex;gap:20px;flex-wrap:wrap;color:var(--mo-muted);font-size:13px}\n      @media(max-width:700px){#myoutlet-app .mo-studio-grid{grid-template-columns:1fr}}
+      #myoutlet-app .mo-rating-note{font-size:12px;color:var(--mo-muted);margin-top:10px}
+      #myoutlet-app .mo-rating-toggle{display:flex;align-items:center;gap:7px;color:var(--mo-muted);font-size:13px}
+      #myoutlet-app .mo-chat{display:none;border-top:1px solid var(--mo-line);padding:16px 18px}
+      #myoutlet-app .mo-chat.open{display:block}
+      #myoutlet-app .mo-chat h3{font-size:16px;margin:0 0 10px}
+      #myoutlet-app .mo-chat-messages{max-height:220px;overflow:auto;display:flex;flex-direction:column;gap:9px;padding:10px;border:1px solid var(--mo-line);border-radius:9px;background:#0c1420}
+      #myoutlet-app .mo-chat-message{font-size:13px;overflow-wrap:anywhere}
+      #myoutlet-app .mo-chat-message strong{color:var(--mo-accent)}
+      #myoutlet-app .mo-chat-message button{margin-left:8px;border:0;background:transparent;color:var(--mo-muted);font-size:11px;text-decoration:underline;cursor:pointer}
+      #myoutlet-app .mo-chat-form{display:flex;gap:8px;margin-top:10px}
+      #myoutlet-app .mo-chat-input{flex:1;min-width:0;border:1px solid var(--mo-line);border-radius:8px;background:#111a27;color:var(--mo-text);padding:10px}
+      #myoutlet-app .mo-chat-status{font-size:12px;color:var(--mo-muted);min-height:18px;margin:8px 0 0}
+      #myoutlet-app .mo-engagement{border-top:1px solid var(--mo-line);padding:16px 18px}
+      #myoutlet-app .mo-engagement-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+      #myoutlet-app .mo-comments{display:grid;gap:8px;margin:12px 0;max-height:220px;overflow:auto}
+      #myoutlet-app .mo-comment{padding:9px;border:1px solid var(--mo-line);border-radius:8px;font-size:13px;overflow-wrap:anywhere}
+      #myoutlet-app .mo-comment-form{display:grid;gap:8px}
+      #myoutlet-app .mo-comment-form textarea,#myoutlet-app .mo-comment-form select{border:1px solid var(--mo-line);border-radius:8px;background:#111a27;color:var(--mo-text);padding:9px}
+      #myoutlet-app .mo-studio-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+      #myoutlet-app .mo-profile-banner{width:100%;max-height:220px;object-fit:cover;border-radius:12px;margin:14px 0}
+      #myoutlet-app .mo-profile-heading{display:flex;gap:14px;align-items:center}
+      #myoutlet-app .mo-profile-avatar{width:72px;height:72px;border-radius:50%;object-fit:cover}
+      #myoutlet-app .mo-profile-links{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+      #myoutlet-app .mo-studio-card{border:1px solid var(--mo-line);border-radius:14px;background:var(--mo-panel);padding:18px;min-width:0}
+      #myoutlet-app .mo-studio-card h3{font-size:18px;margin:0 0 12px}
+      #myoutlet-app .mo-studio-form{display:grid;gap:9px}
+      #myoutlet-app .mo-studio-form label{font-size:12px;color:var(--mo-muted);display:grid;gap:4px}
+      #myoutlet-app .mo-studio-form input,#myoutlet-app .mo-studio-form textarea,#myoutlet-app .mo-studio-form select{width:100%;min-height:40px;border:1px solid var(--mo-line);border-radius:8px;background:#111a27;color:var(--mo-text);padding:9px}
+      #myoutlet-app .mo-studio-form textarea{min-height:82px;resize:vertical}
+      #myoutlet-app .mo-studio-status{font-size:12px;color:var(--mo-muted);min-height:18px;margin:10px 0}
+      #myoutlet-app .mo-studio-list{display:grid;gap:8px;margin-top:12px}
+      #myoutlet-app .mo-studio-row{padding:10px;border:1px solid var(--mo-line);border-radius:8px;font-size:13px;display:flex;justify-content:space-between;gap:10px}
+      #myoutlet-app .mo-studio-row span:last-child{color:var(--mo-muted)}
+      #myoutlet-app .mo-studio-metrics{display:flex;gap:20px;flex-wrap:wrap;color:var(--mo-muted);font-size:13px}
+      @media(max-width:700px){#myoutlet-app .mo-studio-grid{grid-template-columns:1fr}}
       @media(max-width:850px){#myoutlet-app .mo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#myoutlet-app .mo-hero{padding:48px 0 40px}}
       @media(max-width:560px){#myoutlet-app .mo-wrap{width:min(100% - 28px,1180px)}#myoutlet-app .mo-nav-inner{align-items:flex-start;flex-direction:column;padding:14px 0;gap:10px}#myoutlet-app .mo-links{gap:14px}#myoutlet-app .mo-grid{grid-template-columns:1fr}#myoutlet-app .mo-section-head{align-items:flex-start;flex-direction:column}}
     </style>
