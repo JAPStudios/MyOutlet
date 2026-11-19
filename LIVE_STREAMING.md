@@ -11,18 +11,28 @@ MyOutlet live sessions use RTMPS contribution, MediaMTX for ingest and HLS packa
 5. Visitors discover active sessions through `browseLiveStreams` or retrieve one by ID through `getLiveStream`. Both methods expose only live sessions whose media remains published, rights-verified and within the viewer's rating preference.
 6. The creator ends the session with `endLiveStream`. The session becomes `ended` and its live media item is removed from the public catalogue.
 
-## Wix Secrets Manager
+## Current Railway deployment
 
-Create these two secrets on the MyOutlet site. Values must match the public host and ports exposed by the MediaMTX service.
+The existing Railway service is a separate MediaMTX streaming service. It does not host the Wix website or the GitHub repository.
 
-- `MYOUTLET_RTMPS_BASE_URL`: the RTMPS base URL, for example `rtmps://stream.example.com:1936`.
-- `MYOUTLET_HLS_BASE_URL`: the HTTPS HLS base URL, for example `https://stream.example.com:8888`.
+- Public RTMPS TCP proxy: `shortline.proxy.rlwy.net:26266`, forwarding to container port `1936`.
+- Public HTTPS domain: `https://mediamtx-production-61fdcd13.up.railway.app`, routed by Railway to container port `8888`.
+- The public HLS base URL is the HTTPS domain above. Do not append `:8888`; that is the container's internal listener port.
+- The intended RTMPS base URL is `rtmps://shortline.proxy.rlwy.net:26266`. The TCP proxy exists, but the currently deployed stock MediaMTX image does not load this repository's configuration and its runtime logs do not show an RTMPS listener. The endpoint must not be treated as operational until the RTMPS listener and its certificate are deployed and tested.
+- Railway terminates HTTPS for the generated HLS domain. For that arrangement, MediaMTX should serve HLS over internal HTTP on port `8888`; the public URL remains HTTPS. The repository's local Compose configuration instead enables MediaMTX TLS directly and requires a certificate mounted in the container.
 
-The live-stream backend refuses to create a session if either secret is missing or has the wrong URL scheme. Do not store the stream key or TLS private key in Wix CMS.
+## Wix streaming configuration
 
-## TLS certificates and service
+The Wix backend reads these site secrets when a creator requests a live session:
 
-Place a certificate and matching private key for the stream host in `live-streaming/certs/fullchain.pem` and `live-streaming/certs/privkey.pem`. The directory is ignored by Git.
+- `MYOUTLET_RTMPS_BASE_URL`: `rtmps://shortline.proxy.rlwy.net:26266`, once the RTMPS listener is operational.
+- `MYOUTLET_HLS_BASE_URL`: `https://mediamtx-production-61fdcd13.up.railway.app`.
+
+The HLS base URL must not include the internal container port. Do not store stream keys or TLS private keys in Wix CMS. The backend refuses to create a session if either URL secret is missing or uses the wrong scheme.
+
+## TLS certificates and local service
+
+For the local Docker Compose deployment, place a certificate and matching private key for the stream host in `live-streaming/certs/fullchain.pem` and `live-streaming/certs/privkey.pem`. The directory is ignored by Git.
 
 Run the service from the `live-streaming` directory with Docker Compose:
 
@@ -30,7 +40,7 @@ Run the service from the `live-streaming` directory with Docker Compose:
 docker compose -f compose.yaml up -d
 ```
 
-The RTMPS listener is exposed on TCP 1936 and HTTPS HLS on TCP 8888. Plain RTMP, RTSP, WebRTC, SRT, MoQ, the MediaMTX control API, metrics and profiling endpoints are disabled. Both RTMPS and HLS use the supplied TLS certificate. MediaMTX delegates every publish/read/playback authorization decision to the MyOutlet Wix HTTP function.
+The local Compose configuration exposes RTMPS on TCP 1936 and HTTPS HLS on TCP 8888. Plain RTMP, RTSP, WebRTC, SRT, MoQ, the MediaMTX control API, metrics and profiling endpoints are disabled. Both RTMPS and HLS use the supplied TLS certificate. MediaMTX delegates every publish/read/playback authorization decision to the MyOutlet Wix HTTP function.
 
 ## Live chat backend
 
@@ -44,8 +54,8 @@ The homepage application includes the live-chat panel, message reporting, creato
 
 The catalogue backend exposes `enqueueSong` for one track and `enqueueSongs` for an ordered batch of one to five tracks. The batch method checks the active stream and verified media rights, enforces the 50-item stream queue and five-pending-requests-per-member limits, inserts the selected tracks sequentially in the submitted order, and marks already inserted items cancelled if a later insert fails. The creator receives one notification for the batch.
 
-This is queue functionality only. It does not yet search NoiseGround, charge the viewer, or transfer the requested amount to the creator. Those integrations remain explicitly unimplemented.
+This is queue functionality only. It does not yet search NoiseGround, charge the viewer, or transfer the requested amount to the creator. Those integrations remain unimplemented.
 
-## Boundaries
+## Remaining service work
 
-Live-stream sessions are delivered as HLS while active. This configuration does not archive sessions as VOD. Live sessions are not automatically archived as VOD. Ending a session removes its live media item from the catalogue. Adaptive-bitrate transcoding, CDN distribution, automatic disconnect detection, NoiseGround catalogue integration, paid song-request checkout and creator payment processing are not implemented in this service yet. The scheduled Wix/CMS health check does not monitor the separate RTMPS/HLS host. The song queue backend accepts ordered batches of up to five requests per viewer, but those requests are not charged. The live service also requires a reachable stream host and valid TLS certificate; those host-specific values are intentionally not fabricated in source control.
+Live-stream sessions are delivered as HLS while active. This configuration does not archive sessions as VOD. Live sessions are not automatically archived as VOD. Ending a session removes its live media item from the catalogue. Adaptive-bitrate transcoding, CDN distribution, automatic disconnect detection, NoiseGround catalogue integration, paid song-request checkout and creator payment processing are not implemented in this service yet. The scheduled Wix/CMS health check does not monitor the separate RTMPS/HLS streaming host. The song queue backend accepts ordered batches of up to five requests per viewer, but those requests are not charged. The live service requires a reachable stream host and a valid TLS certificate for RTMPS.
