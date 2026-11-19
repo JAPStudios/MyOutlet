@@ -1,6 +1,7 @@
 import { browseCatalog, browseCreators } from "backend/catalog.jsw";
 import { browseLiveStreams } from "backend/liveStreams.jsw";
 import { getPublishedMediaPlayback } from "backend/media.jsw";
+import { getLiveChatMessages, sendLiveChatMessage, reportLiveChatMessage } from "backend/liveChat.jsw";
 
 const REQUEST_EVENT = "myoutlet:request";
 const RESPONSE_EVENT = "myoutlet:response";
@@ -40,6 +41,12 @@ async function handleRequest(detail) {
       result = await browseCreators({ limit: 50, offset: 0 });
     } else if (method === "POST" && route === "publicPlayback") {
       result = await getPublishedMediaPlayback(body);
+    } else if (method === "GET" && route === "liveChatMessages") {
+      result = await getLiveChatMessages(query);
+    } else if (method === "POST" && route === "sendLiveChatMessage") {
+      result = await sendLiveChatMessage(body);
+    } else if (method === "POST" && route === "reportLiveChatMessage") {
+      result = await reportLiveChatMessage(body);
     } else {
       throw new Error("Unsupported MyOutlet request.");
     }
