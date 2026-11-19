@@ -31,7 +31,7 @@ for (const required of [
   assert.ok(app.includes(required), 'The homepage application must include ' + required + '.');
 }
 
-assert.match(app, /const siteBase = "\\/myoutlet"/,
+assert.ok(app.includes('const siteBase = "/myoutlet";'),
   'Public HTTP requests must include the MyOutlet Wix site path.');
 assert.match(app, /Ratings are creator-supplied content classifications/,
   'The interface must distinguish creator ratings from verified age checks.');
