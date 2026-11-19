@@ -123,7 +123,7 @@
         <div class="mo-tools">
           <input class="mo-input" id="mo-search" type="search" placeholder="Search titles, descriptions and categories" aria-label="Search content">
           <select class="mo-select" id="mo-type" aria-label="Content type"><option value="all">All formats</option><option value="video">Video</option><option value="audio">Audio</option></select>
-          <select class="mo-select" id="mo-rating" aria-label="Maximum content rating"><option value="all">All ratings</option><option>TV-Y</option><option>TV-Y7</option><option>TV-G</option><option>Unrated</option></select><label class="mo-rating-toggle"><input id="mo-hide-unrated" type="checkbox"> Hide unrated</label>
+          <select class="mo-select" id="mo-rating" aria-label="Maximum content rating"><option value="all">All ratings</option><option>TV-Y</option><option>TV-Y7</option><option>TV-G</option><option>TV-PG</option><option>TV-14</option><option>TV-MA</option><option>Unrated</option></select><label class="mo-rating-toggle"><input id="mo-hide-unrated" type="checkbox"> Hide unrated</label>
         </div>
         <p class="mo-rating-note">Ratings are creator-supplied content classifications. The selector filters displayed items; it does not verify a viewer's age.</p>
         <div class="mo-status" id="mo-catalog-status" role="status">Loading published content…</div>
@@ -181,7 +181,7 @@
               <label>Title<input id="mo-media-title" maxlength="120" required></label>
               <label>Description<textarea id="mo-media-description" maxlength="2000"></textarea></label>
               <label>Format<select id="mo-media-type"><option value="video">Video</option><option value="audio">Audio</option></select></label>
-              <label>Content rating<select id="mo-media-rating"><option>TV-Y</option><option>TV-Y7</option><option>TV-G</option><option>Unrated</option></select></label>
+              <label>Content rating<select id="mo-media-rating"><option>TV-Y</option><option>TV-Y7</option><option>TV-G</option><option>TV-PG</option><option>TV-14</option><option>TV-MA</option><option>Unrated</option></select></label>
               <label>Category<input id="mo-media-category" maxlength="50" value="Other"></label>
               <label>Tags, separated by commas<input id="mo-media-tags" maxlength="300"></label>
               <label>Language code<input id="mo-media-language" maxlength="5" placeholder="en"></label>
@@ -229,7 +229,7 @@
             <form class="mo-studio-form" id="mo-live-form">
               <label>Stream title<input id="mo-live-title" maxlength="120" required></label>
               <label>Description<textarea id="mo-live-description" maxlength="2000"></textarea></label>
-              <label>Content rating<select id="mo-live-rating"><option>TV-Y</option><option>TV-Y7</option><option>TV-G</option><option>Unrated</option></select></label>
+              <label>Content rating<select id="mo-live-rating"><option>TV-Y</option><option>TV-Y7</option><option>TV-G</option><option>TV-PG</option><option>TV-14</option><option>TV-MA</option><option>Unrated</option></select></label>
               <label>Category<input id="mo-live-category" maxlength="50" value="Live"></label>
               <label>Thumbnail HTTPS URL<input id="mo-live-thumbnail" type="url" placeholder="https://"></label>
               <button class="mo-btn primary" type="submit">Create live stream</button>
@@ -566,7 +566,7 @@
     const term = $("#mo-search").value.trim().toLowerCase();
     const type = $("#mo-type").value;
     const rating = $("#mo-rating").value;
-    const ratingOrder = ["TV-Y", "TV-Y7", "TV-G"];
+    const ratingOrder = ["TV-Y", "TV-Y7", "TV-G", "TV-PG", "TV-14", "TV-MA"];
     const maximumRating = ratingOrder.indexOf(rating);
     const filtered = catalog.filter(item => {
       const searchable = [item.title, item.description, item.category, ...(item.tags || [])].join(" ").toLowerCase();
@@ -949,7 +949,7 @@
 
   async function saveRatingPreferences() {
     const selected = $("#mo-rating").value;
-    const maxContentRating = ["TV-Y", "TV-Y7", "TV-G"].includes(selected)
+    const maxContentRating = ["TV-Y", "TV-Y7", "TV-G", "TV-PG", "TV-14", "TV-MA"].includes(selected)
       ? selected : "TV-G";
     try {
       await getJson(siteBase + "/_functions/setMyViewingPreferences", {
@@ -1235,7 +1235,7 @@
     ]);
     if (results[3].status === "fulfilled") {
       const preference = results[3].value;
-      $("#mo-rating").value = preference.maxContentRating || "TV-G";
+      $("#mo-rating").value = preference.maxContentRating || "TV-MA";
       $("#mo-hide-unrated").checked = preference.hideUnrated === true;
       renderCatalog();
     }
