@@ -136,6 +136,7 @@
   let catalogLoading = false;
   let creators = [];
   let hlsInstance = null;
+  let hlsLoadPromise = null;
 
   function unwrap(payload) {
     return payload && payload.result ? payload.result : payload;
@@ -257,6 +258,20 @@
     filtered.forEach(item => catalogNode.appendChild(card(item, false)));
   }
 
+  function ensureHls() {
+    if (window.Hls) return Promise.resolve(window.Hls);
+    if (hlsLoadPromise) return hlsLoadPromise;
+    hlsLoadPromise = new Promise(resolve => {
+      const script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/hls.js@1.6.15/dist/hls.min.js";
+      script.async = true;
+      script.onload = () => resolve(window.Hls || null);
+      script.onerror = () => resolve(null);
+      document.head.appendChild(script);
+    });
+    return hlsLoadPromise;
+  }
+
   async function playItem(item, isLive) {
     let source = item.mediaUrl || item.playbackUrl || "";
     if (!isLive && source.startsWith("wix:video://")) {
@@ -277,6 +292,14 @@
       catalogStatus.textContent = "This item does not currently have a playable HTTPS source.";
       return;
     }
+    const isHls = /\.m3u8(?:$|\?)/i.test(source);
+    if (isHls && !window.Hls && !video.canPlayType("application/vnd.apple.mpegurl")) {
+      await ensureHls();
+    }
+    if (isHls && !window.Hls && !video.canPlayType("application/vnd.apple.mpegurl")) {
+      catalogStatus.textContent = "HLS playback is unavailable because the player library could not be loaded.";
+      return;
+    }
     if (hlsInstance) {
       hlsInstance.destroy();
       hlsInstance = null;
@@ -284,7 +307,7 @@
     video.pause();
     video.removeAttribute("src");
     video.load();
-    if (window.Hls && window.Hls.isSupported() && /\.m3u8(?:$|\?)/i.test(source)) {
+    if (isHls && window.Hls && window.Hls.isSupported()) {
       hlsInstance = new window.Hls();
       hlsInstance.loadSource(source);
       hlsInstance.attachMedia(video);
@@ -316,12 +339,6 @@
   document.addEventListener("keydown", event => { if (event.key === "Escape" && modal.classList.contains("open")) closePlayer(); });
 
   async function init() {
-    if (!window.Hls) {
-      const script = document.createElement("script");
-      script.src = "https://cdn.jsdelivr.net/npm/hls.js@1.6.15/dist/hls.min.js";
-      script.async = true;
-      document.head.appendChild(script);
-    }
     const tasks = await Promise.allSettled([
       getJson(siteBase + "/_functions/publicCatalog?offset=0"),
       getJson(siteBase + "/_functions/publicLiveStreams"),
