@@ -1,7 +1,7 @@
 import wixData from 'wix-data';
 
 const COLLECTION = 'ViewerPreferences';
-const RATING_ORDER = ['TV-Y', 'TV-Y7', 'TV-G'];
+const RATING_ORDER = ['TV-Y', 'TV-Y7', 'TV-G', 'TV-PG', 'TV-14', 'TV-MA'];
 
 export async function getViewerRatingPreference(memberId) {
   if (!memberId) throw new Error('A member ID is required.');
@@ -10,11 +10,11 @@ export async function getViewerRatingPreference(memberId) {
     .limit(1)
     .find({ suppressAuth: true });
   if (!result.items.length) {
-    return { maxContentRating: 'TV-G', hideUnrated: false };
+    return { maxContentRating: 'TV-MA', hideUnrated: false };
   }
   return {
     maxContentRating: RATING_ORDER.includes(result.items[0].maxContentRating)
-      ? result.items[0].maxContentRating : 'TV-G',
+      ? result.items[0].maxContentRating : 'TV-MA',
     hideUnrated: result.items[0].hideUnrated === true,
     updatedAt: result.items[0].updatedAt
   };
@@ -24,7 +24,7 @@ export async function saveViewerRatingPreference(memberId, input = {}) {
   if (!memberId) throw new Error('A signed-in site member is required.');
   const maxContentRating = input.maxContentRating;
   if (!RATING_ORDER.includes(maxContentRating)) {
-    throw new Error('Maximum content rating must be TV-Y, TV-Y7 or TV-G.');
+    throw new Error('Maximum content rating must be TV-Y, TV-Y7, TV-G, TV-PG, TV-14 or TV-MA.');
   }
   const hideUnrated = input.hideUnrated === undefined ? false : input.hideUnrated;
   if (typeof hideUnrated !== 'boolean') {
