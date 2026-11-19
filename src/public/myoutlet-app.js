@@ -216,6 +216,12 @@
   const submissionsList = $("#mo-submissions-list");
   const submissionsStatus = $("#mo-submissions-status");
   const analyticsNode = $("#mo-analytics");
+  const liveForm = $("#mo-live-form");
+  const liveStatus = $("#mo-live-status");
+  const ingestUrlNode = $("#mo-ingest-url");
+  const myLiveStreamsNode = $("#mo-my-live-streams");
+  const queueStatus = $("#mo-queue-status");
+  const songQueueNode = $("#mo-song-queue");
   let creatorChannel = null;
   let pendingUploadSessionId = "";
   let pendingUploadStatus = "";
@@ -797,6 +803,136 @@
       button.disabled = false;
     }
   });
+
+  async function loadMyLiveStreams() {
+    if (!creatorChannel) return;
+    const result = await getJson(siteBase + "/_functions/myLiveStreams?limit=50");
+    myLiveStreamsNode.replaceChildren();
+    const items = Array.isArray(result.items) ? result.items : [];
+    if (!items.length) {
+      const empty = document.createElement("div");
+      empty.className = "mo-empty";
+      empty.textContent = "No live-stream sessions yet.";
+      myLiveStreamsNode.appendChild(empty);
+      return;
+    }
+    items.forEach(stream => {
+      const row = document.createElement("div");
+      row.className = "mo-studio-row";
+      const label = document.createElement("span");
+      label.textContent = (stream.title || "Untitled stream") + " · " + stream.status;
+      row.appendChild(label);
+      if (!["ended", "cancelled"].includes(stream.status)) {
+        const end = document.createElement("button");
+        end.className = "mo-btn";
+        end.type = "button";
+        end.textContent = "End";
+        end.addEventListener("click", async () => {
+          end.disabled = true;
+          try {
+            await getJson(siteBase + "/_functions/endLiveStream", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ streamId: stream._id })
+            });
+            liveStatus.textContent = "The live-stream session has ended.";
+            await loadMyLiveStreams();
+            await refreshSongQueue();
+          } catch (error) {
+            liveStatus.textContent = error.message || "The stream could not be ended.";
+            end.disabled = false;
+          }
+        });
+        row.appendChild(end);
+      }
+      myLiveStreamsNode.appendChild(row);
+    });
+  }
+
+  async function refreshSongQueue() {
+    if (!creatorChannel) return;
+    try {
+      const result = await getJson(siteBase + "/_functions/songQueue?creatorChannelId=" + encodeURIComponent(creatorChannel._id));
+      songQueueNode.replaceChildren();
+      const items = Array.isArray(result.items) ? result.items : [];
+      if (!result.live) {
+        queueStatus.textContent = "Song requests appear here while this channel is live.";
+      } else {
+        queueStatus.textContent = items.length + " queued song" + (items.length === 1 ? "" : "s");
+      }
+      if (!items.length) {
+        const empty = document.createElement("div");
+        empty.className = "mo-empty";
+        empty.textContent = "The live song queue is empty.";
+        songQueueNode.appendChild(empty);
+        return;
+      }
+      items.forEach(song => {
+        const row = document.createElement("div");
+        row.className = "mo-studio-row";
+        const label = document.createElement("span");
+        label.textContent = song.title + " — " + song.artist;
+        row.appendChild(label);
+        ["played", "skipped"].forEach(status => {
+          const button = document.createElement("button");
+          button.className = "mo-btn";
+          button.type = "button";
+          button.textContent = status === "played" ? "Played" : "Skip";
+          button.addEventListener("click", async () => {
+            button.disabled = true;
+            try {
+              await getJson(siteBase + "/_functions/setSongRequestStatus", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ requestId: song._id, status })
+              });
+              await refreshSongQueue();
+            } catch (error) {
+              queueStatus.textContent = error.message || "The song request could not be updated.";
+              button.disabled = false;
+            }
+          });
+          row.appendChild(button);
+        });
+        songQueueNode.appendChild(row);
+      });
+    } catch (error) {
+      queueStatus.textContent = error.message || "The live song queue could not be loaded.";
+    }
+  }
+
+  liveForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!creatorChannel) {
+      liveStatus.textContent = "Create a creator channel before starting a live stream.";
+      return;
+    }
+    const button = liveForm.querySelector('button[type="submit"]');
+    button.disabled = true;
+    try {
+      const result = await getJson(siteBase + "/_functions/createLiveStream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          creatorChannelId: creatorChannel._id,
+          title: $("#mo-live-title").value,
+          description: $("#mo-live-description").value,
+          contentRating: $("#mo-live-rating").value,
+          category: $("#mo-live-category").value,
+          thumbnailUrl: $("#mo-live-thumbnail").value
+        })
+      });
+      ingestUrlNode.value = result.ingestUrl || "";
+      liveStatus.textContent = "Live-stream session created with status: " + result.status + ". Complete rights review and moderation before broadcasting.";
+      await loadMyLiveStreams();
+    } catch (error) {
+      liveStatus.textContent = error.message || "The live-stream session could not be created.";
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  $("#mo-refresh-queue").addEventListener("click", refreshSongQueue);
 
   async function init() {
     const tasks = await Promise.allSettled([
