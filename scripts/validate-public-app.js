@@ -31,8 +31,13 @@ for (const required of [
   assert.ok(app.includes(required), 'The homepage application must include ' + required + '.');
 }
 
-assert.doesNotMatch(app, /mo-productions|PB&J|O\\.M\\.G\\. \/ Oh My Gawd|Creespyracies|Tales of Grimwald|The Shakespearience/,
-  'The MyOutlet homepage must not include the unrequested production slate.');
+for (const forbidden of [
+  'mo-productions', 'PB&J', 'O.M.G. / Oh My Gawd',
+  'Creespyracies', 'Tales of Grimwald', 'The Shakespearience'
+]) {
+  assert.ok(!app.includes(forbidden),
+    'The MyOutlet homepage must not include the unrequested production slate: ' + forbidden);
+}
 
 assert.ok(app.includes('const siteBase = "/myoutlet";'),
   'Public HTTP requests must include the MyOutlet Wix site path.');
