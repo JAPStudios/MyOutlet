@@ -30,6 +30,10 @@ No payment is collected by the current backend. Song requests are queued as meta
 
 See [LIVE_STREAMING.md](LIVE_STREAMING.md) for the MediaMTX ingest/playback service and its Wix secrets.
 
+## MyOutlet employment and operating capacity
+
+MyOutlet's staffing scope includes paid software-engineering personnel and paid platform-operations personnel. Engineering work covers the application, backend services, integrations, security and ongoing software maintenance. Platform operations cover the reliability and day-to-day operation of media delivery, streaming, storage, moderation systems and member-facing platform services. These are MyOutlet roles and belong in its own development, staffing and operating requirements. This repository does not assign headcount, compensation rates or hiring dates without an approved staffing plan.
+
 ## Upstream code
 
 See [UPSTREAM_COMPONENTS.md](UPSTREAM_COMPONENTS.md) for the upstream repository inventory and license notes. A Git submodule entry records a pinned commit; it does not copy source files into the MyOutlet application.
