@@ -9,7 +9,7 @@ const LIVE = 'LiveStreams';
 const MEDIA = 'MediaItems';
 const CHANNELS = 'CreatorChannels';
 const SONGS = 'SongRequests';
-const RATINGS = ['TV-Y', 'TV-Y7', 'TV-G', 'TV-PG', 'TV-14', 'TV-MA', 'Unrated'];
+const RATINGS = ['TV-Y', 'TV-Y7', 'TV-G', 'Unrated'];
 
 function memberId() {
   const id = wixUsersBackend.currentUser && wixUsersBackend.currentUser.id;
