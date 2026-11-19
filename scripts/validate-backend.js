@@ -238,6 +238,20 @@ assert.match(catalog, /session\.status\s*!==\s*'ready'/,
   'Content submission must wait for successful transcoding');
 
 const ratingPreferences = read('src/backend/ratingPreferences.js');
+const supportedContentRatings = ['TV-Y', 'TV-Y7', 'TV-G', 'TV-PG', 'TV-14', 'TV-MA'];
+for (const rating of supportedContentRatings) {
+  assert.ok(catalog.includes("'" + rating + "'"),
+    'The media catalogue must preserve ' + rating + ' classifications');
+  assert.ok(liveStreams.includes("'" + rating + "'"),
+    'Live streams must preserve ' + rating + ' classifications');
+  assert.ok(ratingPreferences.includes("'" + rating + "'"),
+    'Viewer preferences must preserve ' + rating + ' classifications');
+}
+assert.ok(catalog.includes("'Unrated'"), 'The catalogue must preserve Unrated media');
+assert.ok(liveStreams.includes("'Unrated'"), 'Live streams must preserve Unrated media');
+assert.ok(ratingPreferences.includes("'TV-MA'"),
+  'Existing saved preferences must not be downgraded to a lower rating');
+
 assert.match(ratingPreferences, /applyViewerRatingPreference/);
 assert.match(ratingPreferences, /hideUnrated/);
 
