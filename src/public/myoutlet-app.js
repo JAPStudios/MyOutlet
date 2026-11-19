@@ -163,6 +163,20 @@
             <div class="mo-studio-list" id="mo-upload-list"></div>
           </section>
           <section class="mo-studio-card">
+            <h3>Distribution rights declaration</h3>
+            <form class="mo-studio-form" id="mo-rights-form">
+              <label>Submitted media<select id="mo-rights-media" required><option value="">Select media</option></select></label>
+              <label>Rights basis<select id="mo-rights-basis"><option value="original_work">Original work</option><option value="licensed">Licensed</option><option value="public_domain">Public domain</option><option value="commissioned">Commissioned</option><option value="other">Other</option></select></label>
+              <label>Rights holder<input id="mo-rights-holder" maxlength="160" required></label>
+              <label>Rights details<textarea id="mo-rights-details" maxlength="2000" required placeholder="Describe the ownership or licence that authorizes worldwide distribution."></textarea></label>
+              <label>Valid from<input id="mo-rights-from" type="date" required></label>
+              <label>Valid until (optional)<input id="mo-rights-until" type="date"></label>
+              <label>Evidence HTTPS URL (optional)<input id="mo-rights-evidence" type="url" placeholder="https://"></label>
+              <button class="mo-btn primary" type="submit">Submit rights declaration</button>
+            </form>
+            <p class="mo-studio-status" id="mo-rights-status" role="status">Rights must cover worldwide distribution. A declaration is reviewed before media can be published.</p>
+            <div class="mo-studio-list" id="mo-rights-records"></div>
+          </section>          <section class="mo-studio-card">
             <h3>My submissions</h3>
             <div class="mo-studio-status" id="mo-submissions-status" role="status"></div>
             <div class="mo-studio-list" id="mo-submissions-list"></div>
