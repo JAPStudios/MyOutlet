@@ -109,7 +109,7 @@ function publicMedia(item) {
   };
 }
 
-const RATINGS = ['TV-Y', 'TV-Y7', 'TV-G', 'Unrated'];
+const RATINGS = ['TV-Y', 'TV-Y7', 'TV-G', 'TV-PG', 'TV-14', 'TV-MA', 'Unrated'];
 const TYPES = ['video', 'livestream', 'audio'];
 
 
