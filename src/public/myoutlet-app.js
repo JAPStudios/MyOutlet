@@ -225,6 +225,10 @@
   const submissionsList = $("#mo-submissions-list");
   const submissionsStatus = $("#mo-submissions-status");
   const analyticsNode = $("#mo-analytics");
+  const libraryStatus = $("#mo-library-status");
+  const continueWatchingNode = $("#mo-continue-watching");
+  const watchlistNode = $("#mo-watchlist");
+  const followingFeedNode = $("#mo-following-feed");
   const liveForm = $("#mo-live-form");
   const creatorLiveStatus = $("#mo-live-status");
   const ingestUrlNode = $("#mo-ingest-url");
@@ -235,6 +239,8 @@
   let pendingUploadSessionId = "";
   let pendingUploadStatus = "";
   let activeLiveStreamId = "";
+  let activeMediaItem = null;
+  let lastProgressPosition = 0;
   let liveChatCursor = null;
   let liveChatTimer = null;
   let liveChatLoading = false;
@@ -491,6 +497,8 @@
       video.src = source;
     }
     playerTitle.textContent = text(item.title) || "Now playing";
+    activeMediaItem = isLive ? null : item;
+    lastProgressPosition = 0;
     modal.classList.add("open");
     if (isLive) {
       activeLiveStreamId = item._id;
@@ -518,6 +526,8 @@
       liveChatTimer = null;
     }
     activeLiveStreamId = "";
+    activeMediaItem = null;
+    lastProgressPosition = 0;
     liveChatCursor = null;
     chatPanel.classList.remove("open");
     video.pause();
@@ -608,6 +618,24 @@
     }
   });
 
+  video.addEventListener("timeupdate", () => {
+    if (!activeMediaItem || activeLiveStreamId) return;
+    const durationSeconds = video.duration;
+    const positionSeconds = video.currentTime;
+    if (!Number.isFinite(durationSeconds) || durationSeconds < 1 ||
+        !Number.isFinite(positionSeconds) || positionSeconds - lastProgressPosition < 15) return;
+    lastProgressPosition = positionSeconds;
+    getJson(siteBase + "/_functions/recordPlaybackProgress", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mediaItemId: activeMediaItem._id,
+        durationSeconds,
+        positionSeconds
+      })
+    }).catch(() => {});
+  });
+
   $("#mo-load-more").addEventListener("click", loadMoreCatalog);
   $("#mo-search").addEventListener("input", renderCatalog);
   $("#mo-type").addEventListener("change", renderCatalog);
@@ -636,6 +664,37 @@
       node.appendChild(row);
     });
   }
+
+  async function loadViewerLibrary() {
+    const results = await Promise.allSettled([
+      getJson(siteBase + "/_functions/myWatchlist?limit=50"),
+      getJson(siteBase + "/_functions/continueWatching?limit=30"),
+      getJson(siteBase + "/_functions/followingFeed?limit=30")
+    ]);
+    const successful = results.filter(result => result.status === "fulfilled").length;
+    if (!successful) {
+      libraryStatus.textContent = "Sign in to view saved media, continue watching and followed-channel updates.";
+      return;
+    }
+    libraryStatus.textContent = "Your member library.";
+    const watchlist = results[0].status === "fulfilled" && Array.isArray(results[0].value.items)
+      ? results[0].value.items : [];
+    const continuing = results[1].status === "fulfilled" && Array.isArray(results[1].value.items)
+      ? results[1].value.items : [];
+    const feed = results[2].status === "fulfilled" && Array.isArray(results[2].value.items)
+      ? results[2].value.items : [];
+    continueWatchingNode.replaceChildren();
+    watchlistNode.replaceChildren();
+    followingFeedNode.replaceChildren();
+    if (continuing.length) continuing.forEach(item => continueWatchingNode.appendChild(card(item, false)));
+    else continueWatchingNode.innerHTML = '<div class="mo-empty">Nothing to continue watching.</div>';
+    if (watchlist.length) watchlist.forEach(item => watchlistNode.appendChild(card(item, false)));
+    else watchlistNode.innerHTML = '<div class="mo-empty">Your watchlist is empty.</div>';
+    if (feed.length) feed.forEach(item => followingFeedNode.appendChild(card(item, false)));
+    else followingFeedNode.innerHTML = '<div class="mo-empty">No new media from followed channels.</div>';
+  }
+
+  $("#mo-refresh-library").addEventListener("click", loadViewerLibrary);
 
   async function loadCreatorStudio() {
     try {
