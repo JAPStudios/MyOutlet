@@ -4,7 +4,7 @@ import { browseLiveStreams } from "backend/liveStreams.jsw";
 import { getPublishedMediaPlayback } from "backend/media.jsw";
 import { getLiveChatMessages, sendLiveChatMessage, reportLiveChatMessage, listLiveChatReports, resolveLiveChatReport } from "backend/liveChat.jsw";
 import { getMediaEngagement, listComments, likeMedia, unlikeMedia, addComment } from "backend/engagement.jsw";
-import { reportContent } from "backend/reports.jsw";
+import { reportContent, listContentReports, resolveContentReport } from "backend/reports.jsw";
 import { getMyChannel, saveMyChannel, submitContent, getMySubmissions } from "backend/catalog.jsw";
 import { createVideoUpload, getMyVideoUploads } from "backend/media.jsw";
 import { getMyCreatorAnalytics } from "backend/viewer.jsw";
@@ -130,6 +130,10 @@ async function handleRequest(detail) {
       result = await addComment(body);
     } else if (method === "POST" && route === "reportContent") {
       result = await reportContent(body);
+    } else if (method === "GET" && route === "listContentReports") {
+      result = await listContentReports(query);
+    } else if (method === "POST" && route === "resolveContentReport") {
+      result = await resolveContentReport(body);
     } else {
       throw new Error("Unsupported MyOutlet request.");
     }
