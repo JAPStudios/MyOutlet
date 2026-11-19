@@ -3,6 +3,8 @@ import { authentication } from "wix-members-frontend";
 import { browseLiveStreams } from "backend/liveStreams.jsw";
 import { getPublishedMediaPlayback } from "backend/media.jsw";
 import { getLiveChatMessages, sendLiveChatMessage, reportLiveChatMessage, listLiveChatReports, resolveLiveChatReport } from "backend/liveChat.jsw";
+import { getMediaEngagement, listComments, likeMedia, unlikeMedia, addComment } from "backend/engagement.jsw";
+import { reportContent } from "backend/reports.jsw";
 import { getMyChannel, saveMyChannel, submitContent, getMySubmissions } from "backend/catalog.jsw";
 import { createVideoUpload, getMyVideoUploads } from "backend/media.jsw";
 import { getMyCreatorAnalytics } from "backend/viewer.jsw";
@@ -116,6 +118,18 @@ async function handleRequest(detail) {
       result = await listLiveChatReports(query);
     } else if (method === "POST" && route === "resolveLiveChatReport") {
       result = await resolveLiveChatReport(body);
+    } else if (method === "GET" && route === "mediaEngagement") {
+      result = await getMediaEngagement(query);
+    } else if (method === "GET" && route === "mediaComments") {
+      result = await listComments(query);
+    } else if (method === "POST" && route === "likeMedia") {
+      result = await likeMedia(body);
+    } else if (method === "POST" && route === "unlikeMedia") {
+      result = await unlikeMedia(body);
+    } else if (method === "POST" && route === "addComment") {
+      result = await addComment(body);
+    } else if (method === "POST" && route === "reportContent") {
+      result = await reportContent(body);
     } else {
       throw new Error("Unsupported MyOutlet request.");
     }
