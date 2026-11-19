@@ -3,6 +3,7 @@
 
   const rawPath = window.location.pathname.replace(/\/+$/, "") || "/";
   const path = rawPath.replace(/^\/myoutlet(?=\/|$)/i, "") || "/";
+  const siteBase = "/myoutlet";
   const existing = document.getElementById("myoutlet-app");
   if (path !== "/" && path !== "/home") {
     if (existing) existing.remove();
@@ -218,7 +219,7 @@
     let source = item.mediaUrl || item.playbackUrl || "";
     if (!isLive && source.startsWith("wix:video://")) {
       try {
-        const playback = await getJson("/_functions/publicPlayback", {
+        const playback = await getJson(siteBase + "/_functions/publicPlayback", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ mediaItemId: item._id, format: "hls" })
@@ -279,9 +280,9 @@
       document.head.appendChild(script);
     }
     const tasks = await Promise.allSettled([
-      getJson("/_functions/publicCatalog"),
-      getJson("/_functions/publicLiveStreams"),
-      getJson("/_functions/publicCreators")
+      getJson(siteBase + "/_functions/publicCatalog"),
+      getJson(siteBase + "/_functions/publicLiveStreams"),
+      getJson(siteBase + "/_functions/publicCreators")
     ]);
     if (tasks[0].status === "fulfilled") {
       catalog = Array.isArray(tasks[0].value.items) ? tasks[0].value.items : [];
