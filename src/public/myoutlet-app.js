@@ -184,6 +184,17 @@
         </div>
       </div>
     </section>
+    <section class="mo-section" id="mo-moderation" hidden>
+      <div class="mo-wrap">
+        <div class="mo-section-head"><div><h2>Site moderation</h2><p class="mo-sub">Review distribution rights, media submissions and live-chat reports.</p></div><button class="mo-btn" id="mo-refresh-moderation" type="button">Refresh moderation</button></div>
+        <p class="mo-studio-status" id="mo-moderation-status" role="status"></p>
+        <div class="mo-studio-grid">
+          <section class="mo-studio-card"><h3>Rights declarations</h3><div class="mo-studio-list" id="mo-pending-rights"></div></section>
+          <section class="mo-studio-card"><h3>Media submissions</h3><div class="mo-studio-list" id="mo-pending-content"></div></section>
+          <section class="mo-studio-card"><h3>Live-chat reports</h3><div class="mo-studio-list" id="mo-chat-reports"></div></section>
+        </div>
+      </div>
+    </section>
     <section class="mo-section" id="mo-library">
       <div class="mo-wrap">
         <div class="mo-section-head"><div><h2>Your library</h2><p class="mo-sub">Saved media, continue watching and followed-channel updates.</p></div><button class="mo-btn" id="mo-refresh-library" type="button">Refresh library</button></div>
@@ -226,6 +237,11 @@
   const submissionsList = $("#mo-submissions-list");
   const submissionsStatus = $("#mo-submissions-status");
   const analyticsNode = $("#mo-analytics");
+  const moderationSection = $("#mo-moderation");
+  const moderationStatus = $("#mo-moderation-status");
+  const pendingRightsNode = $("#mo-pending-rights");
+  const pendingContentNode = $("#mo-pending-content");
+  const chatReportsNode = $("#mo-chat-reports");
   const libraryStatus = $("#mo-library-status");
   const continueWatchingNode = $("#mo-continue-watching");
   const watchlistNode = $("#mo-watchlist");
@@ -717,6 +733,126 @@
     });
   }
 
+  function makeModerationRow(titleText, detailText, actions) {
+    const row = document.createElement("div");
+    row.className = "mo-studio-row";
+    const details = document.createElement("span");
+    details.textContent = titleText + (detailText ? " · " + detailText : "");
+    row.appendChild(details);
+    actions.forEach(action => {
+      const button = document.createElement("button");
+      button.className = "mo-btn";
+      button.type = "button";
+      button.textContent = action.label;
+      button.addEventListener("click", action.onClick);
+      row.appendChild(button);
+    });
+    return row;
+  }
+
+  async function loadModeration() {
+    const results = await Promise.allSettled([
+      getJson(siteBase + "/_functions/listPendingRights?limit=100"),
+      getJson(siteBase + "/_functions/listPendingContent?limit=100"),
+      getJson(siteBase + "/_functions/listLiveChatReports?limit=100&status=open")
+    ]);
+    if (results.every(result => result.status === "rejected")) {
+      moderationSection.hidden = true;
+      return;
+    }
+    moderationSection.hidden = false;
+    pendingRightsNode.replaceChildren();
+    pendingContentNode.replaceChildren();
+    chatReportsNode.replaceChildren();
+
+    const rights = results[0].status === "fulfilled" && Array.isArray(results[0].value.items)
+      ? results[0].value.items : [];
+    rights.forEach(item => {
+      const row = makeModerationRow(item.mediaTitle || "Media rights declaration", item.territories && item.territories.join(", "),
+        [
+          { label: "Verify", onClick: async event => {
+            try {
+              await getJson(siteBase + "/_functions/reviewRightsDeclaration", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ rightsId: item._id, status: "verified" })
+              });
+              await loadModeration();
+            } catch (error) { moderationStatus.textContent = error.message || "Rights verification failed."; }
+          }},
+          { label: "Reject", onClick: async () => {
+            try {
+              await getJson(siteBase + "/_functions/reviewRightsDeclaration", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ rightsId: item._id, status: "rejected" })
+              });
+              await loadModeration();
+            } catch (error) { moderationStatus.textContent = error.message || "Rights rejection failed."; }
+          }}
+        ]);
+      pendingRightsNode.appendChild(row);
+    });
+    if (!rights.length) pendingRightsNode.textContent = "No pending rights declarations.";
+
+    const content = results[1].status === "fulfilled" && Array.isArray(results[1].value.items)
+      ? results[1].value.items : [];
+    content.forEach(item => {
+      const row = makeModerationRow(item.title, item.contentType + " · " + item.contentRating,
+        [
+          { label: "Publish", onClick: async () => {
+            try {
+              await getJson(siteBase + "/_functions/moderateContent", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contentId: item._id, status: "published" })
+              });
+              await loadModeration();
+            } catch (error) { moderationStatus.textContent = error.message || "Media publication failed."; }
+          }},
+          { label: "Reject", onClick: async () => {
+            try {
+              await getJson(siteBase + "/_functions/moderateContent", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contentId: item._id, status: "rejected" })
+              });
+              await loadModeration();
+            } catch (error) { moderationStatus.textContent = error.message || "Media rejection failed."; }
+          }}
+        ]);
+      pendingContentNode.appendChild(row);
+    });
+    if (!content.length) pendingContentNode.textContent = "No pending media submissions.";
+
+    const reports = results[2].status === "fulfilled" && Array.isArray(results[2].value.items)
+      ? results[2].value.items : [];
+    reports.forEach(item => {
+      const row = makeModerationRow(item.senderName || "Viewer", (item.reason || "other") + " · " + (item.messageBody || "Message unavailable"),
+        [
+          { label: "Remove", onClick: async () => {
+            try {
+              await getJson(siteBase + "/_functions/resolveLiveChatReport", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ reportId: item._id, status: "resolved", resolution: "remove_message" })
+              });
+              await loadModeration();
+            } catch (error) { moderationStatus.textContent = error.message || "The chat report could not be resolved."; }
+          }},
+          { label: "Dismiss", onClick: async () => {
+            try {
+              await getJson(siteBase + "/_functions/resolveLiveChatReport", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ reportId: item._id, status: "dismissed", resolution: "no_action" })
+              });
+              await loadModeration();
+            } catch (error) { moderationStatus.textContent = error.message || "The chat report could not be dismissed."; }
+          }}
+        ]);
+      chatReportsNode.appendChild(row);
+    });
+    if (!reports.length) chatReportsNode.textContent = "No open live-chat reports.";
+    moderationStatus.textContent = "Moderation queues refreshed.";
+  }
+
+  $("#mo-refresh-moderation").addEventListener("click", loadModeration);
+
   async function loadViewerLibrary() {
     const results = await Promise.allSettled([
       getJson(siteBase + "/_functions/myWatchlist?limit=50"),
@@ -798,7 +934,7 @@
         headers: { "Content-Type": "application/json" },
         body: "{}"
       });
-      await Promise.allSettled([loadCreatorStudio(), loadViewerLibrary()]);
+      await Promise.allSettled([loadCreatorStudio(), loadViewerLibrary(), loadModeration()]);
     } catch (error) {
       studioStatus.textContent = error.message || "Sign-in was cancelled or could not be completed.";
     } finally {
