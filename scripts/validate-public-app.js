@@ -51,7 +51,9 @@ assert.ok(homePage.includes('from "backend/liveStreams.jsw"'),
   'The homepage Velo page code must import the live-stream web module.');
 assert.ok(homePage.includes('from "backend/media.jsw"'),
   'The homepage Velo page code must import the media playback web module.');
-for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'publicPlayback']) {
+assert.ok(homePage.includes('from "backend/liveChat.jsw"'),
+  'The homepage Velo page code must import the live-chat web module.');
+for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'publicPlayback', 'liveChatMessages', 'sendLiveChatMessage', 'reportLiveChatMessage']) {
   assert.ok(homePage.includes(route), 'The Velo bridge must handle ' + route + '.');
 }
 assert.match(homePage, /window\.addEventListener\(REQUEST_EVENT/,
@@ -64,6 +66,14 @@ assert.match(app, /myoutlet:request/,
   'The homepage must send API requests through the Velo bridge.');
 assert.match(app, /myoutlet:response/,
   'The homepage must receive API responses from the Velo bridge.');
+assert.match(app, /mo-chat-messages/,
+  'The live player must render live-chat messages.');
+assert.match(app, /sendLiveChatMessage/,
+  'Signed-in viewers must be able to submit live-chat messages.');
+assert.match(app, /reportLiveChatMessage/,
+  'Viewers must be able to report live-chat messages.');
+assert.match(app, /setInterval\(\(\) => loadLiveChat\(false\), 5000\)/,
+  'Live chat must refresh while a live stream is open.');
 assert.match(app, /function ensureHls\(\)/,
   'The player must wait for HLS.js before attempting HLS playback.');
 assert.match(app, /HLS playback is unavailable because the player library could not be loaded/,
