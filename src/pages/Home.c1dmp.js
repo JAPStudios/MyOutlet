@@ -3,7 +3,7 @@ import { authentication } from "wix-members-frontend";
 import { browseLiveStreams } from "backend/liveStreams.jsw";
 import { getPublishedMediaPlayback } from "backend/media.jsw";
 import { getLiveChatMessages, sendLiveChatMessage, reportLiveChatMessage, listLiveChatReports, resolveLiveChatReport } from "backend/liveChat.jsw";
-import { getMediaEngagement, listComments, likeMedia, unlikeMedia, addComment } from "backend/engagement.jsw";
+import { getMediaEngagement, listComments, likeMedia, unlikeMedia, addComment, listPendingComments, listMyPendingComments, moderateComment, moderateMyChannelComment } from "backend/engagement.jsw";
 import { reportContent, listContentReports, resolveContentReport } from "backend/reports.jsw";
 import { getMyPlaylists, createPlaylist, getPlaylist, addMediaToPlaylist, removeMediaFromPlaylist, updatePlaylist, deletePlaylist } from "backend/playlists.jsw";
 import { getMyNotifications, markNotificationRead, markAllNotificationsRead } from "backend/notifications.jsw";
