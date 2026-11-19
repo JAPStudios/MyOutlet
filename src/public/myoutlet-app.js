@@ -162,6 +162,10 @@
             <p class="mo-studio-status">Playback starts, client-reported watch time and completions are estimates, not audited audience measurements.</p>
           </section>
           <section class="mo-studio-card">
+            <h3>Comments awaiting review</h3>
+            <div class="mo-studio-list" id="mo-my-pending-comments"></div>
+          </section>
+          <section class="mo-studio-card">
             <h3>Live broadcast</h3>
             <form class="mo-studio-form" id="mo-live-form">
               <label>Stream title<input id="mo-live-title" maxlength="120" required></label>
@@ -191,7 +195,7 @@
         <div class="mo-studio-grid">
           <section class="mo-studio-card"><h3>Rights declarations</h3><div class="mo-studio-list" id="mo-pending-rights"></div></section>
           <section class="mo-studio-card"><h3>Media submissions</h3><div class="mo-studio-list" id="mo-pending-content"></div></section>
-          <section class="mo-studio-card"><h3>Live-chat reports</h3><div class="mo-studio-list" id="mo-chat-reports"></div></section><section class="mo-studio-card"><h3>Content reports</h3><div class="mo-studio-list" id="mo-content-reports"></div></section>
+          <section class="mo-studio-card"><h3>Live-chat reports</h3><div class="mo-studio-list" id="mo-chat-reports"></div></section><section class="mo-studio-card"><h3>Content reports</h3><div class="mo-studio-list" id="mo-content-reports"></div></section><section class="mo-studio-card"><h3>Pending comments</h3><div class="mo-studio-list" id="mo-pending-comments"></div></section>
         </div>
       </div>
     </section>
@@ -258,6 +262,8 @@
   const submissionsList = $("#mo-submissions-list");
   const submissionsStatus = $("#mo-submissions-status");
   const analyticsNode = $("#mo-analytics");
+  const myPendingCommentsNode = $("#mo-my-pending-comments");
+  const pendingCommentsNode = $("#mo-pending-comments");
   const moderationSection = $("#mo-moderation");
   const moderationStatus = $("#mo-moderation-status");
   const pendingRightsNode = $("#mo-pending-rights");
@@ -879,7 +885,8 @@
       getJson(siteBase + "/_functions/listPendingRights?limit=100"),
       getJson(siteBase + "/_functions/listPendingContent?limit=100"),
       getJson(siteBase + "/_functions/listLiveChatReports?limit=100&status=open"),
-      getJson(siteBase + "/_functions/listContentReports?limit=100&status=open")
+      getJson(siteBase + "/_functions/listContentReports?limit=100&status=open"),
+      getJson(siteBase + "/_functions/listPendingComments?limit=100")
     ]);
     if (results.every(result => result.status === "rejected")) {
       moderationSection.hidden = true;
@@ -890,6 +897,7 @@
     pendingContentNode.replaceChildren();
     chatReportsNode.replaceChildren();
     contentReportsNode.replaceChildren();
+    pendingCommentsNode.replaceChildren();
 
     const rights = results[0].status === "fulfilled" && Array.isArray(results[0].value.items)
       ? results[0].value.items : [];
@@ -1002,6 +1010,33 @@
       contentReportsNode.appendChild(row);
     });
     if (!contentReports.length) contentReportsNode.textContent = "No open content reports.";
+
+    const pendingComments = results[4].status === "fulfilled" && Array.isArray(results[4].value.items)
+      ? results[4].value.items : [];
+    pendingComments.forEach(comment => {
+      const row = makeModerationRow(comment.mediaTitle || "Media", comment.body, [
+        { label: "Approve", onClick: async () => {
+          try {
+            await getJson(siteBase + "/_functions/moderateComment", {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ commentId: comment._id, status: "published" })
+            });
+            await loadModeration();
+          } catch (error) { moderationStatus.textContent = error.message || "Comment approval failed."; }
+        }},
+        { label: "Remove", onClick: async () => {
+          try {
+            await getJson(siteBase + "/_functions/moderateComment", {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ commentId: comment._id, status: "removed" })
+            });
+            await loadModeration();
+          } catch (error) { moderationStatus.textContent = error.message || "Comment removal failed."; }
+        }}
+      ]);
+      pendingCommentsNode.appendChild(row);
+    });
+    if (!pendingComments.length) pendingCommentsNode.textContent = "No pending comments.";
     moderationStatus.textContent = "Moderation queues refreshed.";
   }
 
@@ -1254,7 +1289,8 @@
       const results = await Promise.allSettled([
         getJson(siteBase + "/_functions/mySubmissions?limit=50"),
         getJson(siteBase + "/_functions/myVideoUploads?limit=50"),
-        getJson(siteBase + "/_functions/myCreatorAnalytics?limit=500")
+        getJson(siteBase + "/_functions/myCreatorAnalytics?limit=500"),
+        getJson(siteBase + "/_functions/listMyPendingComments?limit=50")
       ]);
       if (results[0].status === "fulfilled") {
         const items = Array.isArray(results[0].value.items) ? results[0].value.items : [];
@@ -1269,6 +1305,34 @@
         analyticsNode.textContent = "Playback starts: " + (totals.playbackStarts || 0) +
           " · Watch time: " + Math.round((totals.watchTimeSeconds || 0) / 60) + " min" +
           " · Completions: " + (totals.completions || 0);
+      }
+      if (results[3].status === "fulfilled") {
+        const pending = Array.isArray(results[3].value.items) ? results[3].value.items : [];
+        myPendingCommentsNode.replaceChildren();
+        pending.forEach(comment => {
+          const row = makeModerationRow(comment.mediaTitle || "Media", comment.body, [
+            { label: "Approve", onClick: async () => {
+              try {
+                await getJson(siteBase + "/_functions/moderateMyChannelComment", {
+                  method: "POST", headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ commentId: comment._id, status: "published" })
+                });
+                await loadCreatorStudio();
+              } catch (error) { studioStatus.textContent = error.message || "Comment approval failed."; }
+            }},
+            { label: "Remove", onClick: async () => {
+              try {
+                await getJson(siteBase + "/_functions/moderateMyChannelComment", {
+                  method: "POST", headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ commentId: comment._id, status: "removed" })
+                });
+                await loadCreatorStudio();
+              } catch (error) { studioStatus.textContent = error.message || "Comment removal failed."; }
+            }}
+          ]);
+          myPendingCommentsNode.appendChild(row);
+        });
+        if (!pending.length) myPendingCommentsNode.textContent = "No comments awaiting review.";
       }
     } catch (error) {
       signInButton.hidden = false;
