@@ -1539,6 +1539,7 @@
         if (!pending.length) myPendingCommentsNode.textContent = "No comments awaiting review.";
       }
       await loadMyLiveChatBans();
+      if (activeLiveStreamId) await loadLiveChat(true);
     } catch (error) {
       signInButton.hidden = false;
       studioStatus.textContent = error.message || "Sign in to manage a creator channel.";
