@@ -62,7 +62,7 @@
       #myoutlet-app .mo-player video{display:block;width:100%;max-height:72vh;background:#000}
       #myoutlet-app .mo-player-info{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px}
       #myoutlet-app .mo-close{border:1px solid #53647a;background:#1d2a3a;color:#fff;border-radius:8px;padding:8px 12px;cursor:pointer}
-      #myoutlet-app .mo-rating-note{font-size:12px;color:var(--mo-muted);margin-top:10px}
+      #myoutlet-app .mo-rating-note{font-size:12px;color:var(--mo-muted);margin-top:10px}\n      #myoutlet-app .mo-chat{display:none;border-top:1px solid var(--mo-line);padding:16px 18px}\n      #myoutlet-app .mo-chat.open{display:block}\n      #myoutlet-app .mo-chat h3{font-size:16px;margin:0 0 10px}\n      #myoutlet-app .mo-chat-messages{max-height:220px;overflow:auto;display:flex;flex-direction:column;gap:9px;padding:10px;border:1px solid var(--mo-line);border-radius:9px;background:#0c1420}\n      #myoutlet-app .mo-chat-message{font-size:13px;overflow-wrap:anywhere}\n      #myoutlet-app .mo-chat-message strong{color:var(--mo-accent)}\n      #myoutlet-app .mo-chat-message button{margin-left:8px;border:0;background:transparent;color:var(--mo-muted);font-size:11px;text-decoration:underline;cursor:pointer}\n      #myoutlet-app .mo-chat-form{display:flex;gap:8px;margin-top:10px}\n      #myoutlet-app .mo-chat-input{flex:1;min-width:0;border:1px solid var(--mo-line);border-radius:8px;background:#111a27;color:var(--mo-text);padding:10px}\n      #myoutlet-app .mo-chat-status{font-size:12px;color:var(--mo-muted);min-height:18px;margin:8px 0 0}
       @media(max-width:850px){#myoutlet-app .mo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#myoutlet-app .mo-hero{padding:48px 0 40px}}
       @media(max-width:560px){#myoutlet-app .mo-wrap{width:min(100% - 28px,1180px)}#myoutlet-app .mo-nav-inner{align-items:flex-start;flex-direction:column;padding:14px 0;gap:10px}#myoutlet-app .mo-links{gap:14px}#myoutlet-app .mo-grid{grid-template-columns:1fr}#myoutlet-app .mo-section-head{align-items:flex-start;flex-direction:column}}
     </style>
@@ -113,7 +113,7 @@
     </section>
     <footer class="mo-footer"><div class="mo-wrap">MyOutlet · Audiovisual publishing, streaming and creator channels</div></footer>
     <div class="mo-modal" id="mo-modal" role="dialog" aria-modal="true" aria-label="Media player">
-      <div class="mo-player"><video id="mo-video" controls playsinline></video><div class="mo-player-info"><strong id="mo-player-title">Now playing</strong><button class="mo-close" id="mo-close" type="button">Close</button></div></div>
+      <div class="mo-player"><video id="mo-video" controls playsinline></video><div class="mo-player-info"><strong id="mo-player-title">Now playing</strong><button class="mo-close" id="mo-close" type="button">Close</button></div><section class="mo-chat" id="mo-chat" aria-label="Live chat"><h3>Live chat</h3><div class="mo-chat-messages" id="mo-chat-messages" aria-live="polite"></div><form class="mo-chat-form" id="mo-chat-form"><input class="mo-chat-input" id="mo-chat-input" type="text" maxlength="500" placeholder="Sign in to join the conversation" aria-label="Live chat message"><button class="mo-btn" type="submit">Send</button></form><p class="mo-chat-status" id="mo-chat-status" role="status"></p></section></div>
     </div>
   `;
 
@@ -129,6 +129,15 @@
   const modal = $("#mo-modal");
   const video = $("#mo-video");
   const playerTitle = $("#mo-player-title");
+  const chatPanel = $("#mo-chat");
+  const chatMessagesNode = $("#mo-chat-messages");
+  const chatForm = $("#mo-chat-form");
+  const chatInput = $("#mo-chat-input");
+  const chatStatus = $("#mo-chat-status");
+  let activeLiveStreamId = "";
+  let liveChatCursor = null;
+  let liveChatTimer = null;
+  let liveChatLoading = false;
   let catalog = [];
   let catalogOffset = 0;
   let catalogTotal = 0;
@@ -361,10 +370,34 @@
     }
     playerTitle.textContent = text(item.title) || "Now playing";
     modal.classList.add("open");
+    if (isLive) {
+      activeLiveStreamId = item._id;
+      liveChatCursor = null;
+      chatMessagesNode.replaceChildren();
+      chatPanel.classList.add("open");
+      chatStatus.textContent = "Loading live chat…";
+      await loadLiveChat(true);
+      if (liveChatTimer) window.clearInterval(liveChatTimer);
+      liveChatTimer = window.setInterval(() => loadLiveChat(false), 5000);
+    } else {
+      activeLiveStreamId = "";
+      chatPanel.classList.remove("open");
+      if (liveChatTimer) {
+        window.clearInterval(liveChatTimer);
+        liveChatTimer = null;
+      }
+    }
     try { await video.play(); } catch (_) {}
   }
 
   function closePlayer() {
+    if (liveChatTimer) {
+      window.clearInterval(liveChatTimer);
+      liveChatTimer = null;
+    }
+    activeLiveStreamId = "";
+    liveChatCursor = null;
+    chatPanel.classList.remove("open");
     video.pause();
     video.removeAttribute("src");
     video.load();
@@ -374,6 +407,84 @@
     }
     modal.classList.remove("open");
   }
+
+  function appendChatMessage(message) {
+    const line = document.createElement("div");
+    line.className = "mo-chat-message";
+    const author = document.createElement("strong");
+    author.textContent = text(message.senderName) || "Viewer";
+    const body = document.createElement("span");
+    body.textContent = ": " + text(message.body);
+    line.append(author, body);
+    if (!message.isCreator) {
+      const report = document.createElement("button");
+      report.type = "button";
+      report.textContent = "Report";
+      report.dataset.messageId = message._id;
+      line.appendChild(report);
+    }
+    chatMessagesNode.appendChild(line);
+    chatMessagesNode.scrollTop = chatMessagesNode.scrollHeight;
+  }
+
+  async function loadLiveChat(reset) {
+    if (!activeLiveStreamId || liveChatLoading) return;
+    liveChatLoading = true;
+    try {
+      const query = new URLSearchParams({ streamId: activeLiveStreamId, limit: "50" });
+      if (!reset && liveChatCursor) query.set("after", liveChatCursor instanceof Date ? liveChatCursor.toISOString() : String(liveChatCursor));
+      const result = await getJson(siteBase + "/_functions/liveChatMessages?" + query.toString());
+      if (reset) chatMessagesNode.replaceChildren();
+      const messages = Array.isArray(result.items) ? result.items : [];
+      messages.forEach(appendChatMessage);
+      liveChatCursor = result.nextAfter || liveChatCursor;
+      chatStatus.textContent = "Live chat is available to signed-in members. Messages are refreshed automatically.";
+    } catch (error) {
+      chatStatus.textContent = error.message || "Live chat is temporarily unavailable.";
+    } finally {
+      liveChatLoading = false;
+    }
+  }
+
+  chatForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    const body = chatInput.value.trim();
+    if (!activeLiveStreamId || !body) return;
+    const submit = chatForm.querySelector('button[type="submit"]');
+    submit.disabled = true;
+    try {
+      const message = await getJson(siteBase + "/_functions/sendLiveChatMessage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ streamId: activeLiveStreamId, body })
+      });
+      appendChatMessage(message);
+      liveChatCursor = message.createdAt || liveChatCursor;
+      chatInput.value = "";
+      chatStatus.textContent = "Message sent.";
+    } catch (error) {
+      chatStatus.textContent = error.message || "The message could not be sent. Sign in to participate.";
+    } finally {
+      submit.disabled = false;
+    }
+  });
+
+  chatMessagesNode.addEventListener("click", async event => {
+    const button = event.target.closest("button[data-message-id]");
+    if (!button) return;
+    button.disabled = true;
+    try {
+      await getJson(siteBase + "/_functions/reportLiveChatMessage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageId: button.dataset.messageId, reason: "other" })
+      });
+      chatStatus.textContent = "Message reported for review.";
+    } catch (error) {
+      chatStatus.textContent = error.message || "The message could not be reported.";
+      button.disabled = false;
+    }
+  });
 
   $("#mo-load-more").addEventListener("click", loadMoreCatalog);
   $("#mo-search").addEventListener("input", renderCatalog);
