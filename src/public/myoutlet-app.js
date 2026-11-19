@@ -1538,9 +1538,60 @@
         });
         if (!pending.length) myPendingCommentsNode.textContent = "No comments awaiting review.";
       }
+      await loadMyLiveChatBans();
     } catch (error) {
       signInButton.hidden = false;
       studioStatus.textContent = error.message || "Sign in to manage a creator channel.";
+    }
+  }
+
+  async function loadMyLiveChatBans() {
+    if (!creatorChannel) {
+      liveChatBansNode.replaceChildren();
+      liveChatBansStatus.textContent = "Sign in and create a creator channel to manage chat restrictions.";
+      return;
+    }
+    try {
+      const result = await getJson(siteBase + "/_functions/myLiveChatBans?creatorChannelId=" + encodeURIComponent(creatorChannel._id));
+      const items = Array.isArray(result.items) ? result.items : [];
+      const active = items.filter(item => item.status === "active");
+      liveChatBansNode.replaceChildren();
+      if (!active.length) {
+        liveChatBansNode.textContent = "No active chat restrictions.";
+      }
+      active.forEach(ban => {
+        const row = document.createElement("div");
+        row.className = "mo-studio-row";
+        const label = document.createElement("span");
+        const member = String(ban.bannedMemberId || "");
+        const expiry = ban.permanent ? "Permanent" : ban.expiresAt ? "Until " + new Date(ban.expiresAt).toLocaleString() : "Timed";
+        label.textContent = "Member " + member.slice(0, 8) + " · " + expiry;
+        row.appendChild(label);
+        const lift = document.createElement("button");
+        lift.className = "mo-btn";
+        lift.type = "button";
+        lift.textContent = "Lift";
+        lift.addEventListener("click", async () => {
+          lift.disabled = true;
+          try {
+            await getJson(siteBase + "/_functions/unbanLiveChatMember", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ creatorChannelId: creatorChannel._id, banId: ban._id })
+            });
+            liveChatBansStatus.textContent = "The chat restriction was lifted.";
+            await loadMyLiveChatBans();
+          } catch (error) {
+            liveChatBansStatus.textContent = error.message || "The restriction could not be lifted.";
+            lift.disabled = false;
+          }
+        });
+        row.appendChild(lift);
+        liveChatBansNode.appendChild(row);
+      });
+      liveChatBansStatus.textContent = active.length + " active chat restriction" + (active.length === 1 ? "" : "s") + ".";
+    } catch (error) {
+      liveChatBansStatus.textContent = error.message || "Chat restrictions could not be loaded.";
     }
   }
 
@@ -1863,6 +1914,7 @@
   });
 
   $("#mo-refresh-queue").addEventListener("click", refreshSongQueue);
+  $("#mo-refresh-chat-bans").addEventListener("click", loadMyLiveChatBans);
 
   async function init() {
     const tasks = await Promise.allSettled([
