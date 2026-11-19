@@ -19,29 +19,18 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  check_credentials:
+  publish:
     runs-on: ubuntu-latest
-    outputs:
-      configured: ${{ steps.detect.outputs.configured }}
     steps:
-      - name: Check whether Wix publishing credentials are configured
-        id: detect
+      - name: Require Wix publishing credentials
         shell: bash
         env:
           WIX_CLI_API_KEY: ${{ secrets.WIX_CLI_API_KEY }}
         run: |
-          if [[ -n "$WIX_CLI_API_KEY" ]]; then
-            echo "configured=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Publishing is waiting for the WIX_CLI_API_KEY repository secret."
+          if [[ -z "$WIX_CLI_API_KEY" ]]; then
+            echo "::error::The WIX_CLI_API_KEY repository secret is required to publish MyOutlet automatically."
+            exit 1
           fi
-
-  publish:
-    needs: check_credentials
-    if: needs.check_credentials.outputs.configured == 'true'
-    runs-on: ubuntu-latest
-    steps:
       - name: Check out the MyOutlet site repository
         uses: actions/checkout@v4
       - name: Set up Node.js
