@@ -12,7 +12,7 @@ import { createVideoUpload, getMyVideoUploads } from "backend/media.jsw";
 import { getMyCreatorAnalytics } from "backend/viewer.jsw";
 import { createLiveStream, getMyLiveStreams, endLiveStream } from "backend/liveStreams.jsw";
 import { listPendingRights, reviewRightsDeclaration, submitRightsDeclaration, getMyRightsRecords } from "backend/rights.jsw";
-import { getSongQueue, setSongRequestStatus, listPendingContent, moderateContent } from "backend/catalog.jsw";
+import { getSongQueue, setSongRequestStatus, submitSongRequestBatch, getPendingSongRequestPayments, reviewSongRequestPayment, listPendingContent, moderateContent } from "backend/catalog.jsw";
 import { followCreator, unfollowCreator, addToWatchlist, removeFromWatchlist, getMyWatchlist, getContinueWatching, getMyFollowing, getFollowingFeed, recordPlaybackProgress, getMyViewingPreferences, setMyViewingPreferences } from "backend/viewer.jsw";
 
 const REQUEST_EVENT = "myoutlet:request";
@@ -93,6 +93,12 @@ async function handleRequest(detail) {
       result = await getSongQueue(query);
     } else if (method === "POST" && route === "setSongRequestStatus") {
       result = await setSongRequestStatus(body);
+    } else if (method === "POST" && route === "submitSongRequestBatch") {
+      result = await submitSongRequestBatch(body);
+    } else if (method === "GET" && route === "pendingSongRequestPayments") {
+      result = await getPendingSongRequestPayments(query);
+    } else if (method === "POST" && route === "reviewSongRequestPayment") {
+      result = await reviewSongRequestPayment(body);
     } else if (method === "POST" && route === "followCreator") {
       result = await followCreator(body);
     } else if (method === "POST" && route === "unfollowCreator") {
