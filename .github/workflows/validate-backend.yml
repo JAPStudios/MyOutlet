@@ -66,6 +66,12 @@ jobs:
           grep -Eiq '^content-type: application/javascript([;[:space:]]|$)' /tmp/myoutlet-headers
           grep -Fq 'root.id = "myoutlet-app"' /tmp/myoutlet-app.js
           grep -Fq 'document.body.insertBefore(root, document.body.firstChild)' /tmp/myoutlet-app.js
+      - name: Verify published Wix homepage references the frontend asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location "https://japbstudios.wixsite.com/myoutlet" --output /tmp/myoutlet-wix-homepage.html
+          grep -Fq 'myoutlet-frontend-assets-production.up.railway.app/myoutlet-app.js' /tmp/myoutlet-wix-homepage.html
       - name: Validate MediaMTX configuration
         run: |
           mkdir -p live-streaming/certs
