@@ -103,12 +103,14 @@ jobs:
                   throw new Error('Wix homepage returned an unsuccessful response on ' + viewport.name);
                 }
                 await page.waitForSelector('#myoutlet-app', { timeout: 60000 });
+                await page.waitForFunction(expectedWidth => window.innerWidth === expectedWidth, viewport.width, { timeout: 10000 });
                 const dimensions = await page.locator('#myoutlet-app').evaluate(element => ({
                   width: element.getBoundingClientRect().width,
                   height: element.getBoundingClientRect().height,
                   textLength: element.innerText.length,
                   viewportWidth: window.innerWidth,
-                  documentWidth: document.documentElement.scrollWidth
+                  documentWidth: document.documentElement.scrollWidth,
+                  viewportMeta: document.querySelector('meta[name="viewport"]')?.content || null
                 }));
                 if (dimensions.viewportWidth !== viewport.width) {
                   throw new Error('Mobile viewport scaling is incorrect on ' + viewport.name + ': ' + JSON.stringify(dimensions));
