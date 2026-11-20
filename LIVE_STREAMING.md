@@ -24,6 +24,17 @@ The existing Railway MediaMTX service now builds from this repository: `JAPStudi
 - The TCP proxy exists, but `rtmps://shortline.proxy.rlwy.net:26266` is not an operational ingest URL until the trusted certificate is installed and the TLS handshake is verified.
 - Railway terminates HTTPS for the generated HLS domain. MediaMTX therefore serves HLS over internal HTTP on port `8888`, while visitors use the public HTTPS URL. The local Compose configuration remains a separate arrangement that enables MediaMTX TLS directly.
 
+## Wix repository publishing connection
+
+The `wix.config.json` site ID matches the existing MyOutlet Wix site. That value is a project binding, not proof of an active Wix Editor GitHub Integration connection. The Velo GitHub App's repository access and the site's GitHub Integration panel have not been independently verified through the available site APIs.
+
+The GitHub Actions workflow uses Wix's documented Wix CLI for Sites sequence: authenticate with `WIX_CLI_API_KEY`, then run `wix publish`. Wix requires the site to be integrated with GitHub before this workflow can publish. The API key must be generated in Wix's API Keys Manager with the **Wix CLI for Sites - Git Integration** permission and stored as the repository Actions secret `WIX_CLI_API_KEY`. The last workflow attempt stopped before checkout, CLI setup or publishing because that secret was empty.
+
+Official Wix references:
+- [Set Up Git Integration & Wix CLI for Sites](https://dev.wix.com/docs/develop-websites/articles/workspace-tools/developer-tools/git-integration-wix-cli-for-sites/setting-up-git-integration-wix-cli-for-sites)
+- [Set Up GitHub Actions to Work with the Wix CLI for Sites](https://dev.wix.com/docs/develop-websites/articles/workspace-tools/developer-tools/git-integration-wix-cli-for-sites/set-up-git-hub-actions-to-work-with-the-wix-cli-for-sites)
+- [Publish a Site with Git Integration & Wix CLI for Sites](https://dev.wix.com/docs/develop-websites/articles/workspace-tools/developer-tools/git-integration-wix-cli-for-sites/publishing-a-site-with-git-integration-wix-cli-for-sites)
+
 ## Wix streaming configuration
 
 The Wix Members Area app has been installed on MyOutlet and verified through the site-scoped Apps Installer API. Wix requires Members Area before the Secrets API can create or manage site secrets.
