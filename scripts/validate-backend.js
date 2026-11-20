@@ -424,13 +424,13 @@ const obsSubmoduleCount = gitmodules.split('[submodule "upstream/obsproject/').l
 const otherSubmoduleCount = gitmodules.split('[submodule "upstream/').length - 1 -
   chatterinoSubmoduleCount - obsSubmoduleCount;
 assert.equal(obsSubmoduleCount, 21, 'All 21 pinned OBS Project repositories must be configured');
-assert.equal(otherSubmoduleCount, 5, 'All five media and archival sources must be configured');
-assert.equal(gitmodules.split('[submodule "').length - 1, 52,
+assert.equal(otherSubmoduleCount, 7, 'All seven media and archival sources must be configured');
+assert.equal(gitmodules.split('[submodule "').length - 1, 54,
   'The upstream configuration must contain all 52 source repositories');
 const gitTree = execFileSync('git', ['ls-tree', '-r', 'HEAD'], {
   cwd: root,
   encoding: 'utf8'
 });
 const gitlinkCount = gitTree.split('\n').filter(line => line.startsWith('160000 commit ')).length;
-assert.equal(gitlinkCount, 52,
+assert.equal(gitlinkCount, 54,
   'Every configured upstream repository must have a committed Git submodule pointer');
