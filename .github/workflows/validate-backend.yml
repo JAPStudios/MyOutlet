@@ -72,6 +72,49 @@ jobs:
           set -euo pipefail
           curl --fail --silent --show-error --location "https://japbstudios.wixsite.com/myoutlet" --output /tmp/myoutlet-wix-homepage.html
           grep -Fq 'myoutlet-frontend-assets-production.up.railway.app/myoutlet-app.js' /tmp/myoutlet-wix-homepage.html
+      - name: Verify MyOutlet renders in a browser
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install --with-deps chromium
+          node <<'NODE'
+          const { chromium } = require('playwright');
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            try {
+              const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+              const pageErrors = [];
+              page.on('pageerror', error => pageErrors.push(error.message));
+              const response = await page.goto('https://japbstudios.wixsite.com/myoutlet', {
+                waitUntil: 'domcontentloaded',
+                timeout: 60000
+              });
+              if (!response || !response.ok()) {
+                throw new Error('Wix homepage returned an unsuccessful response: ' + (response && response.status()));
+              }
+              await page.waitForSelector('#myoutlet-app', { timeout: 60000 });
+              const dimensions = await page.locator('#myoutlet-app').evaluate(element => ({
+                width: element.getBoundingClientRect().width,
+                height: element.getBoundingClientRect().height,
+                textLength: element.innerText.length
+              }));
+              if (dimensions.width < 300 || dimensions.height < 200) {
+                throw new Error('MyOutlet root exists but is not visibly rendered: ' + JSON.stringify(dimensions));
+              }
+              if (pageErrors.length) {
+                console.log('Browser page errors: ' + JSON.stringify(pageErrors));
+              }
+              console.log('MyOutlet rendered: ' + JSON.stringify(dimensions));
+            } finally {
+              await browser.close();
+            }
+          })().catch(error => {
+            console.error(error);
+            process.exitCode = 1;
+          });
+          NODE
       - name: Validate MediaMTX configuration
         run: |
           mkdir -p live-streaming/certs
