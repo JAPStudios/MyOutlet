@@ -66,7 +66,7 @@ assert.ok(homePage.includes('from "backend/media.jsw"'),
   'The homepage Velo page code must import the media playback web module.');
 assert.ok(homePage.includes('from "backend/liveChat.jsw"'),
   'The homepage Velo page code must import the live-chat web module.');
-for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'creatorProfile', 'publicPlayback', 'liveChatMessages', 'sendLiveChatMessage', 'reportLiveChatMessage', 'moderateMyChannelChatMessage', 'banLiveChatMember', 'unbanLiveChatMember', 'myLiveChatBans', 'myChannel', 'saveMyChannel', 'submitContent', 'mySubmissions', 'createVideoUpload', 'myVideoUploads', 'myCreatorAnalytics', 'createLiveStream', 'myLiveStreams', 'endLiveStream', 'songQueue', 'setSongRequestStatus', 'followCreator', 'unfollowCreator', 'addToWatchlist', 'removeFromWatchlist', 'myWatchlist', 'continueWatching', 'myFollowing', 'followingFeed', 'recordPlaybackProgress', 'myViewingPreferences', 'setMyViewingPreferences', 'promptLogin', 'listPendingContent', 'moderateContent', 'listPendingRights', 'reviewRightsDeclaration', 'submitRightsDeclaration', 'myRightsRecords', 'listLiveChatReports', 'resolveLiveChatReport', 'mediaEngagement', 'mediaComments', 'likeMedia', 'unlikeMedia', 'addComment', 'reportContent', 'listContentReports', 'resolveContentReport', 'listPendingComments', 'listMyPendingComments', 'moderateComment', 'moderateMyChannelComment', 'myPlaylists', 'createPlaylist', 'playlist', 'addMediaToPlaylist', 'removeMediaFromPlaylist', 'updatePlaylist', 'deletePlaylist', 'myNotifications', 'markNotificationRead', 'markAllNotificationsRead']) {
+for (const route of ['publicCatalog', 'publicLiveStreams', 'publicCreators', 'creatorProfile', 'publicPlayback', 'liveChatMessages', 'sendLiveChatMessage', 'reportLiveChatMessage', 'moderateMyChannelChatMessage', 'banLiveChatMember', 'unbanLiveChatMember', 'myLiveChatBans', 'myChannel', 'saveMyChannel', 'submitContent', 'mySubmissions', 'createVideoUpload', 'myVideoUploads', 'myCreatorAnalytics', 'createLiveStream', 'myLiveStreams', 'endLiveStream', 'songQueue', 'setSongRequestStatus', 'submitSongRequestBatch', 'pendingSongRequestPayments', 'reviewSongRequestPayment', 'followCreator', 'unfollowCreator', 'addToWatchlist', 'removeFromWatchlist', 'myWatchlist', 'continueWatching', 'myFollowing', 'followingFeed', 'recordPlaybackProgress', 'myViewingPreferences', 'setMyViewingPreferences', 'promptLogin', 'listPendingContent', 'moderateContent', 'listPendingRights', 'reviewRightsDeclaration', 'submitRightsDeclaration', 'myRightsRecords', 'listLiveChatReports', 'resolveLiveChatReport', 'mediaEngagement', 'mediaComments', 'likeMedia', 'unlikeMedia', 'addComment', 'reportContent', 'listContentReports', 'resolveContentReport', 'listPendingComments', 'listMyPendingComments', 'moderateComment', 'moderateMyChannelComment', 'myPlaylists', 'createPlaylist', 'playlist', 'addMediaToPlaylist', 'removeMediaFromPlaylist', 'updatePlaylist', 'deletePlaylist', 'myNotifications', 'markNotificationRead', 'markAllNotificationsRead']) {
   assert.ok(homePage.includes(route), 'The Velo bridge must handle ' + route + '.');
 }
 const backendImports = [...homePage.matchAll(/import\s*\{([^}]+)\}\s*from\s*["']backend\/([^"']+)["']/gs)];
@@ -99,6 +99,10 @@ assert.match(app, /myoutlet:request/,
   'The homepage must send API requests through the Velo bridge.');
 assert.match(app, /myoutlet:response/,
   'The homepage must receive API responses from the Velo bridge.');
+assert.match(app, /mtxbpf8g3l\\.execute-api\\.us-east-1\\.amazonaws\\.com\\/tracks/);
+assert.match(app, /mo-song-payment-reference/);
+assert.match(app, /Confirm payment/);
+assert.match(app, /pending_payment/);
 assert.match(app, /mo-chat-messages/,
   'The live player must render live-chat messages.');
 assert.match(app, /sendLiveChatMessage/,
