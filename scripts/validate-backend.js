@@ -367,7 +367,7 @@ assert.match(catalog, /export async function submitSongRequestBatch/);
 assert.match(catalog, /export async function getPendingSongRequestPayments/);
 assert.match(catalog, /export async function reviewSongRequestPayment/);
 assert.match(catalog, /status: 'pending_payment'/);
-assert.match(catalog, /status: decision === 'confirm' \\? 'confirmed' : 'rejected'/);
+assert.match(catalog, /status: decision === 'confirm' \? 'confirmed' : 'rejected'/);
 assert.match(liveStreams, /songRequestPriceMinor/);
 assert.match(liveStreams, /songRequestPaymentInstructions/);
 assert.match(cms, /## SongRequestPayments/);
