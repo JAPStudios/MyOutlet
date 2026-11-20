@@ -104,6 +104,19 @@
       #myoutlet-app .mo-studio-row{padding:10px;border:1px solid var(--mo-line);border-radius:8px;font-size:13px;display:flex;justify-content:space-between;gap:10px}
       #myoutlet-app .mo-studio-row span:last-child{color:var(--mo-muted)}
       #myoutlet-app .mo-studio-metrics{display:flex;gap:20px;flex-wrap:wrap;color:var(--mo-muted);font-size:13px}
+      #myoutlet-app .mo-song-dialog .mo-player{max-height:92vh;overflow:auto}
+      #myoutlet-app .mo-song-dialog .mo-song-columns{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px 18px}
+      #myoutlet-app .mo-song-dialog .mo-song-list{display:grid;gap:8px;max-height:260px;overflow:auto}
+      #myoutlet-app .mo-song-dialog .mo-song-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px;border:1px solid var(--mo-line);border-radius:8px;font-size:13px}
+      #myoutlet-app .mo-song-dialog .mo-song-row span{min-width:0;overflow-wrap:anywhere}
+      #myoutlet-app .mo-song-dialog .mo-song-row button{flex-shrink:0}
+      #myoutlet-app .mo-song-dialog .mo-song-panel{min-width:0}
+      #myoutlet-app .mo-song-dialog .mo-song-panel h3{font-size:15px;margin:0 0 8px}
+      #myoutlet-app .mo-song-dialog .mo-song-note{font-size:12px;color:var(--mo-muted);white-space:pre-wrap;overflow-wrap:anywhere}
+      #myoutlet-app .mo-song-dialog .mo-song-form{display:grid;gap:9px;padding:0 18px 18px}
+      #myoutlet-app .mo-song-dialog .mo-song-form label{display:grid;gap:4px;font-size:12px;color:var(--mo-muted)}
+      #myoutlet-app .mo-song-dialog .mo-song-form input{width:100%;min-height:40px;border:1px solid var(--mo-line);border-radius:8px;background:#111a27;color:var(--mo-text);padding:9px}
+      #myoutlet-app .mo-song-dialog .mo-song-total{font-size:16px;font-weight:800}
       @media(max-width:700px){#myoutlet-app .mo-studio-grid{grid-template-columns:1fr}}
       @media(max-width:850px){#myoutlet-app .mo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#myoutlet-app .mo-hero{padding:48px 0 40px}}
       @media(max-width:560px){#myoutlet-app .mo-wrap{width:min(100% - 28px,1180px)}#myoutlet-app .mo-nav-inner{align-items:flex-start;flex-direction:column;padding:14px 0;gap:10px}#myoutlet-app .mo-links{gap:14px}#myoutlet-app .mo-grid{grid-template-columns:1fr}#myoutlet-app .mo-section-head{align-items:flex-start;flex-direction:column}}
@@ -240,6 +253,11 @@
               <label>Content rating<select id="mo-live-rating"><option>TV-Y</option><option>TV-Y7</option><option>TV-G</option><option>TV-PG</option><option>TV-14</option><option>TV-MA</option><option>Unrated</option></select></label>
               <label>Category<input id="mo-live-category" maxlength="50" value="Live"></label>
               <label>Thumbnail HTTPS URL<input id="mo-live-thumbnail" type="url" placeholder="https://"></label>
+              <label><span><input id="mo-live-song-requests" type="checkbox"> Enable paid song requests</span></label>
+              <label>Price per song<input id="mo-live-song-price" type="number" min="0.01" max="1000000" step="0.01" value="1.00"></label>
+              <label>Currency code<input id="mo-live-song-currency" type="text" maxlength="3" value="USD"></label>
+              <label>Payment instructions<textarea id="mo-live-song-instructions" maxlength="2000" placeholder="List the payment methods and details viewers should use."></textarea></label>
+              <p class="mo-rating-note">Butter Bank can be recommended for lower additional costs. Viewers may use any payment method accepted in the creator's instructions.</p>
               <button class="mo-btn primary" type="submit">Create live stream</button>
             </form>
             <p class="mo-studio-status" id="mo-live-status" role="status"></p>
@@ -251,6 +269,11 @@
             <button class="mo-btn" id="mo-refresh-queue" type="button">Refresh queue</button>
             <p class="mo-studio-status" id="mo-queue-status" role="status"></p>
             <div class="mo-studio-list" id="mo-song-queue"></div>
+          </section>
+          <section class="mo-studio-card">
+            <h3>Song-request payments awaiting confirmation</h3>
+            <p class="mo-studio-status" id="mo-pending-song-payments-status" role="status">Verify the payment with the selected payment provider before confirming.</p>
+            <div class="mo-studio-list" id="mo-pending-song-payments"></div>
           </section>
           <section class="mo-studio-card">
             <h3>Live-chat restrictions</h3>
@@ -303,7 +326,7 @@
       <article class="mo-studio-card"><h3>How do content ratings work?</h3><p>Creators assign a content classification when submitting media. Viewer preferences filter the catalogue, but these classifications are not independently verified age checks.</p></article>
       <article class="mo-studio-card"><h3>How are distribution rights reviewed?</h3><p>Creators submit a declaration identifying the rights basis, rights holder, details and validity period. Media is not published until the declaration has been reviewed and verified for worldwide distribution.</p></article>
       <article class="mo-studio-card"><h3>How does live streaming work?</h3><p>Creators request a live-stream session in Creator Studio. A session must be reviewed before it can go live. Streaming requires the platform RTMPS ingest and HLS playback services to be configured and available.</p></article>
-      <article class="mo-studio-card"><h3>Can viewers pay for song requests?</h3><p>The creator studio currently provides a song-request queue for live-stream moderation. Paid requests and payment processing are not currently available.</p></article>
+      <article class="mo-studio-card"><h3>How do paid song requests work?</h3><p>Creators set a per-song price and payment instructions for each live stream. Viewers select tracks from NoiseGround, choose a payment method and submit a payment reference. The creator verifies receipt outside MyOutlet and confirms the batch before its songs enter the live queue. MyOutlet records the confirmation but does not collect or hold the payment.</p></article>
       <article class="mo-studio-card"><h3>Do viewers need an account?</h3><p>Published media, live broadcasts and creator channels can be browsed publicly. An account is required for member features such as following channels, saving media, commenting and joining live chat.</p></article>
     </div>
   </div>
@@ -388,6 +411,12 @@
   const myLiveStreamsNode = $("#mo-my-live-streams");
   const queueStatus = $("#mo-queue-status");
   const songQueueNode = $("#mo-song-queue");
+  const pendingSongPaymentsNode = $("#mo-pending-song-payments");
+  const pendingSongPaymentsStatus = $("#mo-pending-song-payments-status");
+  const songRequestEnabledInput = $("#mo-live-song-requests");
+  const songRequestPriceInput = $("#mo-live-song-price");
+  const songRequestCurrencyInput = $("#mo-live-song-currency");
+  const songRequestInstructionsInput = $("#mo-live-song-instructions");
   const liveChatBansNode = $("#mo-chat-bans");
   const liveChatBansStatus = $("#mo-chat-bans-status");
   let creatorChannel = null;
@@ -409,6 +438,41 @@
   let creators = [];
   let hlsInstance = null;
   let hlsLoadPromise = null;
+
+  const songRequestOverlay = document.createElement("div");
+  songRequestOverlay.className = "mo-modal mo-song-dialog";
+  songRequestOverlay.id = "mo-song-request-overlay";
+  songRequestOverlay.setAttribute("role", "dialog");
+  songRequestOverlay.setAttribute("aria-modal", "true");
+  songRequestOverlay.setAttribute("aria-label", "Request songs from NoiseGround");
+  songRequestOverlay.innerHTML = `
+    <div class="mo-player">
+      <div class="mo-player-info"><strong id="mo-song-dialog-title">Request songs</strong><button class="mo-close" id="mo-song-dialog-close" type="button">Close</button></div>
+      <div style="padding:0 18px"><p class="mo-song-note" id="mo-song-payment-instructions"></p></div>
+      <div class="mo-song-columns">
+        <section class="mo-song-panel">
+          <h3>Search NoiseGround</h3>
+          <input class="mo-input" id="mo-noiseground-search" type="search" placeholder="Search song titles or artists" aria-label="Search NoiseGround">
+          <p class="mo-chat-status" id="mo-noiseground-status" role="status"></p>
+          <div class="mo-song-list" id="mo-noiseground-results"></div>
+          <button class="mo-btn" id="mo-noiseground-more" type="button" hidden>Load more tracks</button>
+        </section>
+        <section class="mo-song-panel">
+          <h3>Selected songs</h3>
+          <p class="mo-song-note">Songs enter the queue in this order after the creator confirms payment. Select up to five.</p>
+          <div class="mo-song-list" id="mo-selected-songs"></div>
+          <p class="mo-song-total" id="mo-song-request-total"></p>
+        </section>
+      </div>
+      <form class="mo-song-form" id="mo-song-request-form">
+        <label>Payment method<input id="mo-song-payment-method" maxlength="100" required placeholder="Payment method accepted by the creator"></label>
+        <label>Payment reference<input id="mo-song-payment-reference" maxlength="250" required placeholder="Transaction ID or payment reference"></label>
+        <p class="mo-song-note">Butter Bank is encouraged for lower additional costs. Other payment methods accepted by the creator remain available. MyOutlet does not collect or hold this payment.</p>
+        <p class="mo-chat-status" id="mo-song-request-status" role="status"></p>
+        <button class="mo-btn primary" id="mo-song-request-submit" type="submit">Submit payment reference</button>
+      </form>
+    </div>`;
+  root.appendChild(songRequestOverlay);
 
   function unwrap(payload) {
     return payload && payload.result ? payload.result : payload;
