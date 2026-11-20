@@ -83,3 +83,21 @@ All 26 public repositories returned by the Chatterino organization repository se
 - Review each repository's current licence, notices, bundled assets, dependencies and third-party terms before copying, modifying, distributing or deploying any component. A repository's existence under the OBS Project organization is not a blanket licence for every asset or dependency.
 - OBS Studio is a desktop production application, not a turnkey browser-based streaming service. Its components may inform a creator production workflow, capture/encoding pipeline or remote-control integration, but MyOutlet still needs its own server-side ingest, transcoding, adaptive delivery, live/VOD storage, playback, creator identity, moderation, rights, payment and reliability systems.
 - FFmpeg and OBS components have platform-specific build requirements and licence implications. No claim is made that these repositories have been compiled, tested or integrated.
+
+## TeamNewPipe and Stremio repositories reviewed on November 20, 2026
+
+The request named the TeamNewPipe and Stremio GitHub organizations. Their organization pages contain many independent repositories; they are not single projects. The following focused source references are pinned as submodules because they are the closest fit to MyOutlet's web-based media and catalogue architecture.
+
+| Local path | Upstream | Branch | Pinned commit | Licence | Relevance and boundary |
+|---|---|---|---|---|---|
+| `upstream/teamnewpipe/NewPipeExtractor` | [TeamNewPipe/NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor) | `dev` | `85025eebd6d07090dd6b7da216528d5fa2943b8f` | GPL-3.0 | Media-source extraction library reference only. It is not integrated into MyOutlet. Any future distribution or linking requires GPL-3.0 compatibility review, and extracting third-party streams does not establish distribution rights or override platform terms. |
+| `upstream/stremio/stremio-addon-sdk` | [Stremio/stremio-addon-sdk](https://github.com/Stremio/stremio-addon-sdk) | `master` | `796ca01c87496df18315e73aab30fa7d87227296` | MIT | Add-on manifest and catalogue-provider protocol reference. It is not integrated or deployed; any MyOutlet provider must expose only metadata and playback sources that the provider is authorized to distribute. |
+
+The NewPipe Android application, NewPlayer and the other TeamNewPipe repositories were not copied into MyOutlet's Wix Velo application: they are separate applications, extractors or supporting tools, not drop-in browser-platform modules. Stremio's web client, core engine and service were reviewed as separate, large application/runtime repositories; they are not merged into MyOutlet. The Stremio add-on SDK is the limited protocol reference selected for future evaluation. The organization repository inventories are not a licence to copy every project, bundled asset or dependency.
+
+## Repositories named individually
+
+- `Amplejohnny/disney_plus_clone` has no repository licence file at the inspected default-branch root and includes Disney-branded artwork plus MP4 media files. It remains an interface reference only. Its code, branding, artwork and media are not copied into MyOutlet.
+- `Mohanapriyar5/DS_Python_youtubedata_project` has no repository licence file at the inspected default-branch root. Its README describes a Streamlit/YouTube Data API/MongoDB/SQL analytics project. Its source is not copied; MyOutlet's analytics remain its own implementation and any external YouTube data access must comply with Google's API terms.
+
+These two submodules, along with the existing OBS Project and Chatterino submodules, remain source references. A Git submodule pins an upstream commit and preserves its history when initialized; it does not merge the upstream application into MyOutlet or make its features operational.

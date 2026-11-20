@@ -180,3 +180,11 @@
 [submodule "upstream/chatterino/twitch-eventsub-ws"]
 	path = upstream/chatterino/twitch-eventsub-ws
 	url = https://github.com/Chatterino/twitch-eventsub-ws.git
+
+[submodule "upstream/teamnewpipe/NewPipeExtractor"]
+	path = upstream/teamnewpipe/NewPipeExtractor
+	url = https://github.com/TeamNewPipe/NewPipeExtractor.git
+
+[submodule "upstream/stremio/stremio-addon-sdk"]
+	path = upstream/stremio/stremio-addon-sdk
+	url = https://github.com/Stremio/stremio-addon-sdk.git
