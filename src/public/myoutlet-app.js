@@ -533,6 +533,200 @@
     return typeof value === "string" ? value : "";
   }
 
+  function currencyFractionDigits(currency) {
+    try {
+      return new Intl.NumberFormat(undefined, { style: "currency", currency }).resolvedOptions().maximumFractionDigits;
+    } catch (_) {
+      return 2;
+    }
+  }
+
+  function formatMinorAmount(amountMinor, currency) {
+    const code = /^[A-Z]{3}$/.test(text(currency)) ? currency : "USD";
+    const digits = currencyFractionDigits(code);
+    const amount = (Number(amountMinor) || 0) / Math.pow(10, digits);
+    try {
+      return new Intl.NumberFormat(undefined, { style: "currency", currency: code }).format(amount);
+    } catch (_) {
+      return amount.toFixed(digits) + " " + code;
+    }
+  }
+
+  let activeSongRequestStream = null;
+  let noiseGroundTracks = [];
+  let noiseGroundCursor = null;
+  let noiseGroundLoading = false;
+  let selectedNoiseGroundSongs = [];
+
+  function renderNoiseGroundResults() {
+    const results = $("#mo-noiseground-results");
+    const term = $("#mo-noiseground-search").value.trim().toLowerCase();
+    const filtered = noiseGroundTracks.filter(track =>
+      [track.title, track.artistName, track.description, track.category].join(" ").toLowerCase().includes(term)
+    );
+    results.replaceChildren();
+    if (!filtered.length) {
+      const empty = document.createElement("div");
+      empty.className = "mo-empty";
+      empty.textContent = noiseGroundTracks.length ? "No NoiseGround tracks match this search." : "No NoiseGround tracks have loaded.";
+      results.appendChild(empty);
+    }
+    filtered.forEach(track => {
+      const row = document.createElement("div");
+      row.className = "mo-song-row";
+      const label = document.createElement("span");
+      label.textContent = (track.title || "Untitled") + " — " + (track.artistName || "Unknown artist");
+      const add = document.createElement("button");
+      add.className = "mo-btn";
+      add.type = "button";
+      const alreadySelected = selectedNoiseGroundSongs.some(song => song.sourceTrackId === track.trackId);
+      add.textContent = alreadySelected ? "Selected" : "Add";
+      add.disabled = alreadySelected || selectedNoiseGroundSongs.length >= 5;
+      add.addEventListener("click", () => {
+        if (selectedNoiseGroundSongs.length >= 5 || alreadySelected) return;
+        selectedNoiseGroundSongs.push({
+          sourceTrackId: track.trackId,
+          title: track.title || "Untitled",
+          artist: track.artistName || "Unknown artist"
+        });
+        renderSelectedNoiseGroundSongs();
+        renderNoiseGroundResults();
+      });
+      row.append(label, add);
+      results.appendChild(row);
+    });
+    $("#mo-noiseground-more").hidden = !noiseGroundCursor;
+    $("#mo-noiseground-more").disabled = noiseGroundLoading;
+  }
+
+  function renderSelectedNoiseGroundSongs() {
+    const list = $("#mo-selected-songs");
+    list.replaceChildren();
+    selectedNoiseGroundSongs.forEach((song, index) => {
+      const row = document.createElement("div");
+      row.className = "mo-song-row";
+      const label = document.createElement("span");
+      label.textContent = (index + 1) + ". " + song.title + " — " + song.artist;
+      row.appendChild(label);
+      const actions = document.createElement("div");
+      actions.style.display = "flex";
+      actions.style.gap = "4px";
+      [["Move up", -1], ["Move down", 1], ["Remove", 0]].forEach(([name, direction]) => {
+        const button = document.createElement("button");
+        button.className = "mo-btn";
+        button.type = "button";
+        button.textContent = name;
+        button.disabled = direction === -1 ? index === 0 : direction === 1 ? index === selectedNoiseGroundSongs.length - 1 : false;
+        button.addEventListener("click", () => {
+          if (direction === 0) selectedNoiseGroundSongs.splice(index, 1);
+          else {
+            const target = index + direction;
+            [selectedNoiseGroundSongs[index], selectedNoiseGroundSongs[target]] =
+              [selectedNoiseGroundSongs[target], selectedNoiseGroundSongs[index]];
+          }
+          renderSelectedNoiseGroundSongs();
+          renderNoiseGroundResults();
+        });
+        actions.appendChild(button);
+      });
+      row.appendChild(actions);
+      list.appendChild(row);
+    });
+    if (!selectedNoiseGroundSongs.length) {
+      const empty = document.createElement("div");
+      empty.className = "mo-empty";
+      empty.textContent = "No songs selected.";
+      list.appendChild(empty);
+    }
+    const unitPrice = Number(activeSongRequestStream && activeSongRequestStream.songRequestPriceMinor) || 0;
+    const currency = activeSongRequestStream && activeSongRequestStream.songRequestCurrency || "USD";
+    $("#mo-song-request-total").textContent = "Total: " + formatMinorAmount(unitPrice * selectedNoiseGroundSongs.length, currency);
+  }
+
+  async function loadNoiseGroundTracks(reset) {
+    if (noiseGroundLoading) return;
+    if (reset) {
+      noiseGroundTracks = [];
+      noiseGroundCursor = null;
+    }
+    noiseGroundLoading = true;
+    $("#mo-noiseground-status").textContent = "Loading NoiseGround tracks…";
+    $("#mo-noiseground-more").disabled = true;
+    try {
+      const query = !reset && noiseGroundCursor ? "?cursor=" + encodeURIComponent(noiseGroundCursor) : "";
+      const response = await fetch("https://mtxbpf8g3l.execute-api.us-east-1.amazonaws.com/tracks" + query, {
+        method: "GET",
+        headers: { Accept: "application/json" }
+      });
+      if (!response.ok) throw new Error("NoiseGround returned HTTP " + response.status + ".");
+      const data = await response.json();
+      const items = Array.isArray(data.items) ? data.items : [];
+      noiseGroundTracks = reset ? items : noiseGroundTracks.concat(items);
+      noiseGroundCursor = data.nextCursor || null;
+      $("#mo-noiseground-status").textContent = noiseGroundTracks.length + " NoiseGround tracks loaded.";
+      renderNoiseGroundResults();
+    } catch (error) {
+      $("#mo-noiseground-status").textContent = "NoiseGround search is unavailable: " + error.message;
+    } finally {
+      noiseGroundLoading = false;
+      $("#mo-noiseground-more").disabled = !noiseGroundCursor;
+    }
+  }
+
+  function openSongRequestDialog(stream) {
+    if (!stream || stream.songRequestsEnabled !== true) return;
+    activeSongRequestStream = stream;
+    selectedNoiseGroundSongs = [];
+    $("#mo-song-dialog-title").textContent = "Request songs for " + (stream.title || "this live stream");
+    $("#mo-song-payment-instructions").textContent = "Creator payment instructions: " + (stream.songRequestPaymentInstructions || "No payment instructions were provided.");
+    $("#mo-noiseground-search").value = "";
+    $("#mo-song-payment-method").value = "";
+    $("#mo-song-payment-reference").value = "";
+    $("#mo-song-request-status").textContent = "";
+    $("#mo-noiseground-status").textContent = "Preparing NoiseGround search…";
+    renderSelectedNoiseGroundSongs();
+    songRequestOverlay.classList.add("open");
+    loadNoiseGroundTracks(true);
+  }
+
+  $("#mo-song-dialog-close").addEventListener("click", () => songRequestOverlay.classList.remove("open"));
+  $("#mo-noiseground-search").addEventListener("input", renderNoiseGroundResults);
+  $("#mo-noiseground-more").addEventListener("click", () => loadNoiseGroundTracks(false));
+  $("#mo-song-request-form").addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!activeSongRequestStream || !selectedNoiseGroundSongs.length) {
+      $("#mo-song-request-status").textContent = "Select at least one NoiseGround track first.";
+      return;
+    }
+    const submit = $("#mo-song-request-submit");
+    submit.disabled = true;
+    try {
+      const result = await getJson(siteBase + "/_functions/submitSongRequestBatch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          liveStreamId: activeSongRequestStream._id,
+          songs: selectedNoiseGroundSongs,
+          paymentMethod: $("#mo-song-payment-method").value.trim(),
+          paymentReference: $("#mo-song-payment-reference").value.trim()
+        })
+      });
+      $("#mo-song-request-status").textContent = "Submitted. " + result.requestCount + " song request(s) totaling " +
+        formatMinorAmount(result.amountMinor, result.currency) +
+        " are awaiting creator payment confirmation. The songs are not queued until the creator confirms receipt.";
+      submit.textContent = "Submitted";
+    } catch (error) {
+      if (error.message && error.message.includes("signed-in site member")) {
+        $("#mo-song-request-status").textContent = "Sign in is required to submit a paid song request.";
+        try { await getJson(siteBase + "/_functions/promptLogin", { method: "POST" }); } catch (_) {}
+      } else {
+        $("#mo-song-request-status").textContent = error.message || "The song request could not be submitted.";
+      }
+    } finally {
+      submit.disabled = false;
+    }
+  });
+
   function creatorName(id) {
     const creator = creators.find(item => item._id === id);
     return creator ? creator.name : "MyOutlet creator";
@@ -578,6 +772,14 @@
     body.append(title, meta);
     if (description.textContent) body.appendChild(description);
     body.appendChild(button);
+    if (live && item.songRequestsEnabled === true) {
+      const requestButton = document.createElement("button");
+      requestButton.className = "mo-btn";
+      requestButton.type = "button";
+      requestButton.textContent = "Request songs · " + formatMinorAmount(item.songRequestPriceMinor, item.songRequestCurrency) + " each";
+      requestButton.addEventListener("click", () => openSongRequestDialog(item));
+      body.appendChild(requestButton);
+    }
     if (!live) {
       const save = document.createElement("button");
       save.className = "mo-btn";
