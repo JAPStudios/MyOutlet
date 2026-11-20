@@ -1,0 +1,28 @@
+logLevel: info
+
+authMethod: http
+authHTTPAddress: https://japbstudios.wixsite.com/myoutlet/_functions/streamAuth
+authHTTPExclude: []
+
+api: false
+metrics: false
+pprof: false
+playback: false
+
+rtsp: false
+rtmp: false
+
+hls: true
+hlsAddress: :8888
+hlsEncryption: false
+hlsAllowOrigins: ["*"]
+hlsVariant: fmp4
+hlsSegmentCount: 7
+hlsSegmentDuration: 2s
+
+webrtc: false
+srt: false
+moq: false
+
+paths:
+  all_others: {}
