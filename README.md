@@ -13,7 +13,7 @@ The backend service layer includes `src/backend/catalog.jsw` for creator discove
 Current MyOutlet site state:
 1. The 20 custom CMS collections documented in `CMS_COLLECTIONS.md` have been created on the MyOutlet site.
 2. Their direct collection permissions are set to `ADMIN`; application-level public, member and site-owner access is controlled by `src/backend/permissions.json`.
-3. The repository's Wix site binding now targets MyOutlet.
+3. The repository's Wix site binding targets the existing MyOutlet site. The GitHub Actions publish workflow requires the repository secret `WIX_CLI_API_KEY`; the site binding is configured, but automatic publishing is not considered verified until that credential is present and a workflow publish succeeds.
 4. The automated source-contract check is available as `npm test`; the homepage bridge, live-chat interface and creator studio have been committed and the Wix site has been published, but live visitor-session behavior still requires runtime verification; the live-chat, live-chat-report and live-chat-ban collections have been created on the MyOutlet site; all chat-report and chat-ban query indexes are active.
 
 ## Visitor-facing homepage
