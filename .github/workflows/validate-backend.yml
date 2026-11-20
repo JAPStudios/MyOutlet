@@ -110,6 +110,9 @@ jobs:
                   viewportWidth: window.innerWidth,
                   documentWidth: document.documentElement.scrollWidth
                 }));
+                if (dimensions.viewportWidth !== viewport.width) {
+                  throw new Error('Mobile viewport scaling is incorrect on ' + viewport.name + ': ' + JSON.stringify(dimensions));
+                }
                 if (dimensions.width < 300 || dimensions.height < 200 || dimensions.textLength < 100) {
                   throw new Error('MyOutlet did not visibly render on ' + viewport.name + ': ' + JSON.stringify(dimensions));
                 }
