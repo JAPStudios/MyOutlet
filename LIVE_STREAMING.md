@@ -13,24 +13,31 @@ MyOutlet live sessions use RTMPS contribution, MediaMTX for ingest and HLS packa
 
 ## Current Railway deployment
 
-The existing Railway service is a separate MediaMTX streaming service. It does not host the Wix website or the GitHub repository.
+The existing Railway MediaMTX service now builds from this repository: `JAPStudios/MyOutlet`, branch `main`, root directory `live-streaming`, Dockerfile `live-streaming/Dockerfile`. Wix hosts the website, GitHub stores the source, and Railway runs the separate MediaMTX service. Render is not part of MyOutlet's hosting path.
 
 - Public RTMPS TCP proxy: `shortline.proxy.rlwy.net:26266`, forwarding to container port `1936`.
 - Public HTTPS domain: `https://mediamtx-production-61fdcd13.up.railway.app`, routed by Railway to container port `8888`.
 - The public HLS base URL is the HTTPS domain above. Do not append `:8888`; that is the container's internal listener port.
-- The intended RTMPS base URL is `rtmps://shortline.proxy.rlwy.net:26266`. The TCP proxy exists, but the currently deployed stock MediaMTX image does not load this repository's configuration and its runtime logs do not show an RTMPS listener. The endpoint must not be treated as operational until the RTMPS listener and its certificate are deployed and tested.
-- Railway terminates HTTPS for the generated HLS domain. For that arrangement, MediaMTX should serve HLS over internal HTTP on port `8888`; the public URL remains HTTPS. The repository's local Compose configuration instead enables MediaMTX TLS directly and requires a certificate mounted in the container.
+- The Railway build uses the repository-owned Dockerfile and configuration files. Its entrypoint removes the old `MTX_*` overrides so the committed configuration controls the service.
+- The current deployment starts `mediamtx.railway.hls-only.yml`. Railway deployment `ca34e73b-0d4c-45f1-b97f-f513c9418387` completed successfully, and its runtime log confirms the HLS listener on `:8888`.
+- RTMPS is deliberately disabled until both `MYOUTLET_RTMPS_CERT_PEM` and `MYOUTLET_RTMPS_KEY_PEM` contain a matching, publicly trusted certificate chain and private key for the RTMPS hostname. When both are present, the entrypoint selects `mediamtx.railway.yml`, which enables strict RTMPS on TCP `1936` while retaining HLS on TCP `8888`.
+- The TCP proxy exists, but `rtmps://shortline.proxy.rlwy.net:26266` is not an operational ingest URL until the trusted certificate is installed and the TLS handshake is verified.
+- Railway terminates HTTPS for the generated HLS domain. MediaMTX therefore serves HLS over internal HTTP on port `8888`, while visitors use the public HTTPS URL. The local Compose configuration remains a separate arrangement that enables MediaMTX TLS directly.
 
 ## Wix streaming configuration
 
-The Wix backend reads these site secrets when a creator requests a live session:
+The Wix Members Area app has been installed on MyOutlet and verified through the site-scoped Apps Installer API. Wix requires Members Area before the Secrets API can create or manage site secrets.
 
-- `MYOUTLET_RTMPS_BASE_URL`: `rtmps://shortline.proxy.rlwy.net:26266`, once the RTMPS listener is operational.
-- `MYOUTLET_HLS_BASE_URL`: `https://mediamtx-production-61fdcd13.up.railway.app`.
+- `MYOUTLET_HLS_BASE_URL` has been created with `https://mediamtx-production-61fdcd13.up.railway.app`.
+- `MYOUTLET_RTMPS_BASE_URL` is intentionally not created yet. It will be set to the RTMPS endpoint only after the listener and trusted certificate are operational.
 
 The HLS base URL must not include the internal container port. Do not store stream keys or TLS private keys in Wix CMS. The backend refuses to create a session if either URL secret is missing or uses the wrong scheme.
 
 ## TLS certificates and local service
+
+For Railway, provide a publicly trusted certificate chain and matching private key for the exact RTMPS hostname as the service variables `MYOUTLET_RTMPS_CERT_PEM` and `MYOUTLET_RTMPS_KEY_PEM`. The entrypoint writes them to ephemeral runtime files with restrictive permissions. Self-signed certificates are not suitable for public OBS publishing.
+
+The Wix account currently has no connected custom domains, so `japbstudios.com` cannot be managed through that Wix account's domain controls. No DNS records have been changed. The domain's current DNS provider must be identified before a DNS-based certificate validation can be completed.
 
 For the local Docker Compose deployment, place a certificate and matching private key for the stream host in `live-streaming/certs/fullchain.pem` and `live-streaming/certs/privkey.pem`. The directory is ignored by Git.
 
