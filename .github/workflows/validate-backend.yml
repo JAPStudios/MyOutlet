@@ -57,6 +57,15 @@ jobs:
         run: node scripts/validate-live-auth.js
       - name: Validate public application and HTTP routes
         run: node scripts/validate-public-app.js
+      - name: Verify deployed frontend asset delivery
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://myoutlet-frontend-assets-production.up.railway.app/myoutlet-app.js"
+          curl --fail --silent --show-error --dump-header /tmp/myoutlet-headers "$url" --output /tmp/myoutlet-app.js
+          grep -Eiq '^content-type: application/javascript([;[:space:]]|$)' /tmp/myoutlet-headers
+          grep -Fq 'root.id = "myoutlet-app"' /tmp/myoutlet-app.js
+          grep -Fq 'document.body.insertBefore(root, document.body.firstChild)' /tmp/myoutlet-app.js
       - name: Validate MediaMTX configuration
         run: |
           mkdir -p live-streaming/certs
