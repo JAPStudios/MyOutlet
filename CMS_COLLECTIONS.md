@@ -109,6 +109,10 @@ Fields:
 - `endedAt` — Date and time
 - `lastPublisherAt` — Date and time
 - `updatedAt` — Date and time
+- `songRequestsEnabled` — Boolean; enables paid NoiseGround requests for this stream
+- `songRequestPriceMinor` — Number; creator-set price per song in minor currency units
+- `songRequestCurrency` — Text; three-letter currency code
+- `songRequestPaymentInstructions` — Text; creator's payment instructions shown to viewers
 
 Permissions: `ADMIN` for direct read, insert, update and remove. Creator session operations are mediated by authenticated backend methods. MediaMTX authorization is mediated by the server-to-server `post_streamAuth` HTTP function.
 
@@ -196,9 +200,33 @@ Fields:
 - `creatorChannelId` — Text
 - `liveStreamId` — Text, required; the specific live session that owns this queue item
 - `requesterMemberId` — Text
-- `status` — Text: `queued`, `played`, `skipped` or `cancelled`
+- `sourceService` — Text; currently `NoiseGround`
+- `sourceTrackId` — Text; source catalogue track ID
+- `paymentBatchId` — Text; associated SongRequestPayments record
+- `paymentAmountMinor` — Number; creator-set per-song amount in minor currency units
+- `paymentCurrency` — Text; three-letter currency code
+- `status` — Text: `pending_payment`, `queued`, `played`, `skipped` or `cancelled`
 
-Permissions: `ADMIN` (site administrators) for direct collection access. Application access is mediated by the backend web methods. Queue reads and member submissions are mediated by the backend module. Each request belongs to one `liveStreamId`; requests are accepted only while that session is live and its media rights remain current. Queues are limited to 50 pending requests and five pending requests per viewer. Ending a stream cancels its remaining queued requests.
+Permissions: `ADMIN` (site administrators) for direct collection access. Viewers submit authenticated batches with payment references. Requests remain `pending_payment` until the creator manually verifies receipt and confirms the batch. Only confirmed requests enter the live queue. Queues are limited to 50 queued or awaiting-confirmation requests and five per viewer. Ending a stream cancels queued requests, pending requests and unconfirmed payment batches.
+
+## SongRequestPayments
+
+Fields:
+- `liveStreamId` — Text, required
+- `creatorChannelId` — Text, required
+- `requesterMemberId` — Text, required
+- `amountMinor` — Number, required; total for the batch in minor currency units
+- `currency` — Text, required
+- `paymentMethod` — Text, required; viewer-selected method
+- `paymentReference` — Text, required; transaction reference supplied by the viewer
+- `requestIdsJson` — Text; ordered list of SongRequests IDs in the batch
+- `requestCount` — Number, required
+- `status` — Text: `pending_confirmation`, `confirmed`, `rejected` or `cancelled`
+- `reviewedByMemberId` — Text
+- `reviewedAt` — Date and time
+- `reviewNote` — Text
+
+Permissions: `ADMIN` for direct read, insert, update and remove. Viewer submissions and creator payment review are mediated by authenticated backend methods. MyOutlet stores the payment reference and creator decision; it does not collect, route or hold viewer payments.
 
 ## ViewerLibrary
 
