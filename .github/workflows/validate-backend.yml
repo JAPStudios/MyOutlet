@@ -81,20 +81,18 @@ jobs:
           npm install --no-save --package-lock=false playwright@1.55.0
           npx playwright install --with-deps chromium
           node <<'NODE'
-          const { chromium } = require('playwright');
+          const { chromium, devices } = require('playwright');
 
           (async () => {
             const browser = await chromium.launch({ headless: true });
             try {
               for (const viewport of [
                 { name: 'desktop', width: 1440, height: 1000 },
-                { name: 'mobile', width: 390, height: 844 }
+                { name: 'mobile', width: 412, height: 915 }
               ]) {
-                const page = await browser.newPage({
-                  viewport: { width: viewport.width, height: viewport.height },
-                  isMobile: viewport.name === 'mobile',
-                  hasTouch: viewport.name === 'mobile'
-                });
+                const page = await browser.newPage(viewport.name === 'mobile'
+                  ? devices['Pixel 7']
+                  : { viewport: { width: viewport.width, height: viewport.height } });
                 const pageErrors = [];
                 page.on('pageerror', error => pageErrors.push(error.message));
                 const response = await page.goto('https://japbstudios.wixsite.com/myoutlet', {
@@ -104,6 +102,7 @@ jobs:
                 if (!response || !response.ok()) {
                   throw new Error('Wix homepage returned an unsuccessful response on ' + viewport.name);
                 }
+                console.log(viewport.name + ' initial viewport: ' + JSON.stringify(await page.evaluate(() => ({ width: window.innerWidth, meta: document.querySelector('meta[name=viewport]')?.content || null }))));
                 await page.waitForSelector('#myoutlet-app', { timeout: 60000 });
                 await page.waitForFunction(expectedWidth => window.innerWidth === expectedWidth, viewport.width, { timeout: 10000 });
                 const dimensions = await page.locator('#myoutlet-app').evaluate(element => ({
