@@ -1,6 +1,14 @@
 (() => {
   "use strict";
 
+  let viewportMeta = document.querySelector("meta[name=viewport]");
+  if (!viewportMeta) {
+    viewportMeta = document.createElement("meta");
+    viewportMeta.name = "viewport";
+    document.head.appendChild(viewportMeta);
+  }
+  viewportMeta.content = "width=device-width, initial-scale=1";
+
   const rawPath = window.location.pathname.replace(/\/+$/, "") || "/";
   const path = rawPath.replace(/^\/myoutlet(?=\/|$)/i, "") || "/";
   const siteBase = "/myoutlet";
