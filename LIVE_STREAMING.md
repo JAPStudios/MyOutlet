@@ -11,6 +11,10 @@ MyOutlet live sessions use RTMPS contribution, MediaMTX for ingest and HLS packa
 5. Visitors discover active sessions through `browseLiveStreams` or retrieve one by ID through `getLiveStream`. Both methods expose only live sessions whose media remains published, rights-verified and within the viewer's rating preference.
 6. The creator ends the session with `endLiveStream`. The session becomes `ended` and its live media item is removed from the public catalogue.
 
+## MyOutlet frontend asset delivery
+
+A separate Railway service named `MyOutlet Frontend Assets` builds from `JAPStudios/MyOutlet`, branch `main`, using `web-delivery/Dockerfile`. It serves `src/public/myoutlet-app.js` over HTTPS at `https://myoutlet-frontend-assets-production.up.railway.app/myoutlet-app.js` with the JavaScript MIME type. Its health endpoint is `/health`, and its container listens on port `8080`. This service delivers the frontend script; it does not host the Wix website or replace GitHub as the source repository.
+
 ## Current Railway deployment
 
 The existing Railway MediaMTX service now builds from this repository: `JAPStudios/MyOutlet`, branch `main`, root directory `live-streaming`, Dockerfile `live-streaming/Dockerfile`. Wix hosts the website, GitHub stores the source, and Railway runs the separate MediaMTX service. Render is not part of MyOutlet's hosting path.
@@ -83,13 +87,13 @@ Live-stream sessions are delivered as HLS while active. This configuration does 
 
 Read-only calls against the selected MyOutlet Wix site confirmed:
 
-- The enabled custom embed is named `MyOutlet Homepage Application`, ID `9f24fff7-b3c2-4820-b3f9-6f82b3114b67`, revision `3`, position `BODY_END`. It is configured to load `src/public/myoutlet-app.js` from the repository's `main` branch through jsDelivr, with the raw GitHub URL as a fallback. It displays a visible diagnostic if both downloads fail or if the application does not mount. The Wix API confirmed the saved embed configuration; browser execution and application rendering have not yet been verified.
+- The enabled custom embed is named `MyOutlet Homepage Application`, ID `9f24fff7-b3c2-4820-b3f9-6f82b3114b67`, revision `4`, position `BODY_END`. It loads the frontend script from `https://myoutlet-frontend-assets-production.up.railway.app/myoutlet-app.js`, with jsDelivr and raw GitHub fallbacks. The Railway service is connected to this repository's `main` branch and publishes `src/public/myoutlet-app.js` as `application/javascript`. The Wix API confirmed the saved embed configuration. Browser execution and application rendering have not yet been verified.
 - Wix reports 26 CMS collections: 20 native MyOutlet collections and 6 Wix-managed collections. The required creator, media, upload, rights, live-stream, song-request, chat, notification and moderation collections exist.
 - All 20 native MyOutlet collections use ADMIN-only CMS read, insert, update and delete permissions. Backend web methods mediate public and member access.
 - The configured indexes across all 20 native collections returned ACTIVE status, including unique creator handles, unique stream paths, unique rights records per media item and the live-chat, song-queue, upload, notification and catalogue query indexes.
 - Members Area is installed. The site-scoped Apps Installer returned app definition ID `14cc59bc-f0b7-15b8-e1c7-89ce41d0e0c9`.
 - Wix Secrets Manager contains `MYOUTLET_HLS_BASE_URL`. It does not yet contain `MYOUTLET_RTMPS_BASE_URL`.
 
-The homepage embed is a configured frontend script reference, not a verified frontend runtime connection. It does not prove that the Velo backend and page-code files in this repository are synchronized with Wix through the Velo GitHub App. The GitHub Actions publishing workflow still requires a successful Velo Git integration and the `WIX_CLI_API_KEY` repository secret.
+The homepage now has a configured GitHub-to-Railway-to-Wix frontend delivery path. Railway builds the script from the repository's `main` branch, and Wix's custom embed requests the Railway asset URL. This does not synchronize the repository's Velo backend and page-code files with Wix through the native Velo GitHub Integration. That separate integration and a published-site browser render remain unverified.
 
 Railway's production MediaMTX service is live, connected to `JAPStudios/MyOutlet` on `main`, and has a successful deployment. Its generated HTTPS domain targets container port 8888, and its TCP proxy forwards public TCP port 26266 to container port 1936. The current Railway variable inventory contains no RTMPS certificate or private-key variables, so the TCP proxy exists but the RTMPS listener is not yet enabled or verified.
