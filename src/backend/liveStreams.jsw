@@ -9,6 +9,7 @@ const LIVE = 'LiveStreams';
 const MEDIA = 'MediaItems';
 const CHANNELS = 'CreatorChannels';
 const SONGS = 'SongRequests';
+const SONG_PAYMENTS = 'SongRequestPayments';
 const RATINGS = ['TV-Y', 'TV-Y7', 'TV-G', 'TV-PG', 'TV-14', 'TV-MA', 'Unrated'];
 
 function memberId() {
@@ -82,6 +83,10 @@ function publicSession(stream, media) {
     createdAt: stream.createdAt,
     startedAt: stream.startedAt || null,
     endedAt: stream.endedAt || null,
+    songRequestsEnabled: stream.songRequestsEnabled === true,
+    songRequestPriceMinor: Number(stream.songRequestPriceMinor) || 0,
+    songRequestCurrency: stream.songRequestCurrency || 'USD',
+    songRequestPaymentInstructions: stream.songRequestPaymentInstructions || '',
     playbackUrl: playable ? media.mediaUrl : ''
   };
 }
@@ -125,6 +130,19 @@ export async function createLiveStream(input = {}) {
     throw new Error('Language must use an ISO 639-1 code with an optional region.');
   }
   const thumbnailUrl = optionalHttpsUrl(input.thumbnailUrl, 'Thumbnail URL');
+  const songRequestsEnabled = input.songRequestsEnabled === true;
+  let songRequestPriceMinor = 0;
+  let songRequestCurrency = 'USD';
+  let songRequestPaymentInstructions = '';
+  if (songRequestsEnabled) {
+    songRequestPriceMinor = Number(input.songRequestPriceMinor);
+    if (!Number.isSafeInteger(songRequestPriceMinor) || songRequestPriceMinor < 1 || songRequestPriceMinor > 100000000) {
+      throw new Error('Song-request price must be a positive whole number of minor currency units.');
+    }
+    songRequestCurrency = requiredText(input.songRequestCurrency || 'USD', 'Song-request currency', 3).toUpperCase();
+    if (!/^[A-Z]{3}$/.test(songRequestCurrency)) throw new Error('Song-request currency must be a three-letter currency code.');
+    songRequestPaymentInstructions = requiredText(input.songRequestPaymentInstructions, 'Song-request payment instructions', 2000);
+  }
   const bases = await streamBases();
 
   const streamPath = randomBytes(16).toString('hex');
@@ -167,6 +185,10 @@ export async function createLiveStream(input = {}) {
       startedAt: null,
       endedAt: null,
       lastPublisherAt: null,
+      songRequestsEnabled,
+      songRequestPriceMinor,
+      songRequestCurrency,
+      songRequestPaymentInstructions,
       updatedAt: now
     }, { suppressAuth: true });
   } catch (error) {
@@ -225,15 +247,19 @@ export async function endLiveStream(input = {}) {
     updatedAt: now
   }, { suppressAuth: true });
 
-  const pendingSongs = await wixData.query(SONGS)
-    .eq('liveStreamId', stream._id)
-    .eq('status', 'queued')
-    .limit(100)
-    .find({ suppressAuth: true });
-  for (const request of pendingSongs.items) {
-    await wixData.update(SONGS, {
-      ...request,
-      status: 'cancelled'
+  const [queuedSongs, pendingSongs, pendingPayments] = await Promise.all([
+    wixData.query(SONGS).eq('liveStreamId', stream._id).eq('status', 'queued').limit(100).find({ suppressAuth: true }),
+    wixData.query(SONGS).eq('liveStreamId', stream._id).eq('status', 'pending_payment').limit(100).find({ suppressAuth: true }),
+    wixData.query(SONG_PAYMENTS).eq('liveStreamId', stream._id).eq('status', 'pending_confirmation').limit(100).find({ suppressAuth: true })
+  ]);
+  for (const request of [...queuedSongs.items, ...pendingSongs.items]) {
+    await wixData.update(SONGS, { ...request, status: 'cancelled' }, { suppressAuth: true });
+  }
+  for (const payment of pendingPayments.items) {
+    await wixData.update(SONG_PAYMENTS, {
+      ...payment,
+      status: 'cancelled',
+      reviewNote: 'The live stream ended before the creator confirmed this payment.'
     }, { suppressAuth: true });
   }
 
@@ -269,6 +295,10 @@ async function getPublicLiveSession(stream) {
     tags: Array.isArray(media.tags) ? media.tags : [],
     language: media.language || '',
     startedAt: stream.startedAt || null,
+    songRequestsEnabled: stream.songRequestsEnabled === true,
+    songRequestPriceMinor: Number(stream.songRequestPriceMinor) || 0,
+    songRequestCurrency: stream.songRequestCurrency || 'USD',
+    songRequestPaymentInstructions: stream.songRequestPaymentInstructions || '',
     playbackUrl: media.mediaUrl
   };
 }
