@@ -83,13 +83,13 @@ Live-stream sessions are delivered as HLS while active. This configuration does 
 
 Read-only calls against the selected MyOutlet Wix site confirmed:
 
-- The enabled custom embed is named `MyOutlet Homepage Application`, ID `9f24fff7-b3c2-4820-b3f9-6f82b3114b67`, revision `3`, position `BODY_END`. It loads `src/public/myoutlet-app.js` from the repository's `main` branch through jsDelivr, with the raw GitHub URL as a fallback. It displays a visible diagnostic if both downloads fail or if the application does not mount. The Wix API confirmed the saved embed configuration; a browser-rendered application test has not yet succeeded.
+- The enabled custom embed is named `MyOutlet Homepage Application`, ID `9f24fff7-b3c2-4820-b3f9-6f82b3114b67`, revision `3`, position `BODY_END`. It is configured to load `src/public/myoutlet-app.js` from the repository's `main` branch through jsDelivr, with the raw GitHub URL as a fallback. It displays a visible diagnostic if both downloads fail or if the application does not mount. The Wix API confirmed the saved embed configuration; browser execution and application rendering have not yet been verified.
 - Wix reports 26 CMS collections: 20 native MyOutlet collections and 6 Wix-managed collections. The required creator, media, upload, rights, live-stream, song-request, chat, notification and moderation collections exist.
 - All 20 native MyOutlet collections use ADMIN-only CMS read, insert, update and delete permissions. Backend web methods mediate public and member access.
 - The configured indexes across all 20 native collections returned ACTIVE status, including unique creator handles, unique stream paths, unique rights records per media item and the live-chat, song-queue, upload, notification and catalogue query indexes.
 - Members Area is installed. The site-scoped Apps Installer returned app definition ID `14cc59bc-f0b7-15b8-e1c7-89ce41d0e0c9`.
 - Wix Secrets Manager contains `MYOUTLET_HLS_BASE_URL`. It does not yet contain `MYOUTLET_RTMPS_BASE_URL`.
 
-The homepage embed is a verified frontend runtime connection. It does not prove that the Velo backend and page-code files in this repository are synchronized with Wix through the Velo GitHub App. The GitHub Actions publishing workflow still requires a successful Velo Git integration and the `WIX_CLI_API_KEY` repository secret.
+The homepage embed is a configured frontend script reference, not a verified frontend runtime connection. It does not prove that the Velo backend and page-code files in this repository are synchronized with Wix through the Velo GitHub App. The GitHub Actions publishing workflow still requires a successful Velo Git integration and the `WIX_CLI_API_KEY` repository secret.
 
 Railway's production MediaMTX service is live, connected to `JAPStudios/MyOutlet` on `main`, and has a successful deployment. Its generated HTTPS domain targets container port 8888, and its TCP proxy forwards public TCP port 26266 to container port 1936. The current Railway variable inventory contains no RTMPS certificate or private-key variables, so the TCP proxy exists but the RTMPS listener is not yet enabled or verified.
