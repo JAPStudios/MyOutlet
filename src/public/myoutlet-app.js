@@ -2076,7 +2076,7 @@
       const row = document.createElement("div");
       row.className = "mo-studio-row";
       const label = document.createElement("span");
-      label.textContent = (stream.title || "Untitled stream") + " · " + stream.status;
+      label.textContent = (stream.title || "Untitled stream") + " · " + stream.status + (stream.songRequestsEnabled ? " · song requests " + formatMinorAmount(stream.songRequestPriceMinor, stream.songRequestCurrency) + " each" : "");
       row.appendChild(label);
       if (!["ended", "cancelled"].includes(stream.status)) {
         const end = document.createElement("button");
@@ -2105,12 +2105,71 @@
     });
   }
 
+  async function refreshPendingSongPayments() {
+    if (!creatorChannel) return;
+    try {
+      const result = await getJson(siteBase + "/_functions/pendingSongRequestPayments?creatorChannelId=" + encodeURIComponent(creatorChannel._id));
+      const items = Array.isArray(result.items) ? result.items : [];
+      pendingSongPaymentsNode.replaceChildren();
+      pendingSongPaymentsStatus.textContent = items.length
+        ? items.length + " payment batch(es) await verification. Check the payment provider before confirming."
+        : "No song-request payments are awaiting confirmation.";
+      items.forEach(payment => {
+        const row = document.createElement("article");
+        row.className = "mo-studio-card";
+        const heading = document.createElement("h4");
+        heading.textContent = formatMinorAmount(payment.amountMinor, payment.currency) + " · " + payment.requestCount + " song(s)";
+        const songs = document.createElement("p");
+        songs.textContent = (payment.songs || []).map(song => song.title + " — " + song.artist).join(" | ");
+        const method = document.createElement("p");
+        method.textContent = "Payment method: " + payment.paymentMethod;
+        const reference = document.createElement("p");
+        reference.textContent = "Payment reference: " + payment.paymentReference;
+        const submitted = document.createElement("p");
+        submitted.className = "mo-rating-note";
+        submitted.textContent = "Submitted: " + (payment.createdAt ? new Date(payment.createdAt).toLocaleString() : "Unknown");
+        const actions = document.createElement("div");
+        actions.className = "mo-engagement-head";
+        ["confirm", "reject"].forEach(decision => {
+          const button = document.createElement("button");
+          button.className = decision === "confirm" ? "mo-btn primary" : "mo-btn";
+          button.type = "button";
+          button.textContent = decision === "confirm" ? "Confirm payment" : "Reject payment";
+          button.addEventListener("click", async () => {
+            button.disabled = true;
+            try {
+              await getJson(siteBase + "/_functions/reviewSongRequestPayment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  paymentBatchId: payment._id,
+                  decision,
+                  note: decision === "confirm" ? "Payment manually verified by creator." : "Payment not verified by creator."
+                })
+              });
+              await refreshSongQueue();
+            } catch (error) {
+              pendingSongPaymentsStatus.textContent = error.message || "The payment decision could not be saved.";
+              button.disabled = false;
+            }
+          });
+          actions.appendChild(button);
+        });
+        row.append(heading, songs, method, reference, submitted, actions);
+        pendingSongPaymentsNode.appendChild(row);
+      });
+    } catch (error) {
+      pendingSongPaymentsStatus.textContent = error.message || "Pending song-request payments could not be loaded.";
+    }
+  }
+
   async function refreshSongQueue() {
     if (!creatorChannel) return;
     try {
       const result = await getJson(siteBase + "/_functions/songQueue?creatorChannelId=" + encodeURIComponent(creatorChannel._id));
       songQueueNode.replaceChildren();
       const items = Array.isArray(result.items) ? result.items : [];
+      await refreshPendingSongPayments();
       if (!result.live) {
         queueStatus.textContent = "Song requests appear here while this channel is live.";
       } else {
@@ -2157,6 +2216,14 @@
     }
   }
 
+  function syncSongRequestSettings() {
+    [songRequestPriceInput, songRequestCurrencyInput, songRequestInstructionsInput].forEach(input => {
+      input.closest("label").hidden = !songRequestEnabledInput.checked;
+    });
+  }
+  songRequestEnabledInput.addEventListener("change", syncSongRequestSettings);
+  syncSongRequestSettings();
+
   liveForm.addEventListener("submit", async event => {
     event.preventDefault();
     if (!creatorChannel) {
@@ -2175,7 +2242,13 @@
           description: $("#mo-live-description").value,
           contentRating: $("#mo-live-rating").value,
           category: $("#mo-live-category").value,
-          thumbnailUrl: $("#mo-live-thumbnail").value
+          thumbnailUrl: $("#mo-live-thumbnail").value,
+          songRequestsEnabled: songRequestEnabledInput.checked,
+          songRequestPriceMinor: songRequestEnabledInput.checked
+            ? Math.round(Number(songRequestPriceInput.value) * Math.pow(10, currencyFractionDigits(songRequestCurrencyInput.value.trim().toUpperCase() || "USD")))
+            : 0,
+          songRequestCurrency: songRequestCurrencyInput.value.trim().toUpperCase() || "USD",
+          songRequestPaymentInstructions: songRequestInstructionsInput.value.trim()
         })
       });
       ingestUrlNode.value = result.ingestUrl || "";
