@@ -712,6 +712,7 @@ export async function setSongRequestStatus(input = {}) {
   if (!['played', 'skipped', 'cancelled'].includes(status)) throw new Error('Unsupported song request status.');
   const existing = await wixData.get(SONGS, id, { suppressAuth: true });
   if (!existing) throw new Error('Song request was not found.');
+  if (existing.status !== 'queued') throw new Error('Only confirmed queued songs can be marked played, skipped or cancelled.');
   const channel = await wixData.get(CHANNELS, existing.creatorChannelId, { suppressAuth: true });
   if (!channel || channel.memberId !== ownerId) {
     throw new Error('Only the owner of this creator channel can update its song queue.');
