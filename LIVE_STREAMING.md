@@ -83,7 +83,7 @@ Live-stream sessions are delivered as HLS while active. This configuration does 
 
 Read-only calls against the selected MyOutlet Wix site confirmed:
 
-- The enabled custom embed is named `MyOutlet Homepage Application`, ID `9f24fff7-b3c2-4820-b3f9-6f82b3114b67`, revision `1`, position `BODY_END`. Its script source is `https://raw.githubusercontent.com/JAPStudios/MyOutlet/main/src/public/myoutlet-app.js`. This is the live homepage's direct reference to the repository's main-branch frontend script.
+- The enabled custom embed is named `MyOutlet Homepage Application`, ID `9f24fff7-b3c2-4820-b3f9-6f82b3114b67`, revision `3`, position `BODY_END`. It loads `src/public/myoutlet-app.js` from the repository's `main` branch through jsDelivr, with the raw GitHub URL as a fallback. It displays a visible diagnostic if both downloads fail or if the application does not mount. The Wix API confirmed the saved embed configuration; a browser-rendered application test has not yet succeeded.
 - Wix reports 26 CMS collections: 20 native MyOutlet collections and 6 Wix-managed collections. The required creator, media, upload, rights, live-stream, song-request, chat, notification and moderation collections exist.
 - All 20 native MyOutlet collections use ADMIN-only CMS read, insert, update and delete permissions. Backend web methods mediate public and member access.
 - The configured indexes across all 20 native collections returned ACTIVE status, including unique creator handles, unique stream paths, unique rights records per media item and the live-chat, song-queue, upload, notification and catalogue query indexes.
