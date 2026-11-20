@@ -72,6 +72,8 @@ jobs:
           set -euo pipefail
           curl --fail --silent --show-error --location "https://japbstudios.wixsite.com/myoutlet" --output /tmp/myoutlet-wix-homepage.html
           grep -Fq 'myoutlet-frontend-assets-production.up.railway.app/myoutlet-app.js' /tmp/myoutlet-wix-homepage.html
+          grep -oEi '<meta[^>]*viewport[^>]*>' /tmp/myoutlet-wix-homepage.html | head -n 5 || true
+          grep -oEi 'MyOutlet Mobile Viewport.{0,300}' /tmp/myoutlet-wix-homepage.html | head -n 2 || true
       - name: Verify MyOutlet renders in desktop and mobile browsers
         shell: bash
         run: |
